@@ -9,25 +9,7 @@ export const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[
 export const reducedMotion = () => !get().settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Synthèse vocale (langue du cours actif) ----------
-// La voix vient du téléphone : on choisit la plus naturelle disponible, du genre demandé dans les réglages.
-// Prénoms des voix connues (iPhone/Mac, Windows/Edge, Android/Chrome) et genre de chacune.
-const VOICE_GENDER = {
-  // coréen
-  yuna: 'f', sora: 'f', sunhi: 'f', heami: 'f', jimin: 'f', seoyeon: 'f', yujin: 'f', jihun: 'm', minsu: 'm', injoon: 'm', hyunsu: 'm', bongjin: 'm', gookmin: 'm', seohyeon: 'f', soonbok: 'f', yoojin: 'f',
-  'ko-kr-x-ism': 'f', 'ko-kr-x-kob': 'f', 'ko-kr-x-koc': 'm', 'ko-kr-x-kod': 'm',
-  // japonais
-  kyoko: 'f', otoya: 'm', hattori: 'm', 'o-ren': 'f', oren: 'f', nanami: 'f', ayumi: 'f', haruka: 'f', sayaka: 'f', mizuki: 'f', shiori: 'f', aoi: 'f', mayu: 'f', keita: 'm', ichiro: 'm', daichi: 'm', naoki: 'm', takumi: 'm', kazuha: 'f', tomoko: 'f',
-  'ja-jp-x-htm': 'f', 'ja-jp-x-jab': 'f', 'ja-jp-x-jac': 'm', 'ja-jp-x-jad': 'm',
-};
-const genderOf = (v) => {
-  const n = v.name.toLowerCase();
-  if (/\b(female|woman|femme)\b/.test(n)) return 'f';
-  if (/\b(male|man|homme)\b/.test(n)) return 'm';
-  for (const [k, g] of Object.entries(VOICE_GENDER)) if (n.includes(k)) return g;
-  // Google « 한국의 » / « 日本語 » (navigateur Chrome) : voix de femme.
-  if (/^google/.test(n)) return 'f';
-  return null;
-};
+// La voix vient du téléphone : on choisit la plus naturelle disponible pour la langue apprise.
 /** Note de qualité : les voix « naturelles », « premium », « améliorées » ou en ligne sonnent bien moins robotiques. */
 function quality(v) {
   const n = v.name.toLowerCase();
@@ -37,7 +19,6 @@ function quality(v) {
   if (/google/.test(n)) q += 15;
   if (v.localService === false) q += 5;
   if (/compact|espeak|novelty|whisper|bad news|bells|zarvox|robot/.test(n)) q -= 60;
-  if (genderOf(v)) q += 3;
   return q;
 }
 let voiceCache = null;
@@ -47,20 +28,13 @@ const voicesFor = () => {
   const all = speechSynthesis.getVoices().filter((v) => v.lang?.replace('_', '-').toLowerCase().startsWith(tag.slice(0, 2)));
   return all.sort((a, b) => quality(b) + (b.lang.replace('_', '-').toLowerCase() === tag ? 2 : 0) - quality(a) - (a.lang.replace('_', '-').toLowerCase() === tag ? 2 : 0));
 };
-/** Les voix de la langue apprise disponibles pour chaque genre. */
-export function voiceChoices() {
-  const list = voicesFor();
-  return { f: list.filter((v) => genderOf(v) === 'f'), m: list.filter((v) => genderOf(v) === 'm'), all: list };
-}
 function findVoice() {
   if (!('speechSynthesis' in window)) return null;
-  const want = get().settings.voice === 'm' ? 'm' : 'f';
-  const key = `${course().tts}|${want}`;
+  const key = course().tts;
   if (voiceCache?.key === key) return voiceCache.v;
-  const { f, m, all } = voiceChoices();
-  const v = (want === 'm' ? m : f)[0] || all.find((x) => !genderOf(x)) || all[0] || null;
-  if (all.length) voiceCache = { key, v };
-  return v;
+  const all = voicesFor();
+  if (all.length) voiceCache = { key, v: all[0] };
+  return all[0] || null;
 }
 if ('speechSynthesis' in window) {
   speechSynthesis.getVoices();
@@ -70,8 +44,6 @@ export const canSpeak = () => 'speechSynthesis' in window;
 export const hasVoice = () => !!findVoice();
 /** La voix qui sera utilisée (pour l'afficher dans les réglages). */
 export const currentVoice = () => findVoice();
-/** La voix du genre demandé existe-t-elle sur l'appareil ? */
-export const hasVoiceOf = (g) => voiceChoices()[g].length > 0;
 
 let current = null; // garde une référence : sinon certains navigateurs coupent la voix en cours de route
 let pending = 0;
