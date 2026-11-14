@@ -1,5 +1,5 @@
 // Haru (하루) — application d'entraînement au coréen et au japonais. Navigation et écrans principaux.
-import { $, $$, esc, speak, canSpeak, hasVoice, sfx, toast, countUp, pulse, celebrate, ICONS } from './ui.js';
+import { $, $$, esc, speak, canSpeak, hasVoice, hasVoiceOf, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS } from './ui.js';
 import * as store from './store.js';
 import { ALL_THEMES, isPhraseTheme, themeGlyph, themeColor, themeShort } from './content/lexicon.js';
 import { course, hasCourse, setCourse, COURSES, t, tr, lang, gloss } from './course.js';
@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '41'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '42'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -602,7 +602,14 @@ function settings(el) {
   const st = store.get();
   const s = st.settings;
   const C = course();
-  const voiceMsg = !canSpeak() ? t('set.noTts') : hasVoice() ? t('set.voiceOk') : t('set.noVoice.' + C.id);
+  const voiceMsg = () => {
+    if (!canSpeak()) return t('set.noTts');
+    if (!hasVoice()) return t('set.noVoice.' + C.id);
+    const v = currentVoice();
+    const g = s.voice === 'm' ? 'm' : 'f';
+    const name = v ? `<b>${esc(v.name.replace(/^(Microsoft|Google)\s+/i, '').replace(/\s+-\s+.*$/, ''))}</b>` : '';
+    return `${t('set.voiceUsed', { name })}${hasVoiceOf(g) ? '' : ` ${t('set.voiceMissing.' + g)}`}<br>${t('set.voiceTip.' + C.id)}`;
+  };
 
   el.innerHTML = `
     <div class="screen settings-screen">
@@ -638,7 +645,9 @@ function settings(el) {
             <input type="range" class="rate" min="0.5" max="1.1" step="0.05" value="${s.rate}" aria-label="${t('set.rate')}">
             <button class="icon-btn test-voice" aria-label="${t('set.testVoice')}">${ICONS.sound}</button>
           </div>
-          <span class="muted small">${voiceMsg}</span>
+        </div>
+        <div class="set-row col"><span>${t('set.voice')}</span>${seg('voice', [['f', t('set.voiceF')], ['m', t('set.voiceM')]], s.voice === 'm' ? 'm' : 'f')}
+          <span class="muted small voice-msg">${voiceMsg()}</span>
         </div>
       </div>
 
@@ -685,6 +694,10 @@ function settings(el) {
     if (k === 'krLarge') s.krLarge = v === 'true';
     else s[k] = v;
     store.save();
+    if (k === 'voice') {
+      $('.voice-msg', el).innerHTML = voiceMsg();
+      speak(C.testVoice);
+    }
     applySettings();
     $$('.seg-btn', g).forEach((x) => x.classList.toggle('on', x === b));
   }));
