@@ -61,7 +61,38 @@ const P = {
   'to wash': '🧼', 'to draw': '🎨', 'to call': '📞', 'to be sad': '😢', 'to be happy': '😊', 'to be tired': '😩',
   'to be hungry': '🍽️', 'to be thirsty': '🥤', 'to get angry': '😠', 'scared, scary': '😱', 'to be surprised': '😮',
   sleepy: '😪', 'to be spicy': '🌶️', 'to be tasty': '😋', 'to be hot (weather)': '🥵', 'to be cold (weather)': '🥶',
-  hello: '👋', 'thank you': '🙏', 'I love you': '🥰',
+  hello: '👋', 'thank you': '🙏', 'I love you': '🥰',  // Fruits et légumes
+  banana: '🍌', strawberry: '🍓', grapes: '🍇', watermelon: '🍉', peach: '🍑', mandarin: '🍊', lemon: '🍋', cherry: '🍒',
+  pineapple: '🍍', mango: '🥭', melon: '🍈', kiwi: '🥝', tomato: '🍅', carrot: '🥕', cucumber: '🥒', mushroom: '🍄',
+  corn: '🌽', 'chilli pepper': '🌶️', 'napa cabbage': '🥬', broccoli: '🥦', 'sweet potato': '🍠', bean: '🫘', avocado: '🥑',
+  // École
+  classroom: '🏫', blackboard: '👩‍🏫', pencil: '✏️', ruler: '📏', scissors: '✂️', textbook: '📘', dictionary: '📙',
+  'class, lesson': '🧑‍🏫', question: '❓', answer: '💡', calculator: '🧮', 'pencil case': '🖍️', grades: '💯', graduation: '🎓',
+  'school entrance': '🎒', playground: '🛝', classmate: '👫', timetable: '🗓️', presentation: '📊',
+  // Mer
+  beach: '🏖️', sand: '⏳', wave: '🌊', swimsuit: '🩱', sunglasses: '🕶️', shell: '🐚', crab: '🦀', octopus: '🐙', squid: '🦑',
+  shrimp: '🦐', whale: '🐋', shark: '🦈', dolphin: '🐬', penguin: '🐧', 'sailing boat': '⛵', lighthouse: '🗼', harbour: '⚓',
+  sunscreen: '🧴', 'swim ring': '🛟', sandcastle: '🏰', seaside: '🏝️',
+  // Musique
+  piano: '🎹', guitar: '🎸', violin: '🎻', drums: '🥁', trumpet: '🎺', saxophone: '🎷', concert: '🎶', karaoke: '🎤', melody: '🎼',
+  album: '💿', fan: '🙌', stage: '🎪', performance: '🎭', 'sheet music': '🎼', earphones: '🎧', microphone: '🎙️', 'idol (pop star)': '🌟',
+  'to play (an instrument)': '🎹', lyrics: '📝', rhythm: '🥁', composer: '🎼',
+  // Lieux de la ville
+  'post office': '🏤', 'police station': '🚓', 'fire station': '🚒', pharmacy: '💊', 'hair salon': '💇', bakery: '🥐', florist: '💐',
+  'city hall': '🏛️', church: '⛪', zoo: '🦒', 'amusement park': '🎢', 'swimming pool': '🏊', 'petrol station': '⛽',
+  'apartment block': '🏢', building: '🏬', 'square, plaza': '⛲', alley: '🏘️', factory: '🏭', embassy: '🏳️', stadium: '🏟️',
+  // Passe-temps
+  hobby: '🎨', yoga: '🧘', camping: '⛺', knitting: '🧶', reading: '📚', chess: '♟️', puzzle: '🧩', 'go (board game)': '⚫',
+  garden: '🏡', gardening: '🌻', skiing: '⛷️', skating: '⛸️', bowling: '🎳', fishing: '🎣', 'walk, stroll': '🚶',
+  collecting: '🗃️', 'board game': '🎲', 'magic tricks': '🎩', 'cooking class': '👩‍🍳', 'taking photos': '📸',
+  // Médecin
+  cough: '😷', headache: '🤕', 'runny nose': '🤧', wound: '🩹', bandage: '🩹', injection: '💉', allergy: '🌾', dentist: '🦷',
+  ambulance: '🚑', patient: '🛌', thermometer: '🌡️', prescription: '📋', 'hospital stay': '🏥', surgery: '🩺',
+  'stomach ache': '🤢', blood: '🩸', bone: '🦴', 'to get hurt': '🤕', 'to get better': '💪', insurance: '📄', 'medical examination': '🩺',
+  // Soins et ménage
+  toothbrush: '🪥', toothpaste: '🦷', shampoo: '🧴', shower: '🚿', bath: '🛁', mirror: '🪞', comb: '💇', tissue: '🧻',
+  cosmetics: '💄', razor: '🪒', 'hair dryer': '💨', nail: '💅', perfume: '🌸', laundry: '🧺', 'washing machine': '🫧',
+  'vacuum cleaner': '🧹', bin: '🗑️', 'washing-up': '🍽️', broom: '🧹', iron: '👔', duvet: '🛏️',
 };
 
 /** Dessin d'un mot, ou null s'il n'en a pas. */

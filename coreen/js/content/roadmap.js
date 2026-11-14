@@ -260,6 +260,52 @@ const shared = (ja) => {
   const g = (ko, jp) => (ja ? jp : ko);
   const p = ja ? 'ja' : 'ko';
   return [
+    // Nouveaux thèmes de vocabulaire (chacun avec ses dessins pour découvrir les mots)
+    {
+      id: `${p}x1`, glyph: g('과일', '果物'), color: 'var(--c-words)',
+      title: L('Fruits et légumes', 'Fruit and vegetables'), sub: L('Au marché : fruits, légumes et couleurs du goût', 'At the market: fruit, vegetables and their flavours'),
+      steps: themePlus('fruitveg'),
+    },
+    {
+      id: `${p}x2`, glyph: g('학교', '学校'), color: 'var(--c-stats)',
+      title: L('À l’école', 'At school'), sub: L('La classe, les fournitures et les phrases du cours', 'The classroom, school supplies and classroom phrases'),
+      steps: [...themePlus('school'), ...phrasePlus('phrClass')],
+    },
+    {
+      id: `${p}x3`, glyph: g('장소', '場所'), color: 'var(--c-stats)',
+      title: L('Les lieux de la ville', 'Places in town'), sub: L('Poste, pharmacie, zoo, mairie… savoir où aller', 'Post office, pharmacy, zoo, city hall… knowing where to go'),
+      steps: themePlus('places'),
+    },
+    {
+      id: `${p}x4`, glyph: g('식당', '食堂'), color: 'var(--c-phrases)',
+      title: L('Au restaurant', 'At the restaurant'), sub: L('Commander, demander, payer', 'Ordering, asking, paying'),
+      steps: [...phrasePlus('phrResto'), ptype('pt-resto', L('Écrire ce qu’on mange', 'Writing about what you eat'), { level: '1', theme: 'food' })],
+    },
+    {
+      id: `${p}x5`, glyph: g('취미', '趣味'), color: 'var(--c-phrases)',
+      title: L('Passe-temps et musique', 'Hobbies and music'), sub: L('Ce qu’on aime faire, les instruments, les concerts', 'What you like doing, instruments, concerts'),
+      steps: [...themePlus('hobbies'), ...theme('music'), dict('music')],
+    },
+    {
+      id: `${p}x6`, glyph: g('바다', '海'), color: 'var(--c-home)',
+      title: L('Vacances à la mer', 'Holidays by the sea'), sub: L('La plage, les animaux marins, le port', 'The beach, sea creatures, the harbour'),
+      steps: themePlus('beach'),
+    },
+    {
+      id: `${p}x7`, glyph: g('병원', '病院'), color: 'var(--c-hangul)',
+      title: L('Chez le médecin', 'At the doctor’s'), sub: L('Dire ce qui ne va pas, comprendre le médecin', 'Saying what’s wrong, understanding the doctor'),
+      steps: themePlus('health'),
+    },
+    {
+      id: `${p}x8`, glyph: g('집안일', '家事'), color: 'var(--c-home)',
+      title: L('Soins et ménage', 'Personal care and chores'), sub: L('La salle de bain, le linge, le ménage', 'The bathroom, laundry, housework'),
+      steps: themePlus('care'),
+    },
+    {
+      id: `${p}x9`, glyph: g('복습', '復習'), color: 'var(--c-hangul)',
+      title: L('Atelier d’écriture : ma vie', 'Writing workshop: my life'), sub: L('Écrire ses loisirs, ses courses, l’école et ses projets', 'Writing about hobbies, shopping, school and plans'),
+      steps: [typeW('music'), speakW('music'), ptype('pt-hobby', L('Écrire ses loisirs', 'Writing about your free time'), { level: '2', theme: 'leisure' }), ptype('pt-market', L('Écrire ses courses', 'Writing about shopping for food'), { level: '2', theme: 'food' }), ptype('pt-class', L('Écrire sur l’école', 'Writing about school'), { level: '2', theme: 'study' }), ptype('pt-weekend', L('Écrire ses projets du week-end', 'Writing your weekend plans'), { level: '2', theme: 'leisure', tense: 'future' })],
+    },
     {
       id: `${p}n1`, glyph: g('숫자', '数'), color: 'var(--c-stats)',
       title: L('Compter', 'Counting'), sub: L('Les nombres, les quantités et leur prononciation', 'Numbers, quantities and how to say them'),
@@ -395,19 +441,19 @@ const C = (id, glyph, title, sub, units) => ({ id, glyph, title, sub, units });
 const CH = {
   ko: [
     C('kc1', '한글', L('Le hangeul', 'Hangul'), L('Lire, taper et prononcer les lettres', 'Reading, typing and saying the letters'), ['ko1', 'ko1w', 'ko2', 'ko2w', 'ko2b']),
-    C('kc2', '첫걸음', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ko3', 'kov1', 'kon1', 'kow1', 'kof1']),
-    C('kc3', '일상', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ko4', 'kov2', 'ko5', 'kov3', 'koc1', 'kos1', 'kow2']),
-    C('kc4', '밖', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ko6', 'kov4', 'kot1', 'kot2', 'kosp', 'kow3']),
-    C('kc5', '이야기', L('Raconter et nuancer', 'Telling and nuancing'), L('Passé, futur, envies, opinions', 'Past, future, wishes, opinions'), ['ko7', 'ko8', 'kov5', 'ko8b', 'kov6', 'kol1', 'kofe', 'kow4']),
+    C('kc2', '첫걸음', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ko3', 'kov1', 'kon1', 'kow1', 'kof1', 'kox2']),
+    C('kc3', '일상', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ko4', 'kov2', 'kox7', 'kox8', 'ko5', 'kov3', 'kox1', 'koc1', 'kox4', 'kos1', 'kow2']),
+    C('kc4', '밖', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ko6', 'kov4', 'kox3', 'kot1', 'kot2', 'kox6', 'kosp', 'kox5', 'kow3']),
+    C('kc5', '이야기', L('Raconter et nuancer', 'Telling and nuancing'), L('Passé, futur, envies, opinions', 'Past, future, wishes, opinions'), ['ko7', 'ko8', 'kov5', 'ko8b', 'kov6', 'kol1', 'kofe', 'kow4', 'kox9']),
     C('kc6', '발음', L('Bien prononcer', 'Sounding right'), L('Les règles avancées et les cas particuliers', 'Advanced rules and special cases'), ['ko9', 'ko9b', 'ko10', 'kov7', 'kote']),
     C('kc7', '고급', L('Niveau avancé', 'Advanced level'), L('Phrases complexes, registres, culture', 'Complex sentences, registers, culture'), ['ko11', 'ko12', 'ko13', 'kocu', 'kow5']),
   ],
   ja: [
     C('jc1', 'かな', L('Les kana', 'Kana'), L('Lire, taper et prononcer hiragana et katakana', 'Reading, typing and saying hiragana and katakana'), ['ja1', 'ja1w', 'ja1k', 'ja2', 'ja2w']),
-    C('jc2', '初め', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ja3', 'jav1', 'jan1', 'jaw1', 'jaf1']),
-    C('jc3', '日常', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ja4', 'jav2', 'ja5', 'jav3', 'jac1', 'jas1', 'jaw2']),
-    C('jc4', '外', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ja6', 'jav4', 'jat1', 'jat2', 'jasp', 'jaw3']),
-    C('jc5', '話', L('Raconter et nuancer', 'Telling and nuancing'), L('Passé, futur, envies, opinions', 'Past, future, wishes, opinions'), ['ja7', 'ja8', 'jav5', 'ja8b', 'jav6', 'jal1', 'jafe', 'jaw4']),
+    C('jc2', '初め', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ja3', 'jav1', 'jan1', 'jaw1', 'jaf1', 'jax2']),
+    C('jc3', '日常', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ja4', 'jav2', 'jax7', 'jax8', 'ja5', 'jav3', 'jax1', 'jac1', 'jax4', 'jas1', 'jaw2']),
+    C('jc4', '外', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ja6', 'jav4', 'jax3', 'jat1', 'jat2', 'jax6', 'jasp', 'jax5', 'jaw3']),
+    C('jc5', '話', L('Raconter et nuancer', 'Telling and nuancing'), L('Passé, futur, envies, opinions', 'Past, future, wishes, opinions'), ['ja7', 'ja8', 'jav5', 'ja8b', 'jav6', 'jal1', 'jafe', 'jaw4', 'jax9']),
     C('jc6', '読み', L('Bien lire et prononcer', 'Reading and sounding right'), L('Lectures particulières et kanji', 'Special readings and kanji'), ['ja9', 'ja9b', 'jav7', 'jate', 'jakw']),
     C('jc7', '上級', L('Niveau avancé', 'Advanced level'), L('Phrases complexes, registres, culture', 'Complex sentences, registers, culture'), ['ja10', 'ja11', 'ja12', 'jacu', 'jaw5']),
   ],
