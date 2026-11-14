@@ -1351,3 +1351,14 @@ body.bare .topbar { border-bottom-color: transparent; }
   box-shadow: 0 8px 24px rgb(0 0 0 / .2); pointer-events: none; animation: popIn .2s var(--spring);
 }
 .peek-help { margin: 8px 0 0; text-align: center; }
+
+/* Bouton clavier (activer / désactiver) dans la barre de progression */
+.qbar .kb-toggle { width: 36px; height: 36px; flex: 0 0 auto; color: var(--accent); background: var(--accent-soft); border-radius: 12px; position: relative; }
+.qbar .kb-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.qbar .kb-toggle.off { color: var(--muted); background: var(--surface-2); }
+.qbar .kb-toggle.off::after { content: ''; position: absolute; left: 6px; right: 6px; top: 50%; height: 2px; background: currentColor; transform: rotate(-35deg); border-radius: 2px; }
+.qbar .kb-toggle[hidden] { display: none; }
+.tiles-card { margin-top: 14px; }
+.tiles-card .recon-fr:empty { display: none; }
+.options.tiles-opts { grid-template-columns: 1fr 1fr; }
+.tiles-opts .opt { text-align: center; }

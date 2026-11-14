@@ -2,7 +2,7 @@
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
-import { addXp, review, pickForReview, mistakes, get, markRoad, starsFor, box, bump, record } from './store.js';
+import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, bump, record } from './store.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
@@ -21,6 +21,7 @@ export const REVIEW_MAX = 10;
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 /** La voix sert aux dictées : sans elle, on écrit à partir de la traduction. */
 const canDictate = () => canSpeak() && hasVoice();
+const KB_ICON = '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M18 13.5h.01M8.5 14.5h7"/></svg>';
 const MIC = '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>';
 
 /**
@@ -48,6 +49,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       <div class="qbar">
         <div class="progress"><i></i></div>
         <span class="combo" aria-live="polite"></span>
+        <button class="icon-btn kb-toggle" hidden aria-pressed="true" aria-label="${t('kb.toggle')}" title="${t('kb.toggle')}">${KB_ICON}</button>
         <span class="count qcount"></span>
       </div>
       <div class="qstage"></div>
@@ -64,6 +66,13 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
   function show() {
     const q = queue[0];
     el.querySelector('.quiz')?.classList.remove('kb-mode');
+    // Bouton clavier : pour les réponses à écrire dans la langue apprise, on peut le remplacer par des étiquettes.
+    const typed = q.type === 'input' && q.kb !== 'latin';
+    const noKb = typed && !!get().settings.noKb;
+    const tog = $('.kb-toggle', el);
+    tog.hidden = !typed;
+    tog.classList.toggle('off', noKb);
+    tog.setAttribute('aria-pressed', String(!noKb));
     const n = exam ? total - queue.length : done;
     bar.style.width = `${(n / total) * 100}%`;
     $('.qcount', el).textContent = `${Math.min(n + 1, total)} / ${total}`;
@@ -85,6 +94,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     }
 
     if (q.type === 'match') return showMatch(q);
+    if (noKb) return showTiles(q, head);
     if (q.type === 'speak') return showSpeak(q, head);
 
     if (q.type === 'input') {
@@ -146,6 +156,44 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     $('.listen-big', stage)?.addEventListener('click', () => speak(q.say));
     if (q.auto && q.say) setTimeout(() => speak(q.say), 250);
   }
+
+  // ---------- Sans clavier : la réponse en étiquettes à remettre dans l'ordre (ou à choisir si elle tient en une seule) ----------
+  function showTiles(q, head) {
+    const ans = q.accept[0];
+    const tiles = answerTiles(ans);
+    if (tiles.length >= 2) {
+      stage.innerHTML = `${head}<div class="qcard pop order-card tiles-card"><div class="order-host"></div></div>`;
+      reconstruct($('.order-host', stage), { tiles, tl: ans, end: '', fr: '', en: '', spell: !/\s/.test(ans.trim()) }, (clean) => settle(q, clean, null, q.answer, true), {
+        strict: !!exam,
+        onFail: () => settle(q, false, null, q.answer, false),
+      });
+    } else {
+      const options = shuffle([ans, ...singleDecoys(ans)]);
+      stage.innerHTML = `${head}
+        <div class="options tiles-opts">
+          ${options.map((o, i) => `<button class="opt kr" style="--i:${i}" data-i="${i}">${esc(o)}</button>`).join('')}
+        </div>`;
+      $$('.opt', stage).forEach((b) => b.addEventListener('click', () => {
+        const ok = options[b.dataset.i] === ans;
+        $$('.opt', stage).forEach((x) => (x.disabled = true));
+        const right = $$('.opt', stage)[options.indexOf(ans)];
+        right.classList.add('right');
+        if (!ok) b.classList.add('wrong');
+        settle(q, ok, right, q.answer, ok);
+      }));
+    }
+    $('.speak', stage)?.addEventListener('click', () => speak(q.say));
+    $('.listen-big', stage)?.addEventListener('click', () => speak(q.say));
+    if (q.auto && q.say) setTimeout(() => speak(q.say), 250);
+  }
+  $('.kb-toggle', el).addEventListener('click', () => {
+    const st = get();
+    st.settings.noKb = !st.settings.noKb;
+    save();
+    sfx.tap();
+    toast(t(st.settings.noKb ? 'kb.off' : 'kb.on'));
+    show();
+  });
 
   // ---------- Paires à relier ----------
   function showMatch(q) {
@@ -352,6 +400,27 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     return;
   }
   show();
+}
+
+/** Réponse coupée en étiquettes : les mots d'une phrase, sinon les syllabes (ou les kana) d'un mot. */
+export function answerTiles(text) {
+  const s = String(text).trim().replace(/[.,!?。、？！~〜…]+$/, '');
+  if (/\s/.test(s)) return s.split(/\s+/).filter(Boolean);
+  const out = [];
+  for (const ch of s) {
+    if (/[ゃゅょぁぃぅぇぉャュョァィゥェォー]/.test(ch) && out.length) out[out.length - 1] += ch;
+    else out.push(ch);
+  }
+  return out;
+}
+/** Trois leurres pour une réponse d'un seul signe : autres lettres de l'alphabet, ou autres syllabes. */
+function singleDecoys(ans) {
+  const S = course().script;
+  const letters = Object.values(S.sets).filter((x) => x.kind !== 'kanji').flatMap((x) => x.items.flatMap((i) => [i.j, i.j2]).filter(Boolean)).filter((j) => [...j].length === 1);
+  const sameKind = (j) => (/[ㄱ-ㅣ]/.test(ans) ? /[ㄱ-ㅣ]/.test(j) : /[ァ-ヶ]/.test(ans) ? /[ァ-ヶ]/.test(j) : /[ぁ-ゖ]/.test(ans) ? /[ぁ-ゖ]/.test(j) : false);
+  let pool = letters.filter(sameKind);
+  if (pool.length < 4) pool = Array.from({ length: 12 }, () => S.randomSyllable().text);
+  return shuffle([...new Set(pool)].filter((j) => j !== ans)).slice(0, 3);
 }
 
 /** Nouvel ordre des réponses pour une question reposée (sans modifier l'originale). */
