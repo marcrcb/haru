@@ -2,6 +2,7 @@
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, confetti, countUp, pulse, floatXp, toast, burst, ICONS } from './ui.js';
 import { addXp, get, save, dayKey, markRoad, starsFor, bump } from './store.js';
 import { mountTyping, normAnswer } from './keyboard.js';
+import { meaningOf, showPeek, peekAttr } from './peek.js';
 import { generate, TENSE_LABEL, STYLE_LABEL, FORM_LABEL } from './generator.js';
 import { THEMES } from './content/concepts.js';
 import { course, t, tr, lang } from './course.js';
@@ -69,6 +70,7 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
       <p class="recon-fr">${esc(meaning(phrase))}</p>
       <div class="answer-line" aria-label="${t('recon.answer')}"></div>
       <div class="bank"></div>
+      ${strict || phrase.spell ? '' : `<p class="muted small peek-help">${t('peek.hold')}</p>`}
       <div class="recon-tools" ${strict ? 'hidden' : ''}>
         <button class="btn ghost small hint-btn">${t('recon.hint')}</button>
         <button class="btn ghost small sol-btn">${t('recon.solution')}</button>
@@ -93,12 +95,20 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
     const x0 = e.clientX;
     const y0 = e.clientY;
     let ghost = null;
+    // Appui long sans bouger : le sens du mot (trou de mémoire), sans le placer.
+    const hold = strict || phrase.spell ? 0 : setTimeout(() => {
+      if (ghost) return;
+      showPeek(chip, meaningOf(item.t, phrase.words));
+      dragged = true;
+      setTimeout(() => { dragged = false; }, 400);
+    }, 450);
     let mark = null;
     let index = -1;
     const others = () => $$('.placed', line).filter((c) => c !== chip);
     const move = (ev) => {
       if (!ghost) {
         if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 8) return;
+        clearTimeout(hold);
         const r = chip.getBoundingClientRect();
         ghost = chip.cloneNode(true);
         ghost.classList.add('drag-ghost');
@@ -131,6 +141,7 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
       else line.append(mark);
     };
     const up = () => {
+      clearTimeout(hold);
       document.removeEventListener('pointermove', move);
       document.removeEventListener('pointerup', up);
       document.removeEventListener('pointercancel', up);
@@ -301,9 +312,10 @@ export function typePhrase(box, phrase, onSolved) {
 /** Texte de la phrase, mot par mot (avec furigana au-dessus des kanji en japonais). */
 export function phraseText(p) {
   if (p.ruby) {
-    return p.ruby.map((x, i) => `<span style="--i:${i}">${rubyWord(x.w, x.r)}${esc(x.p || '')}</span>`).join('') + esc(p.end);
+    return p.ruby.map((x, i) => `<span style="--i:${i}"${peekAttr(x.w, p.words)}>${rubyWord(x.w, x.r)}${esc(x.p || '')}</span>`).join('') + esc(p.end);
   }
-  return p.tl.split(' ').map((w, i) => `<span style="--i:${i}">${esc(w)}</span>`).join(' ');
+  // Chaque mot se touche pour voir son sens.
+  return p.tl.split(' ').map((w, i) => `<span style="--i:${i}"${peekAttr(w, p.words)}>${esc(w)}</span>`).join(' ');
 }
 
 function phraseCard(p, { roman }) {

@@ -23,6 +23,8 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Succès** : 17 badges à cinq paliers (bronze, argent, or, platine, diamant) dans le Profil.
 - **À voix haute** : le téléphone écoute (reconnaissance vocale du navigateur) et vérifie qu’il comprend le bon mot ou la bonne lettre. Sans micro, ces exercices sont remplacés par des exercices écrits.
 - **Difficulté progressive** : au début du parcours, surtout des choix multiples ; ensuite, de plus en plus d’exercices à écrire (clavier coréen ou japonais), des paires à relier, des syllabes et des mots à remettre dans l’ordre par glisser-déposer ; à la fin, plus aucun choix multiple. Le nombre de questions est fixé par type de série (`SERIES` dans `js/quiz.js`).
+- **Nouveaux mots en images** : au premier contact avec un mot concret, on le reconnaît parmi quatre dessins (`js/content/pictures.js`).
+- **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
 - **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
 

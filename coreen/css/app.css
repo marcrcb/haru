@@ -1334,3 +1334,20 @@ body.bare .topbar { border-bottom-color: transparent; }
 .kb-gap { display: block; }
 .kb-flick span { min-width: 58px; height: 58px; font-size: calc(1.8rem * var(--krs)); }
 @media (max-height: 700px) { .type-dock .kb-ja .kb-key { height: 42px; } .type-dock .kb-ja .kb-key.tall { height: auto; } }
+
+/* Première rencontre d'un mot : quatre dessins */
+.options.pics { grid-template-columns: 1fr 1fr; }
+.opt.pic-opt { display: grid; justify-items: center; gap: 4px; padding: 14px 8px 12px; text-align: center; }
+.opt.pic-opt .pic { font-size: 3rem; line-height: 1.1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.opt.pic-opt .kr { font-size: calc(1.25rem * var(--krs)); font-weight: 800; }
+.opt.pic-opt small { font-size: .78rem; }
+
+/* Trou de mémoire : mot à toucher, et bulle avec son sens */
+[data-peek] { cursor: help; text-decoration: underline dotted color-mix(in srgb, var(--muted) 55%, transparent); text-underline-offset: .22em; text-decoration-thickness: 1.5px; }
+.exam-mode [data-peek] { text-decoration: none; cursor: auto; }
+.peek-tip {
+  position: fixed; z-index: 60; max-width: min(280px, calc(100vw - 16px)); padding: 8px 12px; border-radius: 12px;
+  background: var(--ink); color: var(--bg); font-weight: 700; font-size: .92rem; line-height: 1.3; text-align: center;
+  box-shadow: 0 8px 24px rgb(0 0 0 / .2); pointer-events: none; animation: popIn .2s var(--spring);
+}
+.peek-help { margin: 8px 0 0; text-align: center; }

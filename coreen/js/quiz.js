@@ -6,6 +6,7 @@ import { addXp, review, pickForReview, mistakes, get, markRoad, starsFor, box, b
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
+import { pictureOf } from './content/pictures.js';
 import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
 import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
@@ -126,8 +127,10 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       });
     } else {
       stage.innerHTML = `${head}
-        <div class="options ${q.options.length > 4 ? 'many' : ''}">
-          ${q.options.map((o, i) => `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${esc(o.label)}</button>`).join('')}
+        <div class="options ${q.options.length > 4 ? 'many' : ''} ${q.pics ? 'pics' : ''}">
+          ${q.options.map((o, i) => (o.pic
+            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}"><span class="pic" aria-hidden="true">${o.pic}</span><span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
+            : `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${esc(o.label)}</button>`)).join('')}
         </div>`;
       $$('.opt', stage).forEach((b) => b.addEventListener('click', () => {
         const i = Number(b.dataset.i);
@@ -434,7 +437,7 @@ export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true
     };
   }
   if (kind === 'spell') {
-    return { ...base, type: 'order', sub: t('order.spell'), phrase: { tiles: spellTiles(w), tl: w.tl, end: '', fr: w.fr, en: w.en } };
+    return { ...base, type: 'order', sub: t('order.spell'), phrase: { tiles: spellTiles(w), tl: w.tl, end: '', fr: w.fr, en: w.en, spell: true } };
   }
   if (kind === 'order') {
     return { ...base, type: 'order', sub: t('order.words'), phrase: { tiles: wordTiles(w), tl: w.tl, end: endOf(w), fr: w.fr, en: w.en } };
@@ -449,6 +452,36 @@ export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true
     return mcq({ ...base, say: null, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('quiz.howSay', { lang: language }) }, { label: w.tl, kr: true }, decoys.map((o) => ({ label: o.tl, kr: true })), n);
   }
   return mcq({ ...base, auto: true, prompt: listenBtn(), sub: t('quiz.whatHeard') }, { label: w.tl, kr: true }, decoys.map((o) => ({ label: o.tl, kr: true })), n);
+}
+
+/**
+ * Première rencontre d'un mot : sa traduction, et quatre dessins accompagnés d'un mot dans la langue apprise.
+ * On choisit le dessin qui correspond : on découvre ainsi le mot avec son image (et sa prononciation).
+ * Renvoie null si le mot n'a pas de dessin ou s'il manque des leurres.
+ */
+export function pictureQuestion(w, pool = []) {
+  const C = course();
+  const pic = pictureOf(w);
+  if (!pic) return null;
+  const roman = get().settings.roman;
+  const opt = (o) => ({ label: o.tl, kr: true, pic: pictureOf(o), rom: roman ? C.wordRom(o) : '' });
+  const seen = new Set([pic, w.tl]);
+  const pick = (list) => shuffle(list).filter((o) => {
+    const p = pictureOf(o);
+    if (!p || seen.has(p) || seen.has(o.tl)) return false;
+    seen.add(p);
+    seen.add(o.tl);
+    return true;
+  });
+  const decoys = [...pick(pool), ...pick(C.words)].slice(0, 3);
+  if (decoys.length < 3) return null;
+  const answer = opt(w);
+  const options = shuffle([answer, ...decoys.map(opt)]);
+  return {
+    pics: true, say: w.tl, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('pic.which'),
+    explain: `<span class="kr">${esc(w.tl)}</span>${roman ? ` · ${esc(C.wordRom(w))}` : ''} = ${esc(gloss(w))}`,
+    options, correct: options.indexOf(answer),
+  };
 }
 
 /** Paires à relier : mots ↔ traductions (jusqu'à quatre). */
@@ -515,8 +548,12 @@ export function vocabQuiz(el, theme, mode, step) {
   else {
     questions = list.map((w, k) => wordQuestion(w, wordKind(w, ease(w), k), { pool, plain: box(w.id) >= 3 }));
     // Pour commencer : relier les mots nouveaux à leur sens. Pour finir : une phrase à remettre dans l'ordre.
+    // Tout premier contact avec un mot : le reconnaître parmi des dessins (avant tout le reste).
+    // Sinon, pour commencer, relier les mots encore nouveaux à leur sens.
+    const intro = list.filter((w) => box(w.id) < 0).map((w) => pictureQuestion(w, pool)).filter(Boolean).slice(0, 4);
     const fresh = list.filter((w) => box(w.id) < 2);
-    if (fresh.length >= 3) questions.unshift(matchWords(fresh));
+    if (intro.length) questions.unshift(...intro);
+    else if (fresh.length >= 3) questions.unshift(matchWords(fresh));
     if (mode !== 'review' || theme) questions.push(sentenceQuestion(theme, depth));
     if (depth >= 0.5) questions.push(sentenceQuestion(theme, depth));
   }
@@ -649,7 +686,7 @@ export function readWordQuestion(w, kind = 'rom', pool = []) {
       pool.filter((o) => o.tl !== w.tl).map((o) => ({ label: C.wordRom(o) })),
     );
   }
-  return { type: 'input', kb: 'latin', answer: C.wordRom(w), accept: [C.wordRom(w)], say: w.tl, prompt: `<span class="qkr ${sizeCls(shown)}">${esc(shown)}</span>`, sub: t('type.romWord'), explain: `${t('quiz.meaning')} ${esc(gloss(w))}` };
+  return { type: 'input', kb: 'latin', answer: C.wordRom(w), accept: [C.wordRom(w)], say: w.tl, prompt: `<span class="qkr ${sizeCls(shown)}" data-peek="${esc(gloss(w))}">${esc(shown)}</span>`, sub: t('type.romWord'), explain: `${t('quiz.meaning')} ${esc(gloss(w))}` };
 }
 
 /**
