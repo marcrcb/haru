@@ -25,7 +25,7 @@ export const STRINGS = {
 
     'words.quiz': 'Quiz mélangé', 'words.pairsSub': 'Contre la montre', 'words.due1': '{n} mot à revoir', 'words.dueN': '{n} mots à revoir',
     'words.consolidate': 'Mots à consolider', 'words.err1': '{n} faute à revoir', 'words.errN': '{n} fautes à revoir', 'words.noErr': 'Aucune faute en attente',
-    'pic.which': 'Lequel correspond ?', 'kb.toggle': 'Activer ou désactiver le clavier', 'kb.off': 'Clavier désactivé : remets les morceaux dans l’ordre', 'kb.on': 'Clavier activé', 'peek.help': 'Touche un mot pour voir son sens', 'peek.hold': 'Appui long sur un mot : son sens', 'review.none': 'Aucune faute à réviser', 'review.noneSub': 'Les mots ratés dans les exercices reviendront ici, une question par faute.', 'review.next1': 'Séance suivante · {n} faute', 'review.nextN': 'Séance suivante · {n} fautes', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
+    'pic.which': 'Lequel correspond ?', 'kb.toggle': 'Activer ou désactiver le clavier', 'peek.help': 'Touche un mot pour voir son sens', 'peek.hold': 'Appui long sur un mot : son sens', 'review.none': 'Aucune faute à réviser', 'review.noneSub': 'Les mots ratés dans les exercices reviendront ici, une question par faute.', 'review.next1': 'Séance suivante · {n} faute', 'review.nextN': 'Séance suivante · {n} fautes', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
 
     'script.quizSet': 'Quiz sur ces lettres', 'script.rules': 'Règles de prononciation',
     'script.rulesSub.ko': 'Liaisons, consonnes finales, ㅎ, nasalisation…', 'script.rulesSub.ja': 'Petit っ, voyelles longues, は / を, accent…',
@@ -182,7 +182,7 @@ export const STRINGS = {
 
     'words.quiz': 'Mixed quiz', 'words.pairsSub': 'Against the clock', 'words.due1': '{n} word to review', 'words.dueN': '{n} words to review',
     'words.consolidate': 'Words to strengthen', 'words.err1': '{n} mistake to review', 'words.errN': '{n} mistakes to review', 'words.noErr': 'No mistakes waiting',
-    'pic.which': 'Which one is it?', 'kb.toggle': 'Turn the keyboard on or off', 'kb.off': 'Keyboard off: put the pieces in order', 'kb.on': 'Keyboard on', 'peek.help': 'Tap a word to see its meaning', 'peek.hold': 'Press and hold a word to see its meaning', 'review.none': 'No mistakes to review', 'review.noneSub': 'Words you miss in the exercises come back here, one question per mistake.', 'review.next1': 'Next session · {n} mistake', 'review.nextN': 'Next session · {n} mistakes', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
+    'pic.which': 'Which one is it?', 'kb.toggle': 'Turn the keyboard on or off', 'peek.help': 'Tap a word to see its meaning', 'peek.hold': 'Press and hold a word to see its meaning', 'review.none': 'No mistakes to review', 'review.noneSub': 'Words you miss in the exercises come back here, one question per mistake.', 'review.next1': 'Next session · {n} mistake', 'review.nextN': 'Next session · {n} mistakes', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
 
     'script.quizSet': 'Quiz on these letters', 'script.rules': 'Pronunciation rules',
     'script.rulesSub.ko': 'Linking, final consonants, ㅎ, nasalization…', 'script.rulesSub.ja': 'Small っ, long vowels, は / を, pitch…',

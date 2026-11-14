@@ -191,7 +191,6 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     st.settings.noKb = !st.settings.noKb;
     save();
     sfx.tap();
-    toast(t(st.settings.noKb ? 'kb.off' : 'kb.on'));
     show();
   });
 
