@@ -63,6 +63,7 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
   if (tiles.length > 1) while (order.every((x, k) => x.i === k)) order = shuffle(tiles);
   const placed = [];
   let helped = false;
+  let erred = false; // une phrase fausse a déjà été proposée : se corriger ensuite ne compte pas comme juste
   let solved = false;
 
   box.innerHTML = `
@@ -219,8 +220,9 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
       burst(line, 16);
       autoSpeak(phrase.tl);
       if (!strict) bump('phrases');
-      onSolved?.(!helped, line);
+      onSolved?.(!helped && !erred, line, erred);
     } else {
+      erred = true;
       $$('.placed', line).forEach((b, k) => b.classList.toggle('bad', placed[k].t !== phrase.tiles[k]));
       if (strict) {
         solved = true;
@@ -273,6 +275,7 @@ export function typePhrase(box, phrase, onSolved) {
       onSolved?.(!helped, typing.box);
     } else {
       tries++;
+      helped = true; // une erreur : la phrase n'est plus réussie du premier coup
       sfx.ko();
       typing.box.classList.add('bad');
       pulse(typing.box, 'shake');

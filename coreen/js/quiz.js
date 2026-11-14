@@ -86,7 +86,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
 
     if (q.type === 'order') {
       stage.innerHTML = `<div class="qcard pop order-card">${q.sub ? `<p class="order-sub muted small">${esc(q.sub)}</p>` : ''}<div class="order-host"></div></div>`;
-      reconstruct($('.order-host', stage), q.phrase, (clean) => settle(q, clean, null, q.phrase.tl, true), {
+      // Une erreur avant de trouver : la question compte comme ratée (elle reviendra), même si on se corrige ensuite.
+      reconstruct($('.order-host', stage), q.phrase, (clean, _, erred) => settle(q, clean, null, q.phrase.tl, !erred), {
         strict: !!exam,
         onFail: () => settle(q, false, null, q.phrase.tl, false),
       });
@@ -163,7 +164,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     const tiles = answerTiles(ans);
     if (tiles.length >= 2) {
       stage.innerHTML = `${head}<div class="qcard pop order-card tiles-card"><div class="order-host"></div></div>`;
-      reconstruct($('.order-host', stage), { tiles, tl: ans, end: '', fr: '', en: '', spell: !/\s/.test(ans.trim()) }, (clean) => settle(q, clean, null, q.answer, true), {
+      reconstruct($('.order-host', stage), { tiles, tl: ans, end: '', fr: '', en: '', spell: !/\s/.test(ans.trim()) }, (clean, _, erred) => settle(q, clean, null, q.answer, !erred), {
         strict: !!exam,
         onFail: () => settle(q, false, null, q.answer, false),
       });
@@ -224,7 +225,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
         sfx.ok();
         found++;
         sel = null;
-        if (found === q.pairs.length) settle(q, errors === 0, null, '', true);
+        // Une seule mauvaise paire : l'exercice compte comme raté (et reviendra), même une fois toutes les paires trouvées.
+        if (found === q.pairs.length) settle(q, errors === 0, null, '', errors === 0);
       } else {
         errors++;
         [sel, b].forEach((x) => pulse(x, 'shake'));
@@ -272,7 +274,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
           heard.innerHTML = `${t('speak.heard')} <b class="kr">${esc(m.heard)}</b>`;
           if (m.ok) {
             bump('spoken');
-            return settle(q, tries === 0, mic, q.answer, true);
+            // Réussi seulement au premier essai ; sinon la question compte comme ratée et reviendra.
+            return settle(q, tries === 0, mic, q.answer, tries === 0);
           }
           tries++;
           sfx.ko();
