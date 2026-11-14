@@ -34,7 +34,35 @@ const MIC = '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx
  *   choix   : options: [{ label, kr? }], correct
  * exam : { pass (0 à 1), onEnd(pct, réussi) } → pas de seconde chance, pas d'indice.
  */
+/**
+ * On ne prononce pas un mot qu'on n'a jamais vu : une question orale passe après une autre question sur le même mot ;
+ * s'il n'y en a pas et que le mot est encore nouveau, on le montre d'abord (dessin ou écrit, avec son sens).
+ */
+export function seeBeforeSaying(questions) {
+  const out = [];
+  const seen = new Set();
+  const later = [];
+  const ids = (q) => (q.wids || (q.wid ? [q.wid] : []));
+  questions.forEach((q, i) => {
+    if (q.type === 'speak' && q.wid && !seen.has(q.wid)) {
+      if (questions.slice(i + 1).some((o) => o.type !== 'speak' && ids(o).includes(q.wid))) return later.push(q);
+      if (q.fresh && q.intro) {
+        const intro = q.intro();
+        if (intro) out.push({ ...intro, wid: q.wid });
+      }
+    }
+    out.push(q);
+    if (q.type !== 'speak') ids(q).forEach((id) => seen.add(id));
+    // Les questions orales mises de côté reviennent juste après la première question qui montre leur mot.
+    for (let k = later.length - 1; k >= 0; k--) {
+      if (seen.has(later[k].wid)) out.push(...later.splice(k, 1));
+    }
+  });
+  return [...out, ...later];
+}
+
 export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
+  if (!exam) questions = seeBeforeSaying(questions);
   let queue = questions.map((q) => ({ ...q, retry: false }));
   let total = questions.length;
   let done = 0;
@@ -269,6 +297,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       msg.textContent = t('speak.listening');
       sfx.tap();
       listening = listen({
+        expected: q.accept,
+        hits: (alts) => matchSpoken(alts, q.accept).ok,
         onResult(alts) {
           const m = matchSpoken(alts, q.accept);
           heard.innerHTML = `${t('speak.heard')} <b class="kr">${esc(m.heard)}</b>`;
@@ -474,19 +504,20 @@ const endOf = (w) => (w.tl.match(/[.?!。？！]+$/) || [''])[0];
  *        secours à choix : kr2fr · fr2kr · listen · listen2fr
  * opts : { pool (leurres), n (nombre de choix), plain (sans romanisation), track (répétition espacée) }
  */
-export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true } = {}) {
+export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true, intro = true } = {}) {
   const C = course();
   const roman = get().settings.roman && !plain;
   const sub = [C.wordRead(w), roman ? C.wordRom(w) : ''].filter(Boolean).join(' · ');
   const all = pool && pool.length >= 8 ? pool : C.words;
   const decoys = all.filter((o) => o.id !== w.id);
   const base = {
+    wid: w.id,
     say: w.tl,
     onAnswer: track ? (ok) => review(w.id, ok) : undefined,
     explain: `<span class="kr">${esc(w.tl)}</span>${sub ? ` · ${esc(sub)}` : ''} = ${esc(gloss(w))}`,
   };
   const language = tr(C.name).toLowerCase();
-  const again = (k) => wordQuestion(w, k, { pool, n, plain, track });
+  const again = (k) => wordQuestion(w, k, { pool, n, plain, track, intro });
 
   if ((kind === 'type' || kind === 'dict') && !typable(w, 16)) kind = spellTiles(w).length > 1 ? 'spell' : 'listen2fr';
   if (kind === 'dict' && !canDictate()) kind = 'type';
@@ -504,6 +535,8 @@ export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true
   if (kind === 'speak') {
     return {
       ...base, type: 'speak', answer: w.tl, accept: acceptWord(w), fallback: () => again(typable(w, 16) ? 'type' : 'spell'),
+      // Mot encore nouveau : on le montre d'abord (dessin, sinon écrit avec son sens à choisir).
+      fresh: intro && box(w.id) < 1, intro: () => pictureQuestion(w, pool || []) || again('kr2fr'),
       prompt: `<span class="qkr ${sizeCls(w.tl)}">${esc(w.tl)}</span>`, sub: [sub, gloss(w)].filter(Boolean).join(' · '),
     };
   }
@@ -549,7 +582,7 @@ export function pictureQuestion(w, pool = []) {
   const answer = opt(w);
   const options = shuffle([answer, ...decoys.map(opt)]);
   return {
-    pics: true, say: w.tl, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('pic.which'),
+    pics: true, wid: w.id, say: w.tl, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('pic.which'),
     explain: `<span class="kr">${esc(w.tl)}</span>${roman ? ` · ${esc(C.wordRom(w))}` : ''} = ${esc(gloss(w))}`,
     options, correct: options.indexOf(answer),
   };
@@ -559,7 +592,7 @@ export function pictureQuestion(w, pool = []) {
 export function matchWords(words, track = true) {
   const list = words.slice(0, 4);
   return {
-    type: 'match', sub: t('match.words'),
+    type: 'match', sub: t('match.words'), wids: list.map((w) => w.id),
     pairs: list.map((w) => ({ a: w.tl, b: gloss(w), say: w.tl })),
     onAnswer: track ? (ok) => { if (!ok) list.forEach((w) => review(w.id, false)); } : undefined,
   };
@@ -651,7 +684,7 @@ export function reviewQuiz(el) {
     return;
   }
   // Un exercice qui fait écrire ou reconnaître le mot, selon sa difficulté (pas de paires ni de phrase en plus).
-  const questions = list.map((w, k) => wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true }));
+  const questions = list.map((w, k) => wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true, intro: false }));
   runQuiz(el, {
     questions,
     title: t('review'),
@@ -674,7 +707,7 @@ const romAccept = (x) => (x.r === 'wo' ? ['wo', 'o'] : [x.r]);
  * kind : rom (lettre → écrire sa lecture au clavier latin) · type (lecture → écrire la lettre) · speak (lettre → la prononcer)
  *        secours à choix : read · pick
  */
-export function letterQuestion(x, kind, others = [], n = 4) {
+export function letterQuestion(x, kind, others = [], n = 4, { intro = false } = {}) {
   const C = course();
   const tip = x.tip ? esc(tr(x.tip)) : '';
   if (x.r === '' && (kind === 'rom' || kind === 'speak')) kind = 'type'; // ㅇ : pas de son propre
@@ -692,7 +725,7 @@ export function letterQuestion(x, kind, others = [], n = 4) {
     return { type: 'input', kb: 'latin', answer: x.r, accept: romAccept(x), say: x.say, prompt: `<span class="qkr">${x.j}</span>`, sub: t('type.rom'), explain: tip };
   }
   if (kind === 'speak') {
-    return { type: 'speak', answer: x.say, accept: [x.say, x.j], say: x.say, prompt: `<span class="qkr">${x.j}</span>`, sub: t('speak.letter'), explain: tip, fallback: () => letterQuestion(x, 'rom', others, n) };
+    return { type: 'speak', wid: 'L' + x.j, fresh: intro, intro: () => letterQuestion(x, 'read', others, n), answer: x.say, accept: [x.say, x.j], say: x.say, prompt: `<span class="qkr">${x.j}</span>`, sub: t('speak.letter'), explain: tip, fallback: () => letterQuestion(x, 'rom', others, n) };
   }
   if (kind === 'pick') {
     return mcq({ prompt: `<span class="qlatin">${esc(romLabel(x))}</span>`, sub: t('quiz.whichLetter'), say: x.say, explain: tip }, { label: x.j, kr: true }, others.filter((o) => o.r !== x.r).map((o) => ({ label: o.j, kr: true })), n);
@@ -789,7 +822,7 @@ export function scriptQuiz(el, set, step, mode) {
     const items = S.sets[set].items.map(form);
     title = tr(S.sets[set].label);
     const others = [...items, ...(S.sets[set].decoys || []).map(form)];
-    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others));
+    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others, 4, { intro: !oral }));
   } else if (set === 'syllables') {
     title = tr(S.syllableLabel);
     const kinds = ease < 0.6 ? ['read', 'type', 'read', 'type'] : ['type', 'read', 'type', 'rom'];
