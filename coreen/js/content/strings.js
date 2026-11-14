@@ -24,14 +24,15 @@ export const STRINGS = {
     'home.wordsOfDay': 'Mots du jour', 'home.generate': 'Générer', 'home.generateSub': 'Une phrase sur mesure',
 
     'words.quiz': 'Quiz mélangé', 'words.pairsSub': 'Contre la montre', 'words.due1': '{n} mot à revoir', 'words.dueN': '{n} mots à revoir',
-    'words.consolidate': 'Mots à consolider', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
+    'words.consolidate': 'Mots à consolider', 'words.err1': '{n} faute à revoir', 'words.errN': '{n} fautes à revoir', 'words.noErr': 'Aucune faute en attente',
+    'review.none': 'Aucune faute à réviser', 'review.noneSub': 'Les mots ratés dans les exercices reviendront ici, une question par faute.', 'review.next1': 'Séance suivante · {n} faute', 'review.nextN': 'Séance suivante · {n} fautes', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
 
     'script.quizSet': 'Quiz sur ces lettres', 'script.rules': 'Règles de prononciation',
     'script.rulesSub.ko': 'Liaisons, consonnes finales, ㅎ, nasalisation…', 'script.rulesSub.ja': 'Petit っ, voyelles longues, は / を, accent…',
     'script.kanaHelp': 'Chaque case montre le hiragana (à gauche) et le katakana (à droite) du même son. Les hiragana servent aux mots japonais et à la grammaire, les katakana aux mots étrangers. Les kanji portent le sens : chacun a une lecture « on » (d’origine chinoise) et une lecture « kun » (japonaise). ゛ et ゜ changent le son (か → が, は → ぱ), et un petit ゃ ゅ ょ forme une syllabe combinée (き + ゃ = きゃ).',
     'kanji.quiz': 'Quiz sur ces kanji', 'kanji.quizAll': 'Quiz sur les {n} kanji', 'words.phrases': 'Phrases utiles', 'road.goal': 'Objectif · {n} / {total} mots', 'kanji.example': 'Exemple :', 'kanji.whatMeans': 'Que signifie ce kanji ?',
     'kanji.whichReading': 'Quelles sont ses lectures (on · kun) ?', 'kanji.whichKanji': 'Quel kanji a ce sens ?',
-    'script.reading': 'Lecture', 'script.syllablesSub': 'Lire des syllabes', 'script.words': 'Mots', 'script.wordsSub': 'Lire de vrais mots',
+    'script.reading': 'Syllabes et mots', 'script.syllablesSub': 'Les lire et les écrire', 'script.words': 'Mots', 'script.wordsSub': 'Lire, écouter et écrire',
     'script.readWords': 'Lire des mots', 'script.example': 'Exemple :',
 
     'quiz.retry': 'À revoir', 'quiz.combo': 'Série ×{n}', 'quiz.cheers': 'Bravo !|Parfait !|Exact !|Génial !', 'quiz.notQuite': 'Pas tout à fait', 'quiz.answer': 'Réponse :',
@@ -180,14 +181,15 @@ export const STRINGS = {
     'home.wordsOfDay': 'Today’s words', 'home.generate': 'Generate', 'home.generateSub': 'A custom sentence',
 
     'words.quiz': 'Mixed quiz', 'words.pairsSub': 'Against the clock', 'words.due1': '{n} word to review', 'words.dueN': '{n} words to review',
-    'words.consolidate': 'Words to strengthen', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
+    'words.consolidate': 'Words to strengthen', 'words.err1': '{n} mistake to review', 'words.errN': '{n} mistakes to review', 'words.noErr': 'No mistakes waiting',
+    'review.none': 'No mistakes to review', 'review.noneSub': 'Words you miss in the exercises come back here, one question per mistake.', 'review.next1': 'Next session · {n} mistake', 'review.nextN': 'Next session · {n} mistakes', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
 
     'script.quizSet': 'Quiz on these letters', 'script.rules': 'Pronunciation rules',
     'script.rulesSub.ko': 'Linking, final consonants, ㅎ, nasalization…', 'script.rulesSub.ja': 'Small っ, long vowels, は / を, pitch…',
     'script.kanaHelp': 'Each tile shows the hiragana (left) and katakana (right) for the same sound. Hiragana are used for Japanese words and grammar, katakana for foreign words. Kanji carry meaning: each has an “on” reading (from Chinese) and a “kun” reading (native Japanese). ゛ and ゜ change the sound (か → が, は → ぱ), and a small ゃ ゅ ょ makes a combined syllable (き + ゃ = きゃ).',
     'kanji.quiz': 'Quiz on these kanji', 'kanji.quizAll': 'Quiz on all {n} kanji', 'words.phrases': 'Useful phrases', 'road.goal': 'Goal · {n} / {total} words', 'kanji.example': 'Example:', 'kanji.whatMeans': 'What does this kanji mean?',
     'kanji.whichReading': 'What are its readings (on · kun)?', 'kanji.whichKanji': 'Which kanji has this meaning?',
-    'script.reading': 'Reading', 'script.syllablesSub': 'Read syllables', 'script.words': 'Words', 'script.wordsSub': 'Read real words',
+    'script.reading': 'Syllables and words', 'script.syllablesSub': 'Read and write them', 'script.words': 'Words', 'script.wordsSub': 'Read, listen and write',
     'script.readWords': 'Reading words', 'script.example': 'Example:',
 
     'quiz.retry': 'Try again', 'quiz.combo': 'Streak ×{n}', 'quiz.cheers': 'Well done!|Perfect!|Correct!|Awesome!', 'quiz.notQuite': 'Not quite', 'quiz.answer': 'Answer:',

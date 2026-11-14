@@ -106,6 +106,12 @@ const KO_ROWS = [
   ['⇧', 'ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ', '⌫'],
 ];
 const KO_SHIFT = { ㅂ: 'ㅃ', ㅈ: 'ㅉ', ㄷ: 'ㄸ', ㄱ: 'ㄲ', ㅅ: 'ㅆ', ㅐ: 'ㅒ', ㅔ: 'ㅖ' };
+// Appui long : doubles consonnes et voyelles composées (on peut aussi les taper en deux fois : ㅗ + ㅏ → ㅘ).
+export const KO_LONG = {
+  ㅂ: ['ㅃ'], ㅈ: ['ㅉ'], ㄷ: ['ㄸ'], ㄱ: ['ㄲ'], ㅅ: ['ㅆ'], ㅐ: ['ㅒ'], ㅔ: ['ㅖ'],
+  ㅗ: ['ㅘ', 'ㅙ', 'ㅚ'], ㅜ: ['ㅝ', 'ㅞ', 'ㅟ'], ㅡ: ['ㅢ'],
+};
+const LONG_MS = 380;
 // Clavier d'ordinateur (AZERTY ou QWERTY : on lit la position de la touche, pas la lettre).
 const KO_CODES = { KeyQ: 'ㅂ', KeyW: 'ㅈ', KeyE: 'ㄷ', KeyR: 'ㄱ', KeyT: 'ㅅ', KeyY: 'ㅛ', KeyU: 'ㅕ', KeyI: 'ㅑ', KeyO: 'ㅐ', KeyP: 'ㅔ', KeyA: 'ㅁ', KeyS: 'ㄴ', KeyD: 'ㅇ', KeyF: 'ㄹ', KeyG: 'ㅎ', KeyH: 'ㅗ', KeyJ: 'ㅓ', KeyK: 'ㅏ', KeyL: 'ㅣ', KeyZ: 'ㅋ', KeyX: 'ㅌ', KeyC: 'ㅊ', KeyV: 'ㅍ', KeyB: 'ㅠ', KeyN: 'ㅜ', KeyM: 'ㅡ' };
 
@@ -146,7 +152,8 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
         if (k === '⇧') return `<button class="kb-key fn ${shift ? 'on' : ''}" data-fn="shift" aria-label="Shift">⇧</button>`;
         if (k === '⌫') return '<button class="kb-key fn" data-fn="back" aria-label="⌫">⌫</button>';
         const c = shift && KO_SHIFT[k] ? KO_SHIFT[k] : k;
-        return `<button class="kb-key kr ${shift && KO_SHIFT[k] ? 'alt' : ''}" data-k="${c}">${c}</button>`;
+        const long = !shift && KO_LONG[k];
+        return `<button class="kb-key kr ${shift && KO_SHIFT[k] ? 'alt' : ''}" data-k="${c}"${long ? ` data-long="${long.join('')}"` : ''}>${c}${long ? `<small class="kb-alt">${long[0]}</small>` : ''}</button>`;
       }).join('')}</div>`).join('')}${space ? '<div class="kb-row"><button class="kb-key fn wide" data-k=" " aria-label="Espace">␣</button></div>' : ''}</div>`;
     } else {
       host.innerHTML = `<div class="kb kb-ja">${JA_ROWS.map((row) => `<div class="kb-row">${row.map((k) => {
@@ -179,10 +186,59 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     }
   }
 
+  // Appui long : une bulle propose les variantes ; on glisse le doigt dessus et on relâche.
+  let held = null; // { key, timer, pop, pick }
+  const closePop = () => {
+    if (!held) return;
+    clearTimeout(held.timer);
+    held.pop?.remove();
+    held.key.classList.remove('hit');
+    held = null;
+  };
+  function openPop(b) {
+    const alts = [...b.dataset.long];
+    const kb = host.querySelector('.kb');
+    const pop = document.createElement('div');
+    pop.className = 'kb-pop kr';
+    pop.innerHTML = alts.map((a, i) => `<span class="${i ? '' : 'on'}" data-k="${a}">${a}</span>`).join('');
+    kb.append(pop);
+    const r = b.getBoundingClientRect();
+    const k = kb.getBoundingClientRect();
+    const w = pop.offsetWidth;
+    pop.style.left = `${Math.max(2, Math.min(k.width - w - 2, r.left - k.left + r.width / 2 - w / 2))}px`;
+    pop.style.top = `${r.top - k.top - pop.offsetHeight - 6}px`;
+    held.pop = pop;
+    held.pick = alts[0];
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch { /* sans vibreur */ }
+  }
+  function track(e) {
+    if (!held?.pop) return;
+    const spans = [...held.pop.children];
+    let best = spans[0];
+    let d = Infinity;
+    for (const sp of spans) {
+      const r = sp.getBoundingClientRect();
+      const dd = Math.abs(e.clientX - (r.left + r.width / 2));
+      if (dd < d) { d = dd; best = sp; }
+    }
+    spans.forEach((sp) => sp.classList.toggle('on', sp === best));
+    held.pick = best.dataset.k;
+  }
+
+  host.addEventListener('contextmenu', (e) => e.preventDefault());
   host.addEventListener('pointerdown', (e) => {
     const b = e.target.closest('.kb-key');
     if (!b || locked) return;
     e.preventDefault(); // pas de sélection de texte ni de perte de focus
+    closePop();
+    if (b.dataset.long) {
+      // La lettre s'écrit au relâchement : un appui long ouvre les variantes.
+      b.classList.add('hit');
+      held = { key: b, pop: null, pick: null };
+      held.timer = setTimeout(() => held?.key === b && openPop(b), LONG_MS);
+      try { b.releasePointerCapture?.(e.pointerId); } catch { /* rien */ }
+      return;
+    }
     if (b.dataset.fn === 'shift') {
       shift = !shift;
       draw();
@@ -195,10 +251,30 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     b.classList.add('hit');
     setTimeout(() => b.classList.remove('hit'), 120);
   });
+  host.addEventListener('pointermove', track);
+  const release = (e) => {
+    if (!host.isConnected) {
+      document.removeEventListener('pointerup', release);
+      document.removeEventListener('pointercancel', release);
+      return;
+    }
+    if (!held) return;
+    const h = held;
+    if (e.type === 'pointercancel' && !h.pop) return closePop();
+    const k = h.pop ? h.pick : h.key.dataset.k;
+    closePop();
+    if (!locked && k) press(k);
+  };
+  document.addEventListener('pointerup', release);
+  document.addEventListener('pointercancel', release);
 
   // Clavier d'ordinateur
   const onKey = (e) => {
-    if (!host.isConnected) return document.removeEventListener('keydown', onKey);
+    if (!host.isConnected) {
+      document.removeEventListener('pointerup', release);
+      document.removeEventListener('pointercancel', release);
+      return document.removeEventListener('keydown', onKey);
+    }
     if (locked || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Backspace') { e.preventDefault(); return back(); }
     if (e.key === 'Enter') { e.preventDefault(); return onEnter?.(); }
@@ -231,11 +307,12 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
   };
 }
 
-/** Zone de saisie complète : la ligne de réponse au-dessus du clavier. */
-export function mountTyping(host, { kind, layout, kata, space, placeholder = '', onEnter, onChange }) {
+/** Zone de saisie complète : la ligne de réponse, les boutons éventuels (actions), puis le clavier. */
+export function mountTyping(host, { kind, layout, kata, space, placeholder = '', actions = '', onEnter, onChange }) {
   host.innerHTML = `
     <div class="type-zone">
       <div class="type-box ${kind === 'latin' ? 'latin' : 'kr'}" aria-live="polite"><span class="type-text"></span><i class="caret"></i><span class="type-ph">${placeholder}</span></div>
+      ${actions}
       <div class="kb-host"></div>
     </div>`;
   const box = host.querySelector('.type-box');

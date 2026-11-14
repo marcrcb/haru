@@ -159,7 +159,7 @@ body.focus #tabs { transform: translateY(110%); }
 #tabs a.on { color: var(--accent); }
 #tabs a.on svg { transform: translateY(-2px) scale(1.08); }
 
-.screen { animation: screenIn .38s var(--ease) both; }
+.screen { animation: screenIn .38s var(--ease) backwards; }
 @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } }
 
 /* ---------- Composants ---------- */
@@ -714,7 +714,7 @@ body.focus .top-actions { display: none; }
 @keyframes tabBounce { 30% { transform: scale(.8) rotate(-8deg); } 70% { transform: scale(1.18) rotate(4deg); } }
 
 /* Transitions d'écran plus vivantes */
-.screen { animation: screenIn .45s var(--spring) both; }
+.screen { animation: screenIn .45s var(--spring) backwards; }
 @keyframes screenIn { from { opacity: 0; transform: translateY(18px) scale(.98); } }
 
 /* Cartes et boutons « 3D » qui s'enfoncent */
@@ -922,7 +922,7 @@ ruby rt { font-size: .45em; color: var(--muted); font-weight: 600; letter-spacin
 .road-top > div:first-child { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .ru { margin-bottom: 26px; }
 /* Bandeau du module : reste collé juste sous l'en-tête, sur un fond plein (rien ne dépasse autour) */
-.ru-stick { position: sticky; top: var(--topbar-h, 66px); z-index: 3; padding: 6px 0 9px; background: var(--bg); }
+.ru-stick { position: sticky; top: calc(var(--topbar-h, 66px) - 1px); z-index: 3; padding: 7px 0 9px; background: var(--bg); }
 .ru-head {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 20px; color: #fff;
   background: var(--tc); box-shadow: 0 5px 0 color-mix(in srgb, var(--tc) 62%, #000);
@@ -1011,8 +1011,9 @@ a.rn:active .rn-btn { transform: translateY(5px); box-shadow: 0 1px 0 color-mix(
 @media (max-width: 380px) { #tabs a { font-size: .6rem; } .lv-meter { width: 30px; } }
 @media (min-width: 900px) { .rn { --amp: 150px; } .rn-label, .rn.right .rn-label { width: 230px; } }
 
-/* En-tête opaque : le contenu qui défile ne transparaît plus derrière le titre */
-.topbar { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* En-tête opaque : le contenu qui défile ne transparaît plus derrière le titre. Trait de séparation comme au-dessus des onglets. */
+.topbar { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom: 1px solid var(--line); }
+body.bare .topbar { border-bottom-color: transparent; }
 
 /* Onglet de l'écriture : caractère (한 / あ) à la place de l'icône */
 .ti-glyph { display: grid; place-items: center; width: 22px; height: 22px; font-size: 1.25rem; font-weight: 800; line-height: 1; transition: transform .3s var(--spring); }
@@ -1284,3 +1285,35 @@ a.rn:active .rn-btn { transform: translateY(5px); box-shadow: 0 1px 0 color-mix(
 .speak-heard { min-height: 1.4em; }
 .speak-heard b { font-size: 1.1rem; color: var(--ink); }
 .speak-skip { margin-top: 10px; }
+
+/* ---------- Réponse au clavier : le clavier collé en bas de l'écran, comme pour un message ---------- */
+.quiz.kb-mode { min-height: calc(100dvh - var(--topbar-h, 62px) - 4px); margin-bottom: calc(-1 * (env(safe-area-inset-bottom) + 24px)); }
+.quiz.kb-mode .qstage { flex: 1; display: flex; flex-direction: column; }
+.type-dock { margin-top: auto; padding-top: 14px; }
+.type-dock .type-zone { margin-top: 0; gap: 10px; }
+.type-dock .type-actions { margin-top: 0; }
+.type-dock .kb { margin: 0 -16px; border-radius: 20px 20px 0 0; padding: 10px 4px calc(env(safe-area-inset-bottom) + 10px); }
+@media (min-width: 900px) {
+  .quiz.kb-mode { margin-bottom: 0; min-height: calc(100dvh - var(--topbar-h, 62px) - 56px); }
+  .type-dock .kb { margin: 0; border-radius: 16px; }
+}
+/* Appui long : variantes d'une touche (ㄲ, ㅘ…) */
+.kb { position: relative; touch-action: none; -webkit-touch-callout: none; }
+.kb-key { position: relative; }
+.kb-alt { position: absolute; top: 3px; right: 4px; font-size: .58rem; font-weight: 700; line-height: 1; color: var(--muted); opacity: .75; pointer-events: none; }
+.kb-pop {
+  position: absolute; z-index: 5; display: flex; gap: 2px; padding: 4px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgb(0 0 0 / .18);
+  animation: popIn .18s var(--spring);
+}
+.kb-pop span { display: grid; place-items: center; min-width: 46px; height: 50px; border-radius: 10px; font-size: calc(1.45rem * var(--krs)); font-weight: 700; }
+.kb-pop span.on { background: var(--accent); color: var(--accent-ink); }
+/* Petits écrans : la question se fait plus discrète pour laisser la place au clavier. */
+@media (max-height: 700px) {
+  .quiz.kb-mode .qbar { margin-bottom: 10px; }
+  .quiz.kb-mode .qcard.compact { min-height: 0; padding: 14px 14px 12px; }
+  .quiz.kb-mode .qkr { font-size: calc(2.6rem * var(--krs)); }
+  .type-dock .type-box { min-height: 52px; padding: 6px 12px; }
+  .type-dock .kb-ja .kb-key { height: 36px; }
+  .type-dock .kb-key { height: 42px; }
+}

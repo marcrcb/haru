@@ -44,7 +44,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '32'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '33'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -104,7 +104,7 @@ addEventListener('haru:xp', levelChip);
 
 // La hauteur de l'en-tête sert à caler les bandeaux de module du parcours juste en dessous.
 const topbar = $('.topbar');
-const syncTopbar = () => document.documentElement.style.setProperty('--topbar-h', `${topbar.offsetHeight}px`);
+const syncTopbar = () => document.documentElement.style.setProperty('--topbar-h', `${topbar.getBoundingClientRect().height}px`);
 new ResizeObserver(syncTopbar).observe(topbar);
 syncTopbar();
 
@@ -168,7 +168,7 @@ function greetingSub() {
 function words(el) {
   const C = course();
   const ja = C.id === 'ja';
-  const due = store.dueCount(C.words);
+  const due = store.mistakes(C.words).length; // fautes en attente
   // Une ligne par thème ; les phrases toutes faites sont listées à part.
   const themeRows = (phrases) => Object.entries(ALL_THEMES).filter(([k]) => isPhraseTheme(k) === phrases).map(([k, label], i) => {
     const ws = wordsOf(k);
@@ -199,7 +199,7 @@ function words(el) {
         <a class="tile-link" href="#/quiz?t=all&mode=type" style="--i:2; --tc: var(--c-hangul)"><span class="tl-kr kr">${ja ? '書く' : '쓰기'}</span><b>${t('words.type')}</b><span class="muted small">${t('words.typeSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=dictation" style="--i:3; --tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '聞く' : '듣기'}</span><b>${t('words.dictation')}</b><span class="muted small">${t('words.dictationSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=speak" style="--i:4; --tc: var(--c-guide)"><span class="tl-kr kr">${ja ? '話す' : '말하기'}</span><b>${t('words.speak')}</b><span class="muted small">${t(listenSupported() ? 'words.speakSub' : 'words.speakNo')}</span></a>
-        <a class="tile-link" href="#/quiz?mode=review" style="--i:2; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'words.dueN' : 'words.due1', { n: due }) : t('words.consolidate')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
+        <a class="tile-link" href="#/quiz?mode=review" style="--i:2; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'words.errN' : 'words.err1', { n: due }) : t('words.noErr')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
         <a class="tile-link" href="#/lexicon" style="--i:3; --tc: var(--c-stats)"><span class="tl-kr kr">${ja ? '単語' : '단어'}</span><b>${t('title.lexicon')}</b><span class="muted small">${t('words.count', { n: C.words.length })}</span></a>
       </div>
       <h2>${t('words.byTheme')}</h2>
@@ -234,9 +234,7 @@ function script(el) {
       <h2>${t('script.reading')}</h2>
       <div class="grid2">
         <a class="tile-link" href="#/hquiz?set=syllables" style="--i:0"><span class="tl-kr kr">${S.syllableSample}</span><b>${tr(S.syllableLabel)}</b><span class="muted small">${t('script.syllablesSub')}</span></a>
-        <a class="tile-link" href="#/hquiz?set=words" style="--i:1"><span class="tl-kr kr">${ja ? 'さかな' : '사과'}</span><b>${t('script.words')}</b><span class="muted small">${t('script.wordsSub')}</span></a>
-        <a class="tile-link" href="#/hquiz?set=syllables&mode=type" style="--i:2; --tc: var(--c-guide)"><span class="tl-kr kr">${ja ? 'にゅ' : '봄'}</span><b>${t('script.typeSyl')}</b><span class="muted small">${t('script.typeSylSub')}</span></a>
-        <a class="tile-link" href="#/hquiz?set=words&mode=type" style="--i:3; --tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '聞く' : '듣기'}</span><b>${t('script.dictation')}</b><span class="muted small">${t('script.dictationSub')}</span></a>
+        <a class="tile-link" href="#/hquiz?set=words" style="--i:1; --tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? 'さかな' : '사과'}</span><b>${t('script.words')}</b><span class="muted small">${t('script.wordsSub')}</span></a>
       </div>
 
       <a class="card guide-link" href="#/guide?c=pron">
@@ -285,7 +283,7 @@ function script(el) {
         tiles.push(`<a class="tile-link" href="#/write?set=${id}&form=kata" style="--tc: var(--c-guide)"><span class="tl-kr kr">${sample.j2}</span><b>${t('script.traceKata')}</b><span class="muted small">${t('script.traceSub')}</span></a>`);
       } else tiles.push(`<a class="tile-link" href="#/write?set=${id}" style="--tc: var(--c-hangul)"><span class="tl-kr kr">${sample.j}</span><b>${t('script.trace')}</b><span class="muted small">${t('script.traceSub')}</span></a>`);
     }
-    tiles.push(`<a class="tile-link" href="#/hquiz?set=${id}&mode=type" style="--tc: var(--c-words)"><span class="tl-kr kr">${ja ? 'かな' : 'ㅂㅈㄷ'}</span><b>${t('script.keyboard')}</b><span class="muted small">${t(kanji ? 'script.keyboardKanji' : 'script.keyboardSub')}</span></a>`);
+    // (Le quiz de la série fait déjà écrire au clavier : pas de tuile « Au clavier » en plus.)
     if (!kanji || !set.groups) tiles.push(`<a class="tile-link" href="#/hquiz?set=${id}&mode=speak" style="--tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '話す' : '말하기'}</span><b>${t('script.speak')}</b><span class="muted small">${t(listenSupported() ? 'script.speakSub' : 'words.speakNo')}</span></a>`);
     $('.write-tiles', el).innerHTML = tiles.join('');
   }

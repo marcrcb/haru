@@ -190,9 +190,11 @@ export function review(id, correct) {
   if (correct) {
     c.b = Math.min(5, c.b + 1);
     c.ok++;
+    c.err = 0; // faute corrigée
   } else {
     c.b = Math.max(0, c.b - 2);
     c.ko++;
+    c.err = 1; // faute à réviser
   }
   c.due = today + INTERVALS[c.b];
   state.srs[id] = c;
@@ -210,6 +212,11 @@ export function pickForReview(words, n, random = Math.random) {
   const rest = shuffle(words.filter((w) => state.srs[w.id] && state.srs[w.id].due > today));
   return [...due, ...fresh, ...rest].slice(0, n);
 }
+
+/** Faute en attente de révision ? (anciennes sauvegardes sans le drapeau : mot raté et encore mal connu) */
+const isMistake = (c) => !!c && (c.err ?? (c.ko > 0 && c.b <= 1 ? 1 : 0)) === 1;
+/** Mots ratés et pas encore réussis depuis : ce que l'onglet Révision fait retravailler, les plus anciennes fautes d'abord. */
+export const mistakes = (words) => words.filter((w) => isMistake(state.srs[w.id])).sort((a, b) => state.srs[a.id].due - state.srs[b.id].due);
 
 export const dueCount = (words) => {
   const today = dayNumber();

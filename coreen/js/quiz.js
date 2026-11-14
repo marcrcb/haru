@@ -2,18 +2,21 @@
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
-import { addXp, review, pickForReview, get, markRoad, starsFor, box, bump, record } from './store.js';
+import { addXp, review, pickForReview, mistakes, get, markRoad, starsFor, box, bump, record } from './store.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
 import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
+import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
 import { canListen, listen, matchSpoken, muteSpeech } from './speech.js';
 import { stepDepth } from './road.js';
 
 const wordsOf = (theme) => (!theme || theme === 'all' ? course().words : course().words.filter((w) => w.t === theme));
 // Nombre de questions par série, selon l'exercice (le réglage n'existe plus).
 export const SERIES = { letters: 10, kanji: 8, syllables: 8, readWords: 8, words: 8, typed: 8, cards: 10, write: 6 };
+/** Révision : une question par faute, au plus REVIEW_MAX par séance (le reste passe à la séance suivante). */
+export const REVIEW_MAX = 10;
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 /** La voix sert aux dictées : sans elle, on écrit à partir de la traduction. */
 const canDictate = () => canSpeak() && hasVoice();
@@ -29,7 +32,7 @@ const MIC = '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx
  *   choix   : options: [{ label, kr? }], correct
  * exam : { pass (0 à 1), onEnd(pct, réussi) } → pas de seconde chance, pas d'indice.
  */
-export function runQuiz(el, { questions, title, again, back, step, exam, backLabel }) {
+export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
   let queue = questions.map((q) => ({ ...q, retry: false }));
   let total = questions.length;
   let done = 0;
@@ -59,6 +62,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
 
   function show() {
     const q = queue[0];
+    el.querySelector('.quiz')?.classList.remove('kb-mode');
     const n = exam ? total - queue.length : done;
     bar.style.width = `${(n / total) * 100}%`;
     $('.qcount', el).textContent = `${Math.min(n + 1, total)} / ${total}`;
@@ -84,12 +88,9 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
 
     if (q.type === 'input') {
       const latin = q.kb === 'latin';
-      stage.innerHTML = `${head}
-        <div class="type-host"></div>
-        <div class="type-actions">
-          ${exam ? '' : `<button class="btn ghost small hint-btn">${t('recon.hint')}</button>`}
-          <button class="btn primary check-btn" disabled>${t('type.check')}</button>
-        </div>`;
+      // Comme pour un message : la question en haut, la réponse et le clavier collés en bas de l'écran.
+      el.querySelector('.quiz').classList.add('kb-mode');
+      stage.innerHTML = `${head}<div class="type-dock"></div>`;
       let helped = false;
       const norm = latin ? normRoman : q.exact ? (s) => s.trim() : normAnswer;
       const good = q.accept.map(norm);
@@ -101,10 +102,14 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
         typing.box.classList.add(ok ? 'good' : 'bad');
         settle(q, ok && !helped, typing.box, q.answer, ok, !latin);
       };
-      const typing = mountTyping($('.type-host', stage), {
+      const typing = mountTyping($('.type-dock', stage), {
         kind: latin ? 'latin' : course().id, layout: lang() === 'en' ? 'qwerty' : 'azerty', kata: q.kata, space: /\s/.test(q.answer),
         placeholder: esc(q.placeholder || t(latin ? 'type.placeholderRom' : 'type.placeholder')), onEnter: check,
         onChange: (v) => { $('.check-btn', stage).disabled = !v; },
+        actions: `<div class="type-actions">
+          ${exam ? '' : `<button class="btn ghost small hint-btn">${t('recon.hint')}</button>`}
+          <button class="btn primary check-btn" disabled>${t('type.check')}</button>
+        </div>`,
       });
       $('.check-btn', stage).addEventListener('click', check);
       $('.hint-btn', stage)?.addEventListener('click', () => {
@@ -318,6 +323,9 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
          <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : t('exam.need', { n: Math.round(exam.pass * 100) })}</p>`
       : `<h2>${ratio === 1 ? t('quiz.perfect') : ratio >= 0.7 ? t('quiz.great') : ratio >= 0.4 ? t('quiz.good') : t('quiz.keepGoing')}</h2>
          <p class="muted">${esc(title || '')}</p>`;
+    // Révision : « Séance suivante (n fautes) », ou rien quand il n'y a plus de faute.
+    const again2 = againLabel ? againLabel() : undefined;
+    el.querySelector('.quiz').classList.remove('kb-mode');
     el.querySelector('.quiz').innerHTML = `
       <div class="result screen ${exam ? (passed ? 'exam-pass' : 'exam-fail') : ''}">
         <div class="score-ring" style="--p:${ratio}">
@@ -327,13 +335,13 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
         ${head}
         <div class="xp-won">+<span class="n">0</span> XP</div>
         <div class="stack">
-          <button class="btn primary again">${exam ? t(passed ? 'exam.again' : 'exam.retry') : t('playAgain')}</button>
+          ${again2 === null ? '' : `<button class="btn primary again">${exam ? t(passed ? 'exam.again' : 'exam.retry') : again2 || t('playAgain')}</button>`}
           <a class="btn ghost" href="${step || exam ? '#/road' : back}">${step || exam ? t('road.back') : backLabel || t('finish')}</a>
         </div>
       </div>`;
     countUp($('.xp-won .n', el), xp);
     requestAnimationFrame(() => $('.score-ring', el)?.classList.add('go'));
-    $('.again', el).addEventListener('click', again);
+    $('.again', el)?.addEventListener('click', again);
   }
 
   if (!total) {
@@ -491,6 +499,7 @@ export function sentenceQuestion(theme, ease) {
  * sinon un mélange qui se durcit avec l'avancement dans le parcours et la maîtrise de chaque mot.
  */
 export function vocabQuiz(el, theme, mode, step) {
+  if (mode === 'review') return reviewQuiz(el);
   const pool = wordsOf(theme);
   const depth = step ? stepDepth(step) : 0;
   let list;
@@ -516,6 +525,37 @@ export function vocabQuiz(el, theme, mode, step) {
   runQuiz(el, { questions, title: label, again: () => vocabQuiz(el, theme, mode, step), step, back: '#/words' });
 }
 
+/**
+ * Révision des fautes : une question par mot raté (et rien d'autre), au plus REVIEW_MAX à la fois.
+ * Une bonne réponse efface la faute ; une mauvaise la garde pour la prochaine séance.
+ */
+export function reviewQuiz(el) {
+  const C = course();
+  const list = mistakes(C.words).slice(0, REVIEW_MAX);
+  if (!list.length) {
+    el.innerHTML = `
+      <div class="screen result">
+        <div class="big-glyph kr">${C.id === 'ja' ? '復習' : '복습'}</div>
+        <h2>${t('review.none')}</h2>
+        <p class="muted">${t('review.noneSub')}</p>
+        <div class="stack"><a class="btn primary" href="#/words">${t('back')}</a></div>
+      </div>`;
+    return;
+  }
+  // Un exercice qui fait écrire ou reconnaître le mot, selon sa difficulté (pas de paires ni de phrase en plus).
+  const questions = list.map((w, k) => wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true }));
+  runQuiz(el, {
+    questions,
+    title: t('review'),
+    again: () => reviewQuiz(el),
+    back: '#/words',
+    againLabel: () => {
+      const left = mistakes(C.words).length;
+      return left ? t(left > 1 ? 'review.nextN' : 'review.next1', { n: left }) : null;
+    },
+  });
+}
+
 // ---------- Écriture : hangeul, kana, kanji ----------
 const romLabel = (x) => (x.r === '' ? t('quiz.silent') : x.r);
 /** Romanisations admises pour une lettre (を se lit « o »). */
@@ -534,7 +574,8 @@ export function letterQuestion(x, kind, others = [], n = 4) {
   if (kind === 'type') {
     const kata = /[ァ-ヶ]/.test(x.j);
     return {
-      type: 'input', exact: true, kata, answer: x.j, accept: [x.j], say: x.say, auto: true,
+      // Une voyelle seule s'écrit ㅗ ou 오 (avec le ㅇ muet) : les deux sont justes, ici comme dans les syllabes.
+      type: 'input', exact: true, kata, answer: x.j, accept: C.id === 'ko' && isVowel(x.j) ? [x.j, x.say] : [x.j], say: x.say, auto: true,
       prompt: `<span class="qlatin">${esc(romLabel(x))}</span>`, sub: C.id === 'ja' ? t(kata ? 'type.kata' : 'type.hira') : t('type.letter'), explain: tip,
       placeholder: C.id === 'ja' ? (kata ? 'カタカナ' : 'ひらがな') : '한글',
     };
@@ -571,6 +612,15 @@ export const matchKanji = (items) => ({
 /** Les deux formes d'un kana (hiragana j, katakana j2) deviennent deux lettres distinctes. */
 export const kanaForms = (items) => items.flatMap((x) => (x.j2 ? [x, { ...x, j: x.j2 }] : [x]));
 
+/** Voyelle du hangeul (ㅏ … ㅣ, y compris ㅘ, ㅢ…). */
+const isVowel = (j) => /^[ㅏ-ㅣ]$/.test(j);
+/** 오 (ㅇ muet + voyelle, sans consonne finale) s'accepte aussi écrit ㅗ, comme dans les exercices sur les lettres. */
+function silentFree(text) {
+  if (course().id !== 'ko' || [...text].length !== 1 || !isSyllable(text)) return [];
+  const d = decompose(text);
+  return d && CHO[d.cho] === 'ㅇ' && !d.jong ? [JUNG[d.jung]] : [];
+}
+
 /** Syllabe au hasard. kind : read (la lire : choisir sa lecture) · rom (écrire sa romanisation) · type (l'écrire) */
 export function syllableQuestion(kind) {
   const S = course().script;
@@ -581,7 +631,7 @@ export function syllableQuestion(kind) {
     return mcq({ prompt: `<span class="qkr">${s.text}</span>`, sub: t('quiz.howReadSyl'), say: s.text }, { label: s.rom }, decoys);
   }
   if (kind === 'type') {
-    return { type: 'input', answer: s.text, accept: [s.text], say: s.text, auto: true, prompt: `<span class="qlatin">${esc(s.rom)}</span>`, sub: t('type.syllable') };
+    return { type: 'input', answer: s.text, accept: [s.text, ...silentFree(s.text)], say: s.text, auto: true, prompt: `<span class="qlatin">${esc(s.rom)}</span>`, sub: t('type.syllable') };
   }
   return { type: 'input', kb: 'latin', answer: s.rom, accept: [s.rom], say: s.text, prompt: `<span class="qkr">${s.text}</span>`, sub: t('type.romSyl') };
 }
