@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '43'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '44'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -800,17 +800,12 @@ addEventListener('haru:goal', (e) => {
   celebrate({ glyph: course().id === 'ja' ? '目標' : '목표', title: t('cel.goal'), text: e.detail > 1 ? t('cel.goalStreak', { n: e.detail }) : t('cel.goalFirst'), button: t('continue') });
 });
 
-// Succès : un palier franchi s'annonce par un message (au plus un à la fois).
+// Succès : les paliers franchis sont enregistrés sans notification (on les retrouve dans le profil).
 let achTimer = 0;
 function checkAchievements() {
   clearTimeout(achTimer);
   achTimer = setTimeout(() => {
-    if (!hasCourse() || choosing) return;
-    const fresh = newTiers();
-    if (!fresh.length) return;
-    const a = fresh.at(-1);
-    sfx.win();
-    toast(`${t('ach.unlocked')} ${tr(a.title)} · ${tr(TIERS[a.tier - 1])}${fresh.length > 1 ? ` (+${fresh.length - 1})` : ''}`);
+    if (hasCourse() && !choosing) newTiers();
   }, 900);
 }
 addEventListener('haru:xp', checkAchievements);
