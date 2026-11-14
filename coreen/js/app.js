@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '38'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '39'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
