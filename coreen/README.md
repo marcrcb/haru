@@ -8,7 +8,7 @@ Elle fonctionne hors connexion. Toutes les données restent sur le téléphone, 
 Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana et katakana pour le japonais, avec furigana au-dessus des kanji).
 
 - **Alphabet** : voyelles, consonnes, lettres composées et doubles, avec la prononciation (voix coréenne du téléphone), des conseils en français, l’ordre des traits animé et des quiz de lecture.
-- **Vocabulaire** : environ 1 400 mots classés en plus de 70 thèmes. Trois façons de s’entraîner : quiz (coréen → français, français → coréen, écoute), cartes mémoire à glisser, et jeu des paires contre la montre. Une répétition espacée (boîtes de Leitner) fait revenir plus souvent les mots oubliés.
+- **Vocabulaire** : environ 1 400 mots classés en près de 70 thèmes. Trois façons de s’entraîner : quiz (coréen → français, français → coréen, écoute), cartes mémoire à glisser, et jeu des paires contre la montre. Une répétition espacée (boîtes de Leitner) fait revenir plus souvent les mots oubliés.
 - **Générateur de phrases**, selon neuf critères (ton, niveau, thème, temps, politesse, forme, genre de phrase, sujet, moment), dont :
   - le niveau ;
   - le thème ;
