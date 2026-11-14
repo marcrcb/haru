@@ -7,7 +7,6 @@
 //   phrase  { title, crit }    trois phrases à reconstituer selon des critères
 //   mastery { theme }          objectif : retenir 60 % des mots du thème (suivi par la répétition espacée)
 //   pairs                      jeu des paires
-//   write   { set, form }      tracer les lettres dans le bon ordre des traits (form : hira | kata pour les kana)
 //   type    { set | theme }    écrire au clavier : lettres d'un jeu, ou mots d'un thème à partir de leur traduction
 //   dictation { theme }        dictée : écrire au clavier les mots entendus
 //   ptype   { title, crit }    trois phrases à écrire entièrement au clavier
@@ -25,7 +24,6 @@ const phrase = (id, title, crit) => ({ id, kind: 'phrase', title, crit });
 const mastery = (theme) => ({ id: `m-${theme}`, kind: 'mastery', theme });
 // Un thème de vocabulaire complet : découvrir (cartes), s'entraîner (quiz), retenir (objectif)
 const theme = (t) => [cards(t), words(t), mastery(t)];
-const write = (set, form) => ({ id: `wr-${set}${form === 'kata' ? '-kata' : ''}`, kind: 'write', set, form });
 const typeS = (set) => ({ id: `ty-${set}`, kind: 'type', set });
 const typeW = (t) => ({ id: `t-${t}`, kind: 'type', theme: t });
 const dict = (t) => ({ id: `d-${t}`, kind: 'dictation', theme: t });
@@ -265,7 +263,7 @@ const shared = (ja) => {
     {
       id: `${p}n1`, glyph: g('숫자', '数'), color: 'var(--c-stats)',
       title: L('Compter', 'Counting'), sub: L('Les nombres, les quantités et leur prononciation', 'Numbers, quantities and how to say them'),
-      steps: [...themePlus('numbers'), lesson(ja ? 'compteurs-son' : 'nombres-pron'), ...(ja ? [write('kanji-num')] : [])],
+      steps: [...themePlus('numbers'), lesson(ja ? 'compteurs-son' : 'nombres-pron'), ...(ja ? [typeS('kanji-num')] : [])],
     },
     {
       id: `${p}w1`, glyph: g('연습', '練習'), color: 'var(--c-home)',
@@ -354,13 +352,13 @@ const shared = (ja) => {
 const KO_NEW = [
   {
     id: 'ko1w', glyph: '쓰기', color: 'var(--c-guide)',
-    title: L('Tracer les lettres', 'Tracing the letters'), sub: L('L’ordre des traits, puis le clavier coréen', 'Stroke order, then the Korean keyboard'),
-    steps: [write('vowels'), write('consonants'), typeS('vowels'), typeS('consonants'), speakS('vowels'), typeS('syllables')],
+    title: L('Le clavier coréen', 'The Korean keyboard'), sub: L('Taper les lettres et les premières syllabes', 'Typing the letters and first syllables'),
+    steps: [typeS('vowels'), typeS('consonants'), speakS('vowels'), typeS('syllables')],
   },
   {
     id: 'ko2w', glyph: '받아쓰기', color: 'var(--c-home)',
     title: L('Écrire pour de bon', 'Writing for real'), sub: L('Lettres composées et doubles, puis des mots sous la dictée', 'Compound and double letters, then words from dictation'),
-    steps: [write('compound'), write('double'), typeS('compound'), typeS('double'), typeS('words'), speakS('words')],
+    steps: [typeS('compound'), typeS('double'), typeS('words'), speakS('words')],
   },
   {
     id: 'ko2b', glyph: '받침', color: 'var(--c-phrases)',
@@ -372,13 +370,13 @@ const KO_NEW = [
 const JA_NEW = [
   {
     id: 'ja1w', glyph: 'かく', color: 'var(--c-guide)',
-    title: L('Tracer les hiragana', 'Tracing hiragana'), sub: L('L’ordre des traits, puis le clavier des kana', 'Stroke order, then the kana keyboard'),
-    steps: [write('base', 'hira'), typeS('base'), speakS('base'), typeS('syllables')],
+    title: L('Le clavier des kana', 'The kana keyboard'), sub: L('Taper les hiragana et les premières syllabes', 'Typing hiragana and first syllables'),
+    steps: [typeS('base'), speakS('base'), typeS('syllables')],
   },
   {
     id: 'ja1k', glyph: 'カナ', color: 'var(--c-home)',
-    title: L('Tracer les katakana', 'Tracing katakana'), sub: L('Les katakana, les sons voisés et les mots étrangers', 'Katakana, voiced sounds and foreign words'),
-    steps: [write('base', 'kata'), lesson('katakana-plus'), write('voiced', 'hira'), write('voiced', 'kata'), typeS('voiced')],
+    title: L('Les katakana', 'Katakana'), sub: L('Les katakana, les sons voisés et les mots étrangers', 'Katakana, voiced sounds and foreign words'),
+    steps: [lesson('katakana-plus'), typeS('voiced')],
   },
   {
     id: 'ja2w', glyph: '書く', color: 'var(--c-phrases)',
@@ -387,8 +385,8 @@ const JA_NEW = [
   },
   {
     id: 'jakw', glyph: '漢字', color: 'var(--c-hangul)',
-    title: L('Tracer les kanji', 'Tracing kanji'), sub: L('Les kanji des gens, du temps, du corps et des actions, trait par trait', 'Kanji for people, time, the body and actions, stroke by stroke'),
-    steps: [write('kanji-people'), write('kanji-time'), write('kanji-body'), write('kanji-action')],
+    title: L('Lire les kanji', 'Reading kanji'), sub: L('Les kanji des gens, du temps, du corps et des actions', 'Kanji for people, time, the body and actions'),
+    steps: [typeS('kanji-people'), typeS('kanji-time'), typeS('kanji-body'), typeS('kanji-action')],
   },
 ];
 
@@ -396,7 +394,7 @@ const JA_NEW = [
 const C = (id, glyph, title, sub, units) => ({ id, glyph, title, sub, units });
 const CH = {
   ko: [
-    C('kc1', '한글', L('Le hangeul', 'Hangul'), L('Lire, tracer et taper les lettres', 'Reading, tracing and typing the letters'), ['ko1', 'ko1w', 'ko2', 'ko2w', 'ko2b']),
+    C('kc1', '한글', L('Le hangeul', 'Hangul'), L('Lire, taper et prononcer les lettres', 'Reading, typing and saying the letters'), ['ko1', 'ko1w', 'ko2', 'ko2w', 'ko2b']),
     C('kc2', '첫걸음', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ko3', 'kov1', 'kon1', 'kow1', 'kof1']),
     C('kc3', '일상', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ko4', 'kov2', 'ko5', 'kov3', 'koc1', 'kos1', 'kow2']),
     C('kc4', '밖', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ko6', 'kov4', 'kot1', 'kot2', 'kosp', 'kow3']),
@@ -405,12 +403,12 @@ const CH = {
     C('kc7', '고급', L('Niveau avancé', 'Advanced level'), L('Phrases complexes, registres, culture', 'Complex sentences, registers, culture'), ['ko11', 'ko12', 'ko13', 'kocu', 'kow5']),
   ],
   ja: [
-    C('jc1', 'かな', L('Les kana', 'Kana'), L('Lire, tracer et taper hiragana et katakana', 'Reading, tracing and typing hiragana and katakana'), ['ja1', 'ja1w', 'ja1k', 'ja2', 'ja2w']),
+    C('jc1', 'かな', L('Les kana', 'Kana'), L('Lire, taper et prononcer hiragana et katakana', 'Reading, typing and saying hiragana and katakana'), ['ja1', 'ja1w', 'ja1k', 'ja2', 'ja2w']),
     C('jc2', '初め', L('Premiers pas', 'First steps'), L('Saluer, se présenter, compter', 'Greeting, introducing yourself, counting'), ['ja3', 'jav1', 'jan1', 'jaw1', 'jaf1']),
     C('jc3', '日常', L('La vie de tous les jours', 'Everyday life'), L('La maison, la table, les magasins', 'Home, meals, shops'), ['ja4', 'jav2', 'ja5', 'jav3', 'jac1', 'jas1', 'jaw2']),
     C('jc4', '外', L('Sortir et bouger', 'Out and about'), L('La ville, les transports, le voyage, le sport', 'Town, transport, travel, sport'), ['ja6', 'jav4', 'jat1', 'jat2', 'jasp', 'jaw3']),
     C('jc5', '話', L('Raconter et nuancer', 'Telling and nuancing'), L('Passé, futur, envies, opinions', 'Past, future, wishes, opinions'), ['ja7', 'ja8', 'jav5', 'ja8b', 'jav6', 'jal1', 'jafe', 'jaw4']),
-    C('jc6', '読み', L('Bien lire et prononcer', 'Reading and sounding right'), L('Lectures particulières, kanji à la main', 'Special readings, kanji by hand'), ['ja9', 'ja9b', 'jav7', 'jate', 'jakw']),
+    C('jc6', '読み', L('Bien lire et prononcer', 'Reading and sounding right'), L('Lectures particulières et kanji', 'Special readings and kanji'), ['ja9', 'ja9b', 'jav7', 'jate', 'jakw']),
     C('jc7', '上級', L('Niveau avancé', 'Advanced level'), L('Phrases complexes, registres, culture', 'Complex sentences, registers, culture'), ['ja10', 'ja11', 'ja12', 'jacu', 'jaw5']),
   ],
 };

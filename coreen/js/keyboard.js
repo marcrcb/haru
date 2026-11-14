@@ -106,23 +106,57 @@ const KO_ROWS = [
   ['⇧', 'ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ', '⌫'],
 ];
 const KO_SHIFT = { ㅂ: 'ㅃ', ㅈ: 'ㅉ', ㄷ: 'ㄸ', ㄱ: 'ㄲ', ㅅ: 'ㅆ', ㅐ: 'ㅒ', ㅔ: 'ㅖ' };
-// Appui long : doubles consonnes et voyelles composées (on peut aussi les taper en deux fois : ㅗ + ㅏ → ㅘ).
+// Appui long : doubles consonnes, ㅒ et ㅖ. Les voyelles composées se tapent en deux fois (ㅗ + ㅏ → ㅘ).
 export const KO_LONG = {
   ㅂ: ['ㅃ'], ㅈ: ['ㅉ'], ㄷ: ['ㄸ'], ㄱ: ['ㄲ'], ㅅ: ['ㅆ'], ㅐ: ['ㅒ'], ㅔ: ['ㅖ'],
-  ㅗ: ['ㅘ', 'ㅙ', 'ㅚ'], ㅜ: ['ㅝ', 'ㅞ', 'ㅟ'], ㅡ: ['ㅢ'],
 };
 const LONG_MS = 380;
 // Clavier d'ordinateur (AZERTY ou QWERTY : on lit la position de la touche, pas la lettre).
 const KO_CODES = { KeyQ: 'ㅂ', KeyW: 'ㅈ', KeyE: 'ㄷ', KeyR: 'ㄱ', KeyT: 'ㅅ', KeyY: 'ㅛ', KeyU: 'ㅕ', KeyI: 'ㅑ', KeyO: 'ㅐ', KeyP: 'ㅔ', KeyA: 'ㅁ', KeyS: 'ㄴ', KeyD: 'ㅇ', KeyF: 'ㄹ', KeyG: 'ㅎ', KeyH: 'ㅗ', KeyJ: 'ㅓ', KeyK: 'ㅏ', KeyL: 'ㅣ', KeyZ: 'ㅋ', KeyX: 'ㅌ', KeyC: 'ㅊ', KeyV: 'ㅍ', KeyB: 'ㅠ', KeyN: 'ㅜ', KeyM: 'ㅡ' };
 
-// Colonnes あ か さ た な は ま や ら わ ; lignes a i u e o.
-const JA_ROWS = [
-  ['あ', 'か', 'さ', 'た', 'な', 'は', 'ま', 'や', 'ら', 'わ'],
-  ['い', 'き', 'し', 'ち', 'に', 'ひ', 'み', '゛', 'り', 'を'],
-  ['う', 'く', 'す', 'つ', 'ぬ', 'ふ', 'む', 'ゆ', 'る', 'ん'],
-  ['え', 'け', 'せ', 'て', 'ね', 'へ', 'め', '゜', 'れ', 'ー'],
-  ['お', 'こ', 'そ', 'と', 'の', 'ほ', 'も', 'よ', 'ろ', '小'],
+// Clavier japonais de téléphone (« 12 touches ») : une touche par colonne あ か さ…
+// Toucher plusieurs fois fait défiler la colonne (あ → い → う…) ; glisser le doigt (« flick ») choisit directement :
+// gauche → い, haut → う, droite → え, bas → お. ゛゜小 transforme le dernier signe, → passe au signe suivant, ↺ revient en arrière.
+// Ordre de chaque liste : toucher, gauche, haut, droite, bas.
+const FLICK = {
+  あ: 'あいうえお', か: 'かきくけこ', さ: 'さしすせそ', た: 'たちつてと', な: 'なにぬねの',
+  は: 'はひふへほ', ま: 'まみむめも', や: 'や「ゆ」よ', ら: 'らりるれろ', わ: 'わをんー〜', '、': '、。？！…',
+};
+const CYCLE = {
+  あ: 'あいうえおぁぃぅぇぉ', か: 'かきくけこ', さ: 'さしすせそ', た: 'たちつてとっ', な: 'なにぬねの',
+  は: 'はひふへほ', ま: 'まみむめも', や: 'やゆよゃゅょ', ら: 'らりるれろ', わ: 'わをんゎー', '、': '、。？！…',
+};
+const JA_GRID = [
+  ['→', 'あ', 'か', 'さ', '⌫'],
+  ['↺', 'た', 'な', 'は', '空白'],
+  ['かな', 'ま', 'や', 'ら', '改行'],
+  ['', '゛゜小', 'わ', '、', null],
 ];
+/** Formes d'un signe pour la touche ゛゜小 : つ → っ → づ, は → ば → ぱ, や → ゃ… */
+function markForms(h) {
+  let base = h;
+  for (const [from, to] of [[PLAIN, VOICED], [HALF_FROM, HALF], [BIG, SMALL]]) if (to.includes(h)) base = from[to.indexOf(h)];
+  if (h === 'ゎ') base = 'わ';
+  const forms = [base];
+  if (BIG.includes(base)) forms.push(SMALL[BIG.indexOf(base)]);
+  if (PLAIN.includes(base)) forms.push(VOICED[PLAIN.indexOf(base)]);
+  if (HALF_FROM.includes(base)) forms.push(HALF[HALF_FROM.indexOf(base)]);
+  if (base === 'わ') forms.push('ゎ');
+  return forms;
+}
+/** Applique la touche ゛゜小 au dernier signe (forme suivante). */
+export function cycleMark(text) {
+  if (!text) return text;
+  const last = text.at(-1);
+  const kata = /[ァ-ヶ]/.test(last);
+  const h = toHira(last);
+  const forms = markForms(h);
+  if (forms.length < 2) return text;
+  const next = forms[(forms.indexOf(h) + 1) % forms.length];
+  return text.slice(0, -1) + (kata ? toKata(next) : next);
+}
+/** Direction d'un glissement : 0 (toucher), 1 gauche, 2 haut, 3 droite, 4 bas. */
+const flickDir = (dx, dy) => (Math.hypot(dx, dy) < 18 ? 0 : Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 1 : 3) : dy < 0 ? 2 : 4);
 
 // Clavier latin, pour écrire la romanisation : AZERTY en français, QWERTY en anglais.
 const LATIN = {
@@ -156,16 +190,25 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
         return `<button class="kb-key kr ${shift && KO_SHIFT[k] ? 'alt' : ''}" data-k="${c}"${long ? ` data-long="${long.join('')}"` : ''}>${c}${long ? `<small class="kb-alt">${long[0]}</small>` : ''}</button>`;
       }).join('')}</div>`).join('')}${space ? '<div class="kb-row"><button class="kb-key fn wide" data-k=" " aria-label="Espace">␣</button></div>' : ''}</div>`;
     } else {
-      host.innerHTML = `<div class="kb kb-ja">${JA_ROWS.map((row) => `<div class="kb-row">${row.map((k) => {
-        if ('゛゜小'.includes(k)) return `<button class="kb-key fn kr" data-mark="${k}" aria-label="${k}">${k === '゛' ? '″' : k === '゜' ? '°' : k}</button>`;
-        const c = kata ? toKata(k) : k;
-        return `<button class="kb-key kr" data-k="${c}">${c}</button>`;
-      }).join('')}</div>`).join('')}
-        <div class="kb-row"><button class="kb-key fn wide kr" data-fn="kata">${kata ? 'あ ひらがな' : 'ア カタカナ'}</button><button class="kb-key fn wide" data-fn="back" aria-label="⌫">⌫</button></div></div>`;
+      const lab = (k) => (kata ? toKata(k) : k);
+      host.innerHTML = `<div class="kb kb-ja">${JA_GRID.flat().map((k) => {
+        if (k === null) return '';
+        if (k === '') return '<span class="kb-gap"></span>';
+        if (k === '⌫') return '<button class="kb-key fn" data-fn="back" aria-label="⌫">⌫</button>';
+        if (k === '→') return '<button class="kb-key fn" data-fn="next" aria-label="→">→</button>';
+        if (k === '↺') return '<button class="kb-key fn" data-fn="undo" aria-label="↺">↺</button>';
+        if (k === 'かな') return `<button class="kb-key fn kr" data-fn="kata">${kata ? 'かな' : 'カナ'}</button>`;
+        if (k === '空白') return `<button class="kb-key fn kr" data-k=" "${space ? '' : ' disabled'}>空白</button>`;
+        if (k === '改行') return '<button class="kb-key fn kr tall" data-fn="enter">改行</button>';
+        if (k === '゛゜小') return '<button class="kb-key kr small-mark" data-fn="mark" aria-label="゛゜小">゛゜<small>小</small></button>';
+        return `<button class="kb-key kr" data-flick="${k}">${k === '、' ? '、。?!' : lab(k)}</button>`;
+      }).join('')}</div>`;
     }
   }
 
+  let cyc = null; // touche japonaise en train de défiler : { key, i }
   function press(k) {
+    cyc = null;
     keys.push(k);
     if (shift) {
       shift = false;
@@ -174,8 +217,38 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     emit();
   }
   function back() {
+    cyc = null;
     keys.pop();
     emit();
+  }
+  /** Touche japonaise touchée : nouveau signe, ou signe suivant de la colonne si on touche encore la même. */
+  function tapKana(k) {
+    const list = [...CYCLE[k]];
+    const out = (c) => (kata ? toKata(c) : c);
+    if (cyc?.key === k && keys.length) {
+      cyc.i = (cyc.i + 1) % list.length;
+      keys[keys.length - 1] = out(list[cyc.i]);
+    } else {
+      keys.push(out(list[0]));
+      cyc = { key: k, i: 0 };
+    }
+    emit();
+  }
+  function undoKana() {
+    if (!cyc || !keys.length) return;
+    const list = [...CYCLE[cyc.key]];
+    cyc.i = (cyc.i - 1 + list.length) % list.length;
+    keys[keys.length - 1] = kata ? toKata(list[cyc.i]) : list[cyc.i];
+    emit();
+  }
+  function markKana() {
+    cyc = null;
+    const before = keys.join('');
+    const after = cycleMark(before);
+    if (after !== before) {
+      keys = [...after];
+      emit();
+    }
   }
   function mark(m) {
     const before = keys.join('');
@@ -211,7 +284,32 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     held.pick = alts[0];
     if (navigator.vibrate) try { navigator.vibrate(8); } catch { /* sans vibreur */ }
   }
+  /** Bulle au-dessus d'une touche japonaise : le signe qui sera écrit selon le glissement. */
+  function showFlick() {
+    const b = held.key;
+    const kb = host.querySelector('.kb');
+    if (!held.pop) {
+      held.pop = document.createElement('div');
+      held.pop.className = 'kb-pop kb-flick kr';
+      kb.append(held.pop);
+    }
+    const c = [...FLICK[held.flick]][held.dir];
+    held.pop.innerHTML = `<span class="on">${kata ? toKata(c) : c}</span>`;
+    const r = b.getBoundingClientRect();
+    const k = kb.getBoundingClientRect();
+    const w = held.pop.offsetWidth;
+    held.pop.style.left = `${Math.max(2, Math.min(k.width - w - 2, r.left - k.left + r.width / 2 - w / 2))}px`;
+    held.pop.style.top = `${r.top - k.top - held.pop.offsetHeight - 6}px`;
+  }
   function track(e) {
+    if (held?.flick) {
+      const d = flickDir(e.clientX - held.x0, e.clientY - held.y0);
+      if (d !== held.dir) {
+        held.dir = d;
+        showFlick();
+      }
+      return;
+    }
     if (!held?.pop) return;
     const spans = [...held.pop.children];
     let best = spans[0];
@@ -231,6 +329,14 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     if (!b || locked) return;
     e.preventDefault(); // pas de sélection de texte ni de perte de focus
     closePop();
+    if (b.dataset.flick) {
+      // Clavier japonais : on attend le relâchement pour savoir s'il y a eu glissement.
+      b.classList.add('hit');
+      held = { key: b, flick: b.dataset.flick, x0: e.clientX, y0: e.clientY, dir: 0, pop: null };
+      try { b.releasePointerCapture?.(e.pointerId); } catch { /* rien */ }
+      showFlick();
+      return;
+    }
     if (b.dataset.long) {
       // La lettre s'écrit au relâchement : un appui long ouvre les variantes.
       b.classList.add('hit');
@@ -246,7 +352,11 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     else if (b.dataset.fn === 'kata') {
       kata = !kata;
       draw();
-    } else if (b.dataset.mark) mark(b.dataset.mark);
+    } else if (b.dataset.fn === 'next') cyc = null;
+    else if (b.dataset.fn === 'undo') undoKana();
+    else if (b.dataset.fn === 'mark') markKana();
+    else if (b.dataset.fn === 'enter') onEnter?.();
+    else if (b.dataset.mark) mark(b.dataset.mark);
     else press(b.dataset.k);
     b.classList.add('hit');
     setTimeout(() => b.classList.remove('hit'), 120);
@@ -260,6 +370,13 @@ export function mountKeyboard(host, { kind, layout = 'azerty', kata = false, spa
     }
     if (!held) return;
     const h = held;
+    if (h.flick) {
+      closePop();
+      if (locked || e.type === 'pointercancel') return;
+      if (!h.dir) return tapKana(h.flick);
+      const c = [...FLICK[h.flick]][h.dir];
+      return press(kata ? toKata(c) : c);
+    }
     if (e.type === 'pointercancel' && !h.pop) return closePop();
     const k = h.pop ? h.pick : h.key.dataset.k;
     closePop();

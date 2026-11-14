@@ -87,3 +87,16 @@ test('textes : les clés choisies à l’exécution existent aussi', () => {
     assert.ok(STRINGS.en[k], 'en manquant : ' + k);
   }
 });
+
+test('clavier japonais : la touche ゛゜小 fait défiler les formes du dernier signe', async () => {
+  const { cycleMark } = await import('../js/keyboard.js');
+  assert.equal(cycleMark('か'), 'が');
+  assert.equal(cycleMark('が'), 'か');
+  assert.equal(cycleMark('は'), 'ば');
+  assert.equal(cycleMark('ば'), 'ぱ');
+  assert.equal(cycleMark('ぱ'), 'は');
+  assert.equal(cycleMark('つ'), 'っ');
+  assert.equal(cycleMark('っ'), 'づ');
+  assert.equal(cycleMark('ヤ'), 'ャ');
+  assert.equal(cycleMark('ん'), 'ん');
+});

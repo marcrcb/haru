@@ -1314,6 +1314,23 @@ body.bare .topbar { border-bottom-color: transparent; }
   .quiz.kb-mode .qcard.compact { min-height: 0; padding: 14px 14px 12px; }
   .quiz.kb-mode .qkr { font-size: calc(2.6rem * var(--krs)); }
   .type-dock .type-box { min-height: 52px; padding: 6px 12px; }
-  .type-dock .kb-ja .kb-key { height: 36px; }
+  .type-dock .kb-ja .kb-key { height: 42px; }
   .type-dock .kb-key { height: 42px; }
 }
+
+/* À voix haute : sous le quiz de la série */
+.speak-set { width: 100%; margin-top: 8px; }
+.speak-set[hidden] { display: none; }
+
+/* Clavier japonais de téléphone : 12 touches de kana entre deux colonnes de fonctions */
+.kb.kb-ja { grid-template-columns: .78fr 1fr 1fr 1fr .78fr; gap: 6px; padding-left: 6px; padding-right: 6px; }
+.kb-ja .kb-key { height: 48px; font-size: calc(1.35rem * var(--krs)); }
+.kb-ja .kb-key.fn { font-size: .95rem; font-weight: 800; }
+.kb-ja .kb-key.tall { grid-row: span 2; height: auto; background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.kb-ja .kb-key:disabled { opacity: .4; }
+.kb-ja .kb-key[data-flick="、"] { font-size: 1rem; }
+.kb-ja .small-mark { font-size: 1rem; color: var(--accent); }
+.kb-ja .small-mark small { font-size: .75rem; margin-left: 1px; }
+.kb-gap { display: block; }
+.kb-flick span { min-width: 58px; height: 58px; font-size: calc(1.8rem * var(--krs)); }
+@media (max-height: 700px) { .type-dock .kb-ja .kb-key { height: 42px; } .type-dock .kb-ja .kb-key.tall { height: auto; } }

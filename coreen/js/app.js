@@ -7,7 +7,7 @@ import { scriptQuiz, vocabQuiz, wordsOf } from './quiz.js';
 import { flashcards, pairs } from './games.js';
 import { phrasesScreen, roadPhrases } from './phrases.js';
 import { roadScreen, findStep } from './road.js';
-import { writeScreen, strokeDemo, canTrace, writeChars } from './draw.js';
+import { strokeDemo, canTrace } from './draw.js';
 import { examScreen } from './exam.js';
 import { achievements, newTiers, TIERS } from './achievements.js';
 import { listenSupported } from './speech.js';
@@ -31,7 +31,6 @@ const SCREENS = {
   settings: { title: () => t('title.settings'), tab: 'settings', top: 'settings', back: '#/profile', render: settings },
   lexicon: { title: () => t('title.lexicon'), tab: 'words', back: '#/words', render: lexicon },
   hquiz: { title: () => t('title.scriptQuiz', { name: tr(course().script.title) }), tab: 'hangul', back: '#/hangul', focus: true, render: (el, q) => scriptQuiz(el, q.set || Object.keys(course().script.sets)[0], q.step, q.mode) },
-  write: { title: () => t('title.write'), tab: 'hangul', back: '#/hangul', focus: true, render: writeScreen },
   exam: { title: () => t('title.exam'), tab: 'road', back: '#/road', focus: true, render: examScreen },
   quiz: { title: () => t('title.quiz'), tab: 'words', back: '#/words', focus: true, render: (el, q) => vocabQuiz(el, q.t || 'all', q.mode, q.step) },
   cards: { title: () => t('title.cards'), tab: 'words', back: '#/words', focus: true, render: (el, q) => flashcards(el, q.t || 'all', q.step) },
@@ -226,10 +225,7 @@ function script(el) {
       <div class="jamo-grid"></div>
       <div class="jamo-detail card" hidden></div>
       <a class="btn primary quiz-set" href="#">${t('script.quizSet')}</a>
-
-      <h2>${t('script.writing')}</h2>
-      <p class="muted small">${t('script.writingHelp')}</p>
-      <div class="grid2 write-tiles"></div>
+      <a class="btn ghost speak-set" href="#">${t('script.speakSub')}</a>
 
       <h2>${t('script.reading')}</h2>
       <div class="grid2">
@@ -266,26 +262,16 @@ function script(el) {
       grid.innerHTML = set.groups.map((g) => `
         <div class="jamo-group">
           <b>${esc(tr(g.label))}</b><span class="muted small">${g.items.length}</span>
-          <a class="btn small ghost" href="#/write?set=kanji-${g.id}">${t('script.trace')}</a>
           <a class="btn small ghost" href="#/hquiz?set=kanji-${g.id}">${t('title.quiz')}</a>
         </div>${g.items.map((x) => cell(x, n++)).join('')}`).join('');
     } else grid.innerHTML = items.map(cell).join('');
     detail.hidden = true;
     $('.quiz-set', el).href = `#/hquiz?set=${scriptSet[C.id]}`;
     $('.quiz-set', el).textContent = set.groups ? t('kanji.quizAll', { n: items.length }) : kanji ? t('kanji.quiz') : t('script.quizSet');
-    // Écriture : tracer à la main (hiragana et katakana séparément) et taper au clavier
-    const id = scriptSet[C.id];
-    const sample = items[0];
-    const tiles = [];
-    if (writeChars(id).length) {
-      if (sample.j2) {
-        tiles.push(`<a class="tile-link" href="#/write?set=${id}&form=hira" style="--tc: var(--c-hangul)"><span class="tl-kr kr">${sample.j}</span><b>${t('script.traceHira')}</b><span class="muted small">${t('script.traceSub')}</span></a>`);
-        tiles.push(`<a class="tile-link" href="#/write?set=${id}&form=kata" style="--tc: var(--c-guide)"><span class="tl-kr kr">${sample.j2}</span><b>${t('script.traceKata')}</b><span class="muted small">${t('script.traceSub')}</span></a>`);
-      } else tiles.push(`<a class="tile-link" href="#/write?set=${id}" style="--tc: var(--c-hangul)"><span class="tl-kr kr">${sample.j}</span><b>${t('script.trace')}</b><span class="muted small">${t('script.traceSub')}</span></a>`);
-    }
-    // (Le quiz de la série fait déjà écrire au clavier : pas de tuile « Au clavier » en plus.)
-    if (!kanji || !set.groups) tiles.push(`<a class="tile-link" href="#/hquiz?set=${id}&mode=speak" style="--tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '話す' : '말하기'}</span><b>${t('script.speak')}</b><span class="muted small">${t(listenSupported() ? 'script.speakSub' : 'words.speakNo')}</span></a>`);
-    $('.write-tiles', el).innerHTML = tiles.join('');
+    // À voix haute : les lettres de la série (pas pour l'ensemble des kanji).
+    const speakBtn = $('.speak-set', el);
+    speakBtn.hidden = kanji && !!set.groups;
+    speakBtn.href = `#/hquiz?set=${scriptSet[C.id]}&mode=speak`;
   }
   grid.addEventListener('click', (e) => {
     const b = e.target.closest('.jamo');
@@ -318,17 +304,15 @@ function script(el) {
     strokes(x, x.j2 ? [x.j, x.j2] : [x.j]);
     pulse(detail, 'pop');
   });
-  /** Sous le détail : l'ordre des traits animé, et un bouton pour s'exercer à tracer. */
+  /** Sous le détail : l'ordre des traits animé (toucher pour le rejouer). */
   function strokes(x, chars) {
     const list = chars.filter((c) => [...c].length === 1 && canTrace(c));
     if (!list.length) return;
-    const id = scriptSet[C.id];
     detail.insertAdjacentHTML('beforeend', `
       <div class="jd-strokes">
         ${list.map((c) => `<div class="jd-demo" data-ch="${c}"></div>`).join('')}
         <div class="jd-trace">
           <span class="muted small">${t('script.strokeOrder')}</span>
-          ${list.map((c, k) => `<a class="btn small ${k ? 'ghost' : 'primary'}" href="#/write?set=${id}&ch=${encodeURIComponent(c)}${x.j2 ? `&form=${k ? 'kata' : 'hira'}` : ''}">${t('script.traceOne', { ch: c })}</a>`).join('')}
         </div>
       </div>`);
     $$('.jd-demo', detail).forEach((h) => strokeDemo(h, h.dataset.ch));

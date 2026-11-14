@@ -36,7 +36,7 @@ export function stepDone(s, st = store.get()) {
   if (s.kind === 'mastery') { const g = goal(s.theme, st); return g.total > 0 && g.n >= g.total; }
   return !!st.road?.[s.id];
 }
-const STARRED = ['script', 'words', 'cards', 'phrase', 'write', 'type', 'dictation', 'ptype', 'speak'];
+const STARRED = ['script', 'words', 'cards', 'phrase', 'type', 'dictation', 'ptype', 'speak'];
 const stars = (s, st) => (STARRED.includes(s.kind) ? st.road?.[s.id] || 0 : 0);
 
 /** Titre, type, pastille et adresse d'une étape. */
@@ -48,15 +48,10 @@ export function stepInfo(s) {
     const g = lessons().find((x) => x.id === s.lesson);
     return { title: g?.title || s.lesson, type: t('road.lesson'), glyph: g?.glyph || '?', href: `#/guide?id=${s.lesson}&${q}` };
   }
-  if (s.kind === 'script' || s.kind === 'write' || ((s.kind === 'type' || s.kind === 'speak') && s.set)) {
+  if (s.kind === 'script' || ((s.kind === 'type' || s.kind === 'speak') && s.set)) {
     const set = C.script.sets[s.set];
-    let title = set ? tr(set.label) : s.set === 'syllables' ? tr(C.script.syllableLabel) : t('script.words');
-    let glyph = set ? set.items[0].j : s.set === 'syllables' ? C.script.syllableSample.slice(0, 2) : ja ? 'さかな' : '사과';
-    if (s.kind === 'write') {
-      if (s.form === 'kata') glyph = set.items[0].j2;
-      if (s.form) title = `${title} · ${s.form === 'kata' ? 'katakana' : 'hiragana'}`;
-      return { title, type: t('road.write'), glyph, href: `#/write?set=${s.set}${s.form ? `&form=${s.form}` : ''}&${q}` };
-    }
+    const title = set ? tr(set.label) : s.set === 'syllables' ? tr(C.script.syllableLabel) : t('script.words');
+    const glyph = set ? set.items[0].j : s.set === 'syllables' ? C.script.syllableSample.slice(0, 2) : ja ? 'さかな' : '사과';
     if (s.kind === 'type') return { title, type: s.set === 'words' ? t('road.dictation') : t('road.type'), glyph, href: `#/hquiz?set=${s.set}&mode=type&${q}` };
     if (s.kind === 'speak') return { title, type: t('road.speak'), glyph, href: `#/hquiz?set=${s.set}&mode=speak&${q}` };
     return { title, type: t('road.quiz'), glyph, href: `#/hquiz?set=${s.set}&${q}` };

@@ -17,7 +17,6 @@ const DEFS = [
   { id: 'modules', g: ['길', '道'], title: L('Sur la route', 'On the road'), desc: L('Terminer {n} modules du parcours', 'Complete {n} modules'), steps: [1, 5, 12, 25, 40], value: (x) => x.R.units.filter((u) => u.complete).length },
   { id: 'plat', g: ['백금', '白金'], title: L('Platine', 'Platinum'), desc: L('Réussir l’examen de {n} modules', 'Pass the exam of {n} modules'), steps: [1, 3, 8, 18, 35], value: (x) => x.R.units.filter((u) => u.plat).length },
   { id: 'stars', g: ['별', '星'], title: L('Pluie d’étoiles', 'Star shower'), desc: L('Récolter {n} étoiles dans le parcours', 'Collect {n} stars on the path'), steps: [10, 40, 100, 220, 400], value: (x) => x.R.starCount },
-  { id: 'traced', g: ['붓', '筆'], title: L('Calligraphe', 'Calligrapher'), desc: L('Tracer {n} signes de mémoire', 'Trace {n} characters from memory'), steps: [10, 40, 120, 300, 700], value: () => store.stat('traced') },
   { id: 'typed', g: ['타자', '入力'], title: L('Dactylo', 'Typist'), desc: L('Écrire {n} bonnes réponses au clavier', 'Type {n} correct answers'), steps: [20, 100, 300, 800, 2000], value: () => store.stat('typed') },
   { id: 'dictation', g: ['귀', '耳'], title: L('Oreille fine', 'Sharp ear'), desc: L('Réussir {n} dictées', 'Get {n} dictations right'), steps: [10, 50, 150, 400, 1000], value: () => store.stat('dictation') },
   { id: 'phrases', g: ['문장', '文'], title: L('Bâtisseur de phrases', 'Sentence builder'), desc: L('Reconstituer ou écrire {n} phrases', 'Rebuild or write {n} sentences'), steps: [5, 25, 75, 200, 500], value: () => store.stat('phrases') },
