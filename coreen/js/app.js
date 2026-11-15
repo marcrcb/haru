@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '44'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '45'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -121,7 +121,7 @@ function welcome(el) {
         <button class="seg-btn ${lang() === 'fr' ? 'on' : ''}" data-l="fr">Français</button>
         <button class="seg-btn ${lang() === 'en' ? 'on' : ''}" data-l="en">English</button>
       </div>
-      <div class="w-logo"><img src="icons/icon.svg" alt=""></div>
+      <div class="w-logo"><img src="icons/icon.svg" alt=""><span class="w-seal kr" aria-hidden="true">하<br>루</span></div>
       <h1>Haru</h1>
       <p class="muted">${t('welcome.tagline')}</p>
       <h2>${t('welcome.question')}</h2>
@@ -621,6 +621,8 @@ function settings(el) {
 
       <h2>${t('set.appearance')}</h2>
       <div class="card settings">
+        <div class="set-row col"><span>${t('set.style')}</span>${seg('style', [['haru', t('set.styleHaru')], ['ink', t('set.styleInk')]], s.style === 'ink' ? 'ink' : 'haru')}
+          <span class="muted small">${t('set.styleHelp')}</span></div>
         <div class="set-row col"><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
           <span class="muted small">${t('set.autoHelp')}</span></div>
         <div class="set-row col"><span>${t('set.textSize', { lang: tr(C.name).toLowerCase() })}</span>${seg('krLarge', [['false', t('set.normal')], ['true', t('set.large')]], s.krLarge)}</div>
@@ -773,17 +775,19 @@ const toggle = (name, label, on) => `
 
 /** Applique thème, taille du texte, animations et police de la langue apprise. */
 const THEME_BG = { light: '#f7f5fb', dark: '#15131c' };
+const INK_BG = { light: '#f3eee4', dark: '#15130f' };
 function applySettings() {
   const s = store.get().settings;
   const root = document.documentElement;
   if (s.theme === 'auto') delete root.dataset.theme;
   else root.dataset.theme = s.theme;
   root.dataset.course = course().id;
+  root.dataset.style = s.style === 'ink' ? 'ink' : 'haru';
   root.classList.toggle('kr-large', !!s.krLarge);
   root.classList.toggle('no-motion', !s.motion);
   $$('meta[name="theme-color"]').forEach((m) => {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
-    m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];
+    m.content = (s.style === 'ink' ? INK_BG : THEME_BG)[s.theme === 'auto' ? scheme : s.theme];
   });
 }
 

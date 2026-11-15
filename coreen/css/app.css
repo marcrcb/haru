@@ -1362,3 +1362,6 @@ body.bare .topbar { border-bottom-color: transparent; }
 .tiles-card .recon-fr:empty { display: none; }
 .options.tiles-opts { grid-template-columns: 1fr 1fr; }
 .tiles-opts .opt { text-align: center; }
+
+/* Sceau du style « Encre » (masqué dans ce style) */
+.w-seal { display: none; }

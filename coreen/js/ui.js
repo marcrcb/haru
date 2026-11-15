@@ -173,8 +173,58 @@ export function celebrate({ glyph, title, text, button = 'Continuer' }) {
   box.addEventListener('click', (e) => e.target === box && close());
 }
 
+/** Style « Encre » : des pétales qui tombent en se balançant, aux couleurs du sceau et de la feuille d'or. */
+function petals() {
+  const c = document.createElement('canvas');
+  c.className = 'confetti';
+  const dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr;
+  c.height = innerHeight * dpr;
+  document.body.append(c);
+  const g = c.getContext('2d');
+  g.scale(dpr, dpr);
+  const css = getComputedStyle(document.documentElement);
+  const colors = ['--seal', '--rose', '--gold', '--c-guide'].map((v) => css.getPropertyValue(v).trim() || '#c23a22');
+  const parts = Array.from({ length: 46 }, (_, i) => ({
+    x: Math.random() * innerWidth,
+    y: -20 - Math.random() * innerHeight * 0.5,
+    vy: 1.2 + Math.random() * 1.4,
+    sway: 0.6 + Math.random() * 1.4,
+    ph: Math.random() * Math.PI * 2,
+    s: 5 + Math.random() * 5,
+    r: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.06,
+    c: colors[i % colors.length],
+  }));
+  const t0 = performance.now();
+  const DUR = 2600;
+  (function frame(t) {
+    const el = t - t0;
+    const fade = el < DUR - 700 ? 1 : Math.max(0, (DUR - el) / 700);
+    g.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of parts) {
+      p.y += p.vy;
+      p.ph += 0.035;
+      p.r += p.vr;
+      g.save();
+      g.globalAlpha = 0.85 * fade;
+      g.translate(p.x + Math.sin(p.ph) * p.sway * 14, p.y);
+      g.rotate(p.r + Math.sin(p.ph) * 0.6);
+      g.scale(1, 0.55 + Math.abs(Math.cos(p.ph)) * 0.45); // le pétale se retourne en tombant
+      g.fillStyle = p.c;
+      g.beginPath();
+      g.ellipse(0, 0, p.s, p.s * 0.62, 0, 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+    }
+    if (el < DUR) requestAnimationFrame(frame);
+    else c.remove();
+  })(t0);
+}
+
 export function confetti() {
   if (reducedMotion()) return;
+  if (document.documentElement.dataset.style === 'ink') return petals();
   const c = document.createElement('canvas');
   c.className = 'confetti';
   const dpr = devicePixelRatio || 1;

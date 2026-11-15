@@ -27,6 +27,11 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Sans clavier** : un bouton clavier, en haut des exercices à écrire, remplace le clavier par les morceaux de la réponse à remettre dans l’ordre (ou, pour une seule lettre, à choisir). Le choix est mémorisé.
 - **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
 - **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
+- **Deux styles** (Réglages → Apparence → Style de l’application), en clair comme en sombre :
+  - **Haru** : le style coloré d’origine (`css/app.css`) ;
+  - **Encre** : papier, encre et sceau vermillon, dessins au trait, animations plus douces (`css/ink.css`, polices Inter, Fraunces et Noto Emoji monochrome réduite aux dessins de l’application, licence SIL OFL).
+
+  Les deux feuilles sont chargées dans deux couches CSS (`@layer classic, ink`) : la seconde ne s’applique que si `data-style="ink"` et remplace la première sans toucher à son code.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
 
 ## Organisation du code
