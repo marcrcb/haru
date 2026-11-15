@@ -73,8 +73,8 @@ export const STRINGS = {
 
     'set.languages': 'Langues', 'set.course': 'Langue apprise', 'set.courseHelp': 'Chaque langue garde sa propre progression.', 'set.uiLang': 'Langue de l’application',
     'set.switched': 'C’est parti pour le {lang} !',
-    'set.style': 'Style de l’application', 'set.styleHaru': 'Haru (d’origine)', 'set.styleInk': 'Encre (nouveau)',
-    'set.styleHelp': 'Encre : papier, encre et sceau vermillon, dessins au trait, animations plus douces. Haru : le style coloré d’origine. Ta progression ne change pas.',
+    'set.style': 'Style de l’application', 'set.styleHaru': 'Haru (d’origine)', 'set.styleQuest': 'Aventure (jeu)',
+    'set.styleHelp': 'Aventure : l’application devient un jeu. Carte des mondes, niveaux à étoiles, combats contre des monstres, boss, coffre du jour. Haru : le style d’origine. Ta progression est la même dans les deux.',
     'set.appearance': 'Apparence', 'set.theme': 'Thème', 'set.auto': 'Automatique', 'set.light': 'Clair', 'set.dark': 'Sombre',
     'set.autoHelp': 'Automatique suit le réglage du téléphone.', 'set.textSize': 'Taille du texte en {lang}', 'set.normal': 'Normale', 'set.large': 'Grande',
     'set.motion': 'Animations',
@@ -235,8 +235,8 @@ export const STRINGS = {
 
     'set.languages': 'Languages', 'set.course': 'Language you’re learning', 'set.courseHelp': 'Each language keeps its own progress.', 'set.uiLang': 'App language',
     'set.switched': 'Let’s go with {lang}!',
-    'set.style': 'App style', 'set.styleHaru': 'Haru (original)', 'set.styleInk': 'Ink (new)',
-    'set.styleHelp': 'Ink: paper, ink and a vermilion seal, line drawings, gentler animations. Haru: the original colourful style. Your progress is unchanged.',
+    'set.style': 'App style', 'set.styleHaru': 'Haru (original)', 'set.styleQuest': 'Adventure (game)',
+    'set.styleHelp': 'Adventure: the app becomes a game. World map, starred levels, monster battles, bosses, a daily chest. Haru: the original style. Your progress is the same in both.',
     'set.appearance': 'Appearance', 'set.theme': 'Theme', 'set.auto': 'Automatic', 'set.light': 'Light', 'set.dark': 'Dark',
     'set.autoHelp': 'Automatic follows your phone’s setting.', 'set.textSize': '{lang} text size', 'set.normal': 'Normal', 'set.large': 'Large',
     'set.motion': 'Animations',

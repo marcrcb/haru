@@ -99,9 +99,9 @@ const starRow = (n) => `<span class="rn-stars" aria-label="${n} / 3">${[1, 2, 3]
 const OFFSETS = [-1, -0.4, 0.4, 1, 0.4, -0.4]; // tracé sinueux : jamais au centre, le texte se place du côté libre
 const openChapters = {}; // chapitres dépliés à la main pendant la séance
 
-export function roadScreen(el) {
+/** Récompenses en attente (bonus d'un module terminé, passage au platine) : annoncées une fois. Renvoie l'état à jour. */
+export function roadRewards() {
   const st = store.get();
-  const C = course();
   st.road ||= {};
   let R = roadState();
 
@@ -121,6 +121,13 @@ export function roadScreen(el) {
     celebrate({ glyph: shiny.glyph, title: t('road.platTitle'), text: t('road.platText', { name: tr(shiny.title) }), button: t('continue') });
     document.querySelector('.celebrate .cel-card')?.classList.add('plat');
   }
+  return R;
+}
+
+export function roadScreen(el) {
+  const st = store.get();
+  const C = course();
+  const R = roadRewards();
 
   const ja = C.id === 'ja';
   const unitHtml = (u) => `

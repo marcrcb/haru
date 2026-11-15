@@ -15,9 +15,9 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <!-- Style et thème choisis, appliqués avant l'affichage (pas d'éclair de l'autre style au lancement). -->
-  <script>try { var hs = JSON.parse(localStorage.getItem('haru.v1')).settings; if (hs.style === 'ink') document.documentElement.dataset.style = 'ink'; if (hs.theme && hs.theme !== 'auto') document.documentElement.dataset.theme = hs.theme; } catch (e) { /* premier lancement */ }</script>
-  <!-- Deux couches : le style d'origine, puis la direction « Encre » (active seulement si data-style="ink"). -->
-  <style>@layer classic, ink; @import url("css/app.css") layer(classic); @import url("css/ink.css") layer(ink);</style>
+  <script>try { var hs = JSON.parse(localStorage.getItem('haru.v1')).settings; if (hs.style === 'quest' || hs.style === 'ink') document.documentElement.dataset.style = 'quest'; if (hs.theme && hs.theme !== 'auto') document.documentElement.dataset.theme = hs.theme; } catch (e) { /* premier lancement */ }</script>
+  <!-- Deux couches : le style d'origine (Haru), puis la version « Aventure » (active seulement si data-style="quest"). -->
+  <style>@layer classic, quest; @import url("css/app.css") layer(classic); @import url("css/quest.css") layer(quest);</style>
 </head>
 <body>
   <header class="topbar">
