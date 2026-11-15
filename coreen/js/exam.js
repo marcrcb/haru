@@ -181,7 +181,6 @@ export function examScreen(el, q) {
       again: () => examScreen(el, q),
       exam: {
         pass,
-        final,
         passText: final ? '' : t('exam.platText'),
         onEnd(pct, passed) {
           if (final) {

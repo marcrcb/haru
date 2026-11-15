@@ -7,7 +7,6 @@ import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
 import { pictureOf } from './content/pictures.js';
-import { battle, battleMode } from './battle.js';
 import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
 import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
@@ -89,8 +88,6 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     </div>`;
   const stage = $('.qstage', el);
   const bar = $('.progress i', el);
-  // Version « Aventure » : la série devient un combat contre un monstre (ou un boss pour les examens).
-  const fight = battleMode() && total ? battle(el, { total, exam, title }) : null;
   const comboEl = $('.combo', el);
   const sheet = $('.sheet', el);
 
@@ -353,7 +350,6 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       combo = 0;
     }
     if (!q.retry) q.onAnswer?.(okNow);
-    fight?.hit(okNow, combo);
     comboEl.textContent = combo >= 3 ? t('quiz.combo', { n: combo }) : '';
     if (combo >= 3) pulse(comboEl, 'bump');
 
@@ -415,7 +411,6 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     el.querySelector('.quiz').classList.remove('kb-mode');
     el.querySelector('.quiz').innerHTML = `
       <div class="result screen ${exam ? (passed ? 'exam-pass' : 'exam-fail') : ''}">
-        ${fight ? fight.end(ratio, passed) : ''}
         <div class="score-ring" style="--p:${ratio}">
           <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52"/><circle class="val" cx="60" cy="60" r="52"/></svg>
           <div><b>${firstTry}</b><span>/ ${total}</span></div>

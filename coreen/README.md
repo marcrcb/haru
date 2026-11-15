@@ -27,15 +27,6 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Sans clavier** : un bouton clavier, en haut des exercices à écrire, remplace le clavier par les morceaux de la réponse à remettre dans l’ordre (ou, pour une seule lettre, à choisir). Le choix est mémorisé.
 - **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
 - **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
-- **Deux versions** (Réglages → Apparence → Style de l’application), en clair comme en sombre, avec la même progression :
-  - **Haru** : la version d’origine (`css/app.css`, `js/road.js`) ;
-  - **Aventure** : l’application devient un jeu (`css/quest.css`, `js/quest.js`, `js/battle.js`, police Lilita One, licence SIL OFL) :
-    - les chapitres deviennent des mondes, les modules des niveaux à étoiles et les étapes des missions ;
-    - l’examen d’un module est le boss du niveau, et l’examen final un dragon ;
-    - chaque série d’exercices est un combat : le monstre perd des points de vie à chaque bonne réponse, tu perds un cœur à chaque erreur ;
-    - un coffre du jour s’ouvre quand l’objectif quotidien est atteint ; toucher l’avatar en change.
-
-  Les deux feuilles de style sont chargées dans deux couches CSS (`@layer classic, quest`). La seconde ne s’applique que si `data-style="quest"` et remplace la première sans toucher à son code.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
 
 ## Organisation du code

@@ -7,7 +7,6 @@ import { scriptQuiz, vocabQuiz, wordsOf } from './quiz.js';
 import { flashcards, pairs } from './games.js';
 import { phrasesScreen, roadPhrases } from './phrases.js';
 import { roadScreen, findStep } from './road.js';
-import { questScreen, questMode } from './quest.js';
 import { strokeDemo, canTrace } from './draw.js';
 import { examScreen } from './exam.js';
 import { achievements, newTiers, TIERS } from './achievements.js';
@@ -23,7 +22,7 @@ let installEvent = null;
 // tab : onglet (et couleur) ; back : adresse du bouton retour ; focus : plein écran (jeux)
 const SCREENS = {
   welcome: { title: () => 'Haru', tab: 'road', bare: true, render: welcome },
-  road: { title: () => t('road.title'), tab: 'road', render: (el) => (questMode() ? questScreen(el) : roadScreen(el)) },
+  road: { title: () => t('road.title'), tab: 'road', render: roadScreen },
   hangul: { title: () => tr(course().script.title), tab: 'hangul', render: script },
   words: { title: () => t('title.words'), tab: 'words', render: words },
   phrases: { title: () => t('title.phrases'), tab: 'phrases', render: phrasesScreen },
@@ -44,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '46'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '47'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -625,8 +624,6 @@ function settings(el) {
 
       <h2>${t('set.appearance')}</h2>
       <div class="card settings">
-        <div class="set-row col"><span>${t('set.style')}</span>${seg('style', [['haru', t('set.styleHaru')], ['quest', t('set.styleQuest')]], isQuest(s) ? 'quest' : 'haru')}
-          <span class="muted small">${t('set.styleHelp')}</span></div>
         <div class="set-row col"><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
           <span class="muted small">${t('set.autoHelp')}</span></div>
         <div class="set-row col"><span>${t('set.textSize', { lang: tr(C.name).toLowerCase() })}</span>${seg('krLarge', [['false', t('set.normal')], ['true', t('set.large')]], s.krLarge)}</div>
@@ -779,22 +776,17 @@ const toggle = (name, label, on) => `
 
 /** Applique thème, taille du texte, animations et police de la langue apprise. */
 const THEME_BG = { light: '#f7f5fb', dark: '#15131c' };
-const QUEST_BG = { light: '#2c2370', dark: '#0d0a26' }; // couleur de la barre de tête de jeu
-/** Version « Aventure » (l'ancien choix « Encre » y mène aussi). */
-const isQuest = (s) => s.style === 'quest' || s.style === 'ink';
-
 function applySettings() {
   const s = store.get().settings;
   const root = document.documentElement;
   if (s.theme === 'auto') delete root.dataset.theme;
   else root.dataset.theme = s.theme;
   root.dataset.course = course().id;
-  root.dataset.style = isQuest(s) ? 'quest' : 'haru';
   root.classList.toggle('kr-large', !!s.krLarge);
   root.classList.toggle('no-motion', !s.motion);
   $$('meta[name="theme-color"]').forEach((m) => {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
-    m.content = (isQuest(s) ? QUEST_BG : THEME_BG)[s.theme === 'auto' ? scheme : s.theme];
+    m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];
   });
 }
 
