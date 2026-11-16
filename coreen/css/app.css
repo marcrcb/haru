@@ -1170,6 +1170,8 @@ body.bare .topbar { border-bottom-color: transparent; }
   box-shadow: 0 5px 0 var(--plat-deep), 0 0 28px rgb(185 205 230 / .6);
   animation: shimmer 6s linear infinite;
 }
+.chapter.plat > .ch-head { z-index: 1; }
+.chapter.plat[open] > .ch-body { padding-top: 26px; }
 .chapter.plat > .ch-head::after { content: ''; position: absolute; z-index: -1; top: -20%; bottom: -20%; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .85) 50%, transparent); animation: glint 4.2s ease-in-out infinite; pointer-events: none; }
 .chapter.plat .ch-glyph { color: var(--plat-ink); background: rgb(255 255 255 / .6); box-shadow: 0 0 0 2px rgb(255 255 255 / .7), 0 0 16px rgb(255 255 255 / .9); }
 .chapter.plat .ch-n { display: inline-flex; align-items: center; gap: 4px; color: var(--plat-ink); }
