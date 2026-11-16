@@ -44,7 +44,7 @@ function examplesOf(ids) {
 
 /**
  * Question sur un exemple de leçon.
- * kind : pron (coréen : écrire la prononciation réelle) · order (phrase : remettre les mots dans l'ordre)
+ * kind : order (phrase : remettre les mots dans l'ordre)
  *        speak (lire à voix haute) · type (traduction → écrire)
  * Renvoie null si l'exemple ne s'y prête pas.
  */
@@ -55,10 +55,6 @@ function lessonQuestion(x, kind) {
   const base = { say: x.tl, explain: `<span class="kr">${esc(x.tl)}</span>${esc(read)}${x.pr && ko ? ` [<span class="kr">${esc(x.pr)}</span>]` : ''} = ${esc(x.tr)}` };
   const size = x.tl.length > 14 ? 'xlong' : x.tl.length > 6 ? 'long' : '';
   const kana = ko ? x.tl : x.pr && !/[一-龯々]/.test(x.pr) ? x.pr : !/[一-龯々]/.test(x.tl) ? x.tl : null;
-  if (kind === 'pron') {
-    if (!ko || !x.pr || x.pr === x.tl || x.pr.length > 8) return null;
-    return { ...base, type: 'input', answer: x.pr, accept: [x.pr], prompt: `<span class="qkr ${size}">${esc(x.tl)}</span>`, sub: t('exam.howPron'), placeholder: '한글' };
-  }
   if (kind === 'order') {
     const tiles = x.tl.replace(/[.?!]+$/, '').split(/\s+/).filter(Boolean);
     if (!ko || tiles.length < 2) return null;
@@ -111,14 +107,14 @@ function compose(src, n, depth = 1) {
   }
   if (letters.length) pools.push(shuffle(letters));
 
-  // Leçons : relier les exemples à leur sens, écrire la prononciation réelle, remettre les phrases dans l'ordre
+  // Leçons : relier les exemples à leur sens, remettre les phrases dans l'ordre, les dire, les écrire
   const ex = shuffle(examplesOf(src.lessons));
   if (ex.length >= 4) {
-    const kinds = ['pron', 'order', 'speak', 'type'];
+    const kinds = ['order', 'speak', 'type'];
     const qs = [];
     for (let k = 0; k + 3 < ex.length && qs.length < 3; k += 4) qs.push(() => matchExamples(ex.slice(k, k + 4)));
     ex.forEach((x, k) => {
-      const q = lessonQuestion(x, kinds[k % 4]) || lessonQuestion(x, 'type') || lessonQuestion(x, 'order');
+      const q = lessonQuestion(x, kinds[k % kinds.length]) || lessonQuestion(x, 'type') || lessonQuestion(x, 'order');
       if (q) qs.push(() => q);
     });
     pools.push(shuffle(qs));
