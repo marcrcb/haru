@@ -52,7 +52,7 @@ function lessonQuestion(x, kind) {
   const C = course();
   const ko = C.id === 'ko';
   const read = x.pr && !ko ? ` · ${x.pr}` : '';
-  const base = { say: x.tl, explain: `<span class="kr">${esc(x.tl)}</span>${esc(read)}${x.pr && ko ? ` [<span class="kr">${esc(x.pr)}</span>]` : ''} = ${esc(x.tr)}` };
+  const base = { say: x.tl, explain: `<span class="kr">${esc(x.tl)}</span>${esc(read)}${x.pr && ko ? ` <span class="pr-real">[<span class="kr">${esc(x.pr)}</span>]</span>` : ''} = ${esc(x.tr)}` };
   const size = x.tl.length > 14 ? 'xlong' : x.tl.length > 6 ? 'long' : '';
   const kana = ko ? x.tl : x.pr && !/[一-龯々]/.test(x.pr) ? x.pr : !/[一-龯々]/.test(x.tl) ? x.tl : null;
   if (kind === 'order') {
