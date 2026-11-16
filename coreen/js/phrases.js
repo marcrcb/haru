@@ -80,9 +80,14 @@ export function reconstruct(box, phrase, onSolved, { strict = false, onFail } = 
   const line = $('.answer-line', box);
   const bank = $('.bank', box);
 
+  // La réserve n'est dessinée qu'une fois (son animation d'entrée ne se rejoue pas à chaque toucher) :
+  // ensuite on grise ou on rend les étiquettes. Seule l'étiquette qui vient d'arriver dans la réponse s'anime.
+  bank.innerHTML = order.map((x, k) => `<button class="chip kr" data-k="${k}" style="--i:${k}">${esc(x.t)}</button>`).join('');
+  let shown = [];
   function render() {
-    line.innerHTML = placed.map((x, k) => `<button class="chip kr placed" data-k="${k}">${esc(x.t)}</button>`).join('') + (placed.length ? '' : `<span class="placeholder">${t('recon.placeholder')}</span>`);
-    bank.innerHTML = order.map((x, k) => `<button class="chip kr ${placed.includes(x) ? 'used' : ''}" data-k="${k}" style="--i:${k}">${esc(x.t)}</button>`).join('');
+    line.innerHTML = placed.map((x, k) => `<button class="chip kr placed${shown.includes(x) ? '' : ' fresh'}" data-k="${k}">${esc(x.t)}</button>`).join('') + (placed.length ? '' : `<span class="placeholder">${t('recon.placeholder')}</span>`);
+    shown = placed.slice();
+    $$('.chip', bank).forEach((b, k) => b.classList.toggle('used', placed.includes(order[k])));
   }
 
   // Glisser-déposer : on attrape une étiquette (dans la réserve ou dans la réponse) et on la pose où l'on veut.
