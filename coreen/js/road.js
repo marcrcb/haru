@@ -90,7 +90,8 @@ export function roadState() {
   const done = units.reduce((n, u) => n + u.done, 0);
   const chapters = roadChapters().map((c) => {
     const us = units.filter((u) => u.chapter === c.id);
-    return { ...c, list: us, complete: us.filter((u) => u.complete).length, plat: us.filter((u) => u.plat).length };
+    const plat = us.filter((u) => u.plat).length;
+    return { ...c, list: us, complete: us.filter((u) => u.complete).length, plat, allPlat: us.length > 0 && plat === us.length };
   });
   return { units, chapters, cur, next, total, done, starCount: units.reduce((n, u) => n + u.steps.reduce((m, s) => m + s.stars, 0), 0) };
 }
@@ -98,6 +99,7 @@ export function roadState() {
 const starRow = (n) => `<span class="rn-stars" aria-label="${n} / 3">${[1, 2, 3].map((k) => `<i class="${k <= n ? 'on' : ''}">${ICONS.star}</i>`).join('')}</span>`;
 const OFFSETS = [-1, -0.4, 0.4, 1, 0.4, -0.4]; // tracé sinueux : jamais au centre, le texte se place du côté libre
 const openChapters = {}; // chapitres dépliés à la main pendant la séance
+let ignite = null; // chapitre qui vient de passer au platine : son titre s'embrase une fois
 
 /** Récompenses en attente (bonus d'un module terminé, passage au platine) : annoncées une fois. Renvoie l'état à jour. */
 export function roadRewards() {
@@ -109,12 +111,21 @@ export function roadRewards() {
   const fresh = R.units.find((u) => u.complete && !st.road[`bonus:${u.id}`]);
   // Examen réussi : le module passe au platine
   const shiny = R.units.find((u) => u.plat && !st.road[`plat:${u.id}`]);
+  // Tous les modules d'un chapitre en platine : le chapitre entier est maîtrisé
+  const crowned = R.chapters.find((c) => c.allPlat && !st.road[`platch:${c.id}`]);
   if (fresh) {
     R.units.filter((u) => u.complete).forEach((u) => { st.road[`bonus:${u.id}`] = true; });
     store.save();
     store.addXp(UNIT_BONUS);
     celebrate({ glyph: fresh.glyph, title: t('road.unitComplete'), text: t('road.unitBonus', { name: tr(fresh.title), xp: UNIT_BONUS }), button: t('continue') });
     R = roadState();
+  } else if (crowned) {
+    R.units.filter((u) => u.plat).forEach((u) => { st.road[`plat:${u.id}`] = true; });
+    R.chapters.filter((c) => c.allPlat).forEach((c) => { st.road[`platch:${c.id}`] = true; });
+    store.save();
+    ignite = crowned.id;
+    celebrate({ glyph: crowned.glyph, title: t('road.chPlatTitle'), text: t('road.chPlatText', { name: tr(crowned.title) }), button: t('continue') });
+    document.querySelector('.celebrate .cel-card')?.classList.add('plat');
   } else if (shiny) {
     R.units.filter((u) => u.plat).forEach((u) => { st.road[`plat:${u.id}`] = true; });
     store.save();
@@ -182,11 +193,12 @@ export function roadScreen(el) {
         const open = openChapters[c.id] ?? here;
         const full = c.complete === c.list.length;
         return `
-      <details class="chapter ${full ? 'complete' : ''} ${c.plat === c.list.length ? 'plat' : ''}" data-c="${c.id}" ${open ? 'open' : ''}>
+      <details class="chapter ${full ? 'complete' : ''} ${c.allPlat ? 'plat' : ''} ${c.allPlat && ignite === c.id ? 'ignite' : ''}" data-c="${c.id}" ${open ? 'open' : ''}>
         <summary class="ch-head">
+          ${c.allPlat ? '<span class="ch-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ''}
           <span class="ch-glyph kr">${esc(c.glyph)}</span>
           <span class="ch-text">
-            <span class="ch-n">${t('road.chapterN', { n: k + 1 })}</span>
+            <span class="ch-n">${c.allPlat ? `${GEM}${t('road.chapterN', { n: k + 1 })} · ${t('road.chMastered')}` : t('road.chapterN', { n: k + 1 })}</span>
             <b>${esc(tr(c.title))}</b>
             <span class="ch-sub">${esc(tr(c.sub))}</span>
           </span>
@@ -246,6 +258,7 @@ export function roadScreen(el) {
   const onResize = () => (el.querySelector('.road') ? draw() : removeEventListener('resize', onResize));
   addEventListener('resize', onResize);
   document.fonts?.ready.then(() => el.querySelector('.road') && draw());
+  ignite = null; // l'embrasement ne se joue qu'une fois
   $$('.chapter', el).forEach((d) => d.addEventListener('toggle', () => {
     openChapters[d.dataset.c] = d.open;
     if (d.open) draw();

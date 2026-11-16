@@ -119,7 +119,7 @@ export const STRINGS = {
     'write.clean': 'Aucune erreur !', 'write.result1': '{n} trait à revoir', 'write.resultN': '{n} traits à revoir',
     'write.resultHint': 'Les signes les moins tracés reviennent en premier.', 'write.more': 'Nouvelle série',
     'road.write': 'Tracé', 'road.type': 'Au clavier', 'road.dictation': 'Dictée', 'road.ptype': '3 phrases à écrire',
-    'road.chapterN': 'Chapitre {n}', 'road.plat': 'Platine', 'road.platN': '{n} en platine',
+    'road.chapterN': 'Chapitre {n}', 'road.chMastered': 'Maîtrisé', 'road.chPlatTitle': 'Chapitre platine !', 'road.chPlatText': '{name} · tous les modules sont en platine. Chapitre maîtrisé !', 'road.plat': 'Platine', 'road.platN': '{n} en platine',
     'road.platTitle': 'Module platine !', 'road.platText': '{name} · examen réussi, le module brille désormais.',
 
     // ---------- Version 31 : oral, paires, clavier latin, critères ----------
@@ -278,7 +278,7 @@ export const STRINGS = {
     'write.clean': 'No mistakes!', 'write.result1': '{n} stroke to review', 'write.resultN': '{n} strokes to review',
     'write.resultHint': 'The characters you have traced least come back first.', 'write.more': 'New set',
     'road.write': 'Tracing', 'road.type': 'Keyboard', 'road.dictation': 'Dictation', 'road.ptype': '3 sentences to write',
-    'road.chapterN': 'Chapter {n}', 'road.plat': 'Platinum', 'road.platN': '{n} platinum',
+    'road.chapterN': 'Chapter {n}', 'road.chMastered': 'Mastered', 'road.chPlatTitle': 'Platinum chapter!', 'road.chPlatText': '{name} · every module is platinum. Chapter mastered!', 'road.plat': 'Platinum', 'road.platN': '{n} platinum',
     'road.platTitle': 'Platinum module!', 'road.platText': '{name} · exam passed, the module now shines.',
 
     // ---------- Version 31: speaking, pairs, Latin keyboard, criteria ----------
