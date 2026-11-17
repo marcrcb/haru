@@ -9,7 +9,7 @@ import { JA } from '../js/lang/ja.js';
 import { audioKey } from '../js/audio-key.js';
 import { generate } from '../js/generator.js';
 import { THEMES } from '../js/content/concepts.js';
-import { phraseTokens } from '../js/phrase-tokens.js';
+import { phraseTokens } from './phrase-tokens.mjs';
 
 let STORIES = {};
 try { ({ STORIES } = await import('../js/content/stories.js')); } catch { /* pas encore d'histoires */ }
