@@ -11,6 +11,7 @@ import { strokeDemo, canTrace } from './draw.js';
 import { examScreen } from './exam.js';
 import { achievements, newTiers, TIERS } from './achievements.js';
 import { listenSupported } from './speech.js';
+import { reviewCount } from './review.js';
 
 const view = $('#view');
 const titleEl = $('#title');
@@ -43,11 +44,12 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '60'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '61'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
-let choosing = true;
+// Le choix de la langue n'apparaît qu'au tout premier lancement ; ensuite, l'application s'ouvre sur la dernière langue.
+let choosing = false;
 try {
   if (sessionStorage.getItem(SKIP_MENU)) { choosing = false; sessionStorage.removeItem(SKIP_MENU); }
 } catch { /* stockage indisponible */ }
@@ -171,11 +173,11 @@ function greetingSub() {
 function words(el) {
   const C = course();
   const ja = C.id === 'ja';
-  const due = store.mistakes(C.words).length; // fautes en attente
+  const due = reviewCount(); // révisions du jour (fautes comprises)
   const st = store.get();
   const stat = (k) => {
     const ws = wordsOf(k);
-    return { n: ws.length, m: ws.filter((w) => store.box(w.id) >= 3).length };
+    return { n: ws.length, m: ws.filter((w) => store.isRetained(w.id)).length };
   };
   const bar = (m, n) => `<div class="mini-bar"><i style="--w:${n ? m / n : 0}"></i></div>`;
   // Thèmes rangés par grandes familles, repliées : on ouvre seulement celle qui intéresse.
@@ -194,7 +196,7 @@ function words(el) {
         <a class="tile-link" href="#/quiz?t=all&mode=type" style="--i:2; --tc: var(--c-hangul)"><span class="tl-kr kr">${ja ? '書く' : '쓰기'}</span><b>${t('words.type')}</b><span class="muted small">${t('words.typeSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=dictation" style="--i:3; --tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '聞く' : '듣기'}</span><b>${t('words.dictation')}</b><span class="muted small">${t('words.dictationSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=speak" style="--i:4; --tc: var(--c-guide)"><span class="tl-kr kr">${ja ? '話す' : '말하기'}</span><b>${t('words.speak')}</b><span class="muted small">${t(listenSupported() ? 'words.speakSub' : 'words.speakNo')}</span></a>
-        <a class="tile-link" href="#/quiz?mode=review" style="--i:5; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'words.errN' : 'words.err1', { n: due }) : t('words.noErr')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
+        <a class="tile-link" href="#/quiz?mode=review" style="--i:5; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'review.dueN' : 'review.due1', { n: due }) : t('review.upToDate')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
         <a class="tile-link wide" href="#/lexicon" style="--i:6; --tc: var(--c-stats)"><span class="tl-kr kr">${ja ? '単語' : '단어'}</span><b>${t('title.lexicon')}</b><span class="muted small">${t('words.count', { n: C.words.length })}</span></a>
       </div>
       <h2>${t('words.byTheme')}</h2>
@@ -280,7 +282,7 @@ function themeSheet(k) {
   const C = course();
   const ja = C.id === 'ja';
   const ws = wordsOf(k);
-  const m = ws.filter((w) => store.box(w.id) >= 3).length;
+  const m = ws.filter((w) => store.isRetained(w.id)).length;
   const name = themeShort(tr(ALL_THEMES[k]));
   const acts = [
     ['quiz', `#/quiz?t=${k}`, t('title.quiz'), t('words.quizSub'), ja ? 'クイズ' : '퀴즈'],
@@ -296,7 +298,7 @@ function themeSheet(k) {
       <span class="tsheet-grab" aria-hidden="true"></span>
       <div class="tsheet-head">
         <span class="gl kr">${esc(themeGlyph(k, ja))}</span>
-        <div class="tsheet-title"><b>${esc(name)}</b><span class="muted small">${t('words.mastered', { m, n: ws.length })}</span><div class="mini-bar"><i style="--w:${ws.length ? m / ws.length : 0}"></i></div></div>
+        <div class="tsheet-title"><b>${esc(name)}</b><span class="muted small">${t('words.retained', { m, n: ws.length })}</span><div class="mini-bar"><i style="--w:${ws.length ? m / ws.length : 0}"></i></div></div>
         <button class="icon-btn tsheet-close" aria-label="${t('words.close')}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <p class="muted small tsheet-pick">${t('words.pick')}</p>
@@ -486,7 +488,7 @@ function lexicon(el) {
             <span><span class="kr">${esc(w.tl)}</span>${read ? ` <span class="kr muted small">${esc(read)}</span>` : ''}${roman ? `<span class="muted small"> ${esc(C.wordRom(w))}</span>` : ''}</span>
             <span class="small">${esc(gloss(w))}</span>
           </button>
-          <span class="dots5" title="${t('lex.mastery')}">${[1, 2, 3, 4, 5].map((k) => `<i class="${b >= k ? 'on' : ''}"></i>`).join('')}</span>
+          <span class="dots5" title="${t('lex.mastery')}">${[1, 2, 3, 4, 5].map((k) => `<i class="${b >= k * 7 / 5 - 0.4 ? 'on' : ''}"></i>`).join('')}</span>
         </li>`;
       }).join('')
       : `<li class="empty muted">${t('lex.none')}</li>`;

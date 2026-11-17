@@ -1,9 +1,9 @@
 {
-  "name": "Haru · coréen au quotidien",
+  "name": "Haru · coréen et japonais au quotidien",
   "short_name": "Haru",
-  "description": "S’entraîner au coréen chaque jour : alphabet, vocabulaire, jeux et phrases générées.",
+  "description": "S’entraîner au coréen ou au japonais chaque jour : alphabet, vocabulaire, révisions espacées, phrases et histoires.",
   "id": "./",
-  "start_url": "./#/home",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -11,9 +11,41 @@
   "theme_color": "#15131c",
   "lang": "fr",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Réviser",
+      "short_name": "Réviser",
+      "description": "Les révisions du jour",
+      "url": "./#/quiz?mode=review",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

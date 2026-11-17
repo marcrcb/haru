@@ -2,7 +2,8 @@
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
-import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, bump, record } from './store.js';
+import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, streakOf, bump, record } from './store.js';
+import { reviewItems, reviewCount, nextReviewIn, letterId, kanjiId, REVIEW_MAX } from './review.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
@@ -17,7 +18,6 @@ const wordsOf = (theme) => (!theme || theme === 'all' ? course().words : course(
 // Nombre de questions par série, selon l'exercice (le réglage n'existe plus).
 export const SERIES = { letters: 10, kanji: 8, syllables: 8, readWords: 8, words: 8, typed: 8, cards: 10, write: 6 };
 /** Révision : une question par faute, au plus REVIEW_MAX par séance (le reste passe à la séance suivante). */
-export const REVIEW_MAX = 10;
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 /** La voix sert aux dictées : sans elle, on écrit à partir de la traduction. */
 const canDictate = () => canSpeak() && hasVoice();
@@ -669,18 +669,18 @@ export function vocabQuiz(el, theme, mode, step) {
     const ok = pool.filter((w) => typable(w));
     list = pickForReview(ok.length >= 5 ? ok : pool, SERIES.typed);
   } else list = pickForReview(pool, SERIES.words);
-  const ease = (w) => Math.max(depth, Math.max(0, box(w.id)) / 5);
+  const ease = (w) => Math.max(depth, Math.min(1, Math.max(0, streakOf(w.id)) / 5));
   let questions;
   if (mode === 'type') questions = list.map((w) => wordQuestion(w, 'type', { pool }));
   else if (mode === 'dictation') questions = list.map((w) => wordQuestion(w, 'dict', { pool }));
   else if (mode === 'speak') questions = list.map((w) => wordQuestion(w, 'speak', { pool }));
   else {
-    questions = list.map((w, k) => wordQuestion(w, wordKind(w, ease(w), k), { pool, plain: box(w.id) >= 3 }));
+    questions = list.map((w, k) => wordQuestion(w, wordKind(w, ease(w), k), { pool, plain: streakOf(w.id) >= 3 }));
     // Pour commencer : relier les mots nouveaux à leur sens. Pour finir : une phrase à remettre dans l'ordre.
     // Tout premier contact avec un mot : le reconnaître parmi des dessins (avant tout le reste).
     // Sinon, pour commencer, relier les mots encore nouveaux à leur sens.
     const intro = list.filter((w) => box(w.id) < 0).map((w) => pictureQuestion(w, pool)).filter(Boolean).slice(0, 4);
-    const fresh = list.filter((w) => box(w.id) < 2);
+    const fresh = list.filter((w) => streakOf(w.id) < 2);
     if (intro.length) questions.unshift(...intro);
     else if (fresh.length >= 3) questions.unshift(matchWords(fresh));
     if (mode !== 'review' || theme) questions.push(sentenceQuestion(theme, depth));
@@ -692,31 +692,42 @@ export function vocabQuiz(el, theme, mode, step) {
 }
 
 /**
- * Révision des fautes : une question par mot raté (et rien d'autre), au plus REVIEW_MAX à la fois.
- * Une bonne réponse efface la faute ; une mauvaise la garde pour la prochaine séance.
+ * Révisions du jour : les fautes, puis les mots, lettres et kanji dont la révision est arrivée (au plus REVIEW_MAX à la fois).
+ * Rappeler (écrire, dire) plutôt que reconnaître : c'est ce qui fixe le mieux la mémoire.
  */
 export function reviewQuiz(el) {
   const C = course();
-  const list = mistakes(C.words).slice(0, REVIEW_MAX);
-  if (!list.length) {
+  const R = reviewItems();
+  // Les fautes et les mots d'abord, lettres et kanji glissés entre eux
+  const items = [...R.words.map((w) => ({ w }))];
+  [...R.letters.map((x) => ({ x })), ...R.kanji.map((k) => ({ k }))].forEach((it, i) => items.splice(Math.min(items.length, 2 + i * 3), 0, it));
+  const pick = items.slice(0, REVIEW_MAX);
+  if (!pick.length) {
+    const next = nextReviewIn();
     el.innerHTML = `
       <div class="screen result">
         <div class="big-glyph kr">${C.id === 'ja' ? '復習' : '복습'}</div>
         <h2>${t('review.none')}</h2>
         <p class="muted">${t('review.noneSub')}</p>
-        <div class="stack"><a class="btn primary" href="#/words">${t('back')}</a></div>
+        ${next ? `<p class="muted small">${next > 1 ? t('review.nextIn', { n: next }) : t('review.nextDay')}</p>` : ''}
+        <div class="stack"><a class="btn primary" href="#/road">${t('road.back')}</a></div>
       </div>`;
     return;
   }
-  // Un exercice qui fait écrire ou reconnaître le mot, selon sa difficulté (pas de paires ni de phrase en plus).
-  const questions = list.map((w, k) => wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true, intro: false }));
+  const questions = pick.map((it, k) => {
+    if (it.x) return tracked(letterQuestion(it.x, k % 2 ? 'rom' : 'type'), letterId(it.x));
+    if (it.k) return tracked(kanjiQuestion(it.k, 'type'), kanjiId(it.k));
+    const w = it.w;
+    return wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true, intro: false });
+  });
   runQuiz(el, {
     questions,
-    title: t('review'),
+    title: t('review.dueTitle'),
     again: () => reviewQuiz(el),
-    back: '#/words',
+    back: '#/road',
+    backLabel: t('road.back'),
     againLabel: () => {
-      const left = mistakes(C.words).length;
+      const left = reviewCount();
       return left ? t(left > 1 ? 'review.nextN' : 'review.next1', { n: left }) : null;
     },
   });
@@ -822,6 +833,16 @@ export function readWordQuestion(w, kind = 'rom', pool = []) {
  * Quiz d'écriture. mode : type (tout écrire avec le clavier de la langue), speak (tout prononcer),
  * sinon un mélange : lire (clavier latin), écrire (clavier coréen ou japonais), prononcer.
  */
+/** Fait suivre une question de lettre ou de kanji par la répétition espacée (y compris sa version écrite de secours). */
+function tracked(q, id) {
+  q.onAnswer = (ok) => review(id, ok);
+  if (q.fallback) {
+    const f = q.fallback;
+    q.fallback = () => tracked(f(), id);
+  }
+  return q;
+}
+
 export function scriptQuiz(el, set, step, mode) {
   const C = course();
   const S = C.script;
@@ -839,15 +860,15 @@ export function scriptQuiz(el, set, step, mode) {
     for (let k = 0; k < items.length; k += 4) {
       const group = items.slice(k, k + 4);
       if (!all && !oral && group.length >= 3) questions.push(matchKanji(group));
-      group.forEach((x, i) => questions.push(kanjiQuestion(x, oral || (!all && i % 3 === 2) ? 'speak' : 'type')));
+      group.forEach((x, i) => questions.push(tracked(kanjiQuestion(x, oral || (!all && i % 3 === 2) ? 'speak' : 'type'), kanjiId(x))));
     }
   } else if (S.sets[set]) {
     // Les kana regroupent hiragana (j) et katakana (j2) : chaque question tire l'une des deux formes.
-    const form = (x) => (x.j2 && Math.random() < 0.5 ? { ...x, j: x.j2 } : x);
+    const form = (x) => (x.j2 && Math.random() < 0.5 ? { ...x, j: x.j2, base: x.j } : x);
     const items = S.sets[set].items.map(form);
     title = tr(S.sets[set].label);
     const others = [...items, ...(S.sets[set].decoys || []).map(form)];
-    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others, 4, { intro: !oral }));
+    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => tracked(letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others, 4, { intro: !oral }), letterId(x)));
   } else if (set === 'syllables') {
     title = tr(S.syllableLabel);
     const kinds = ease < 0.6 ? ['read', 'type', 'read', 'type'] : ['type', 'read', 'type', 'rom'];

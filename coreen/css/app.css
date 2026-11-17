@@ -1567,3 +1567,70 @@ body.sheet-open { overflow: hidden; }
   .ru.plat .rn.done .rn-btn, #title::after, .xp-won, .celebrate .cel-card::before { animation: none; }
   .btn.primary::after, .lv-n::after, .opt.right::after, .progress i::before, .mini-bar i::before, .xp-bar i::before { display: none; }
 }
+
+/* ================= Version 61 : révisions du jour, contraste ================= */
+.review-card {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  border-color: color-mix(in srgb, var(--c-home) 45%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--c-home) 45%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c-home) 16%, var(--surface)), var(--surface));
+}
+.review-card .eyebrow { color: var(--c-home); margin: 0; }
+.rv-glyph { flex: 0 0 auto; display: grid; place-items: center; min-width: 52px; height: 52px; padding: 0 6px; border-radius: 15px; font-weight: 900; color: #fff; background: var(--c-home); box-shadow: 0 3px 0 color-mix(in srgb, var(--c-home) 60%, #000); }
+.rv-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.rv-text b { font-size: 1.08rem; }
+.review-card:not(.pressed) .rv-glyph { animation: wiggle 3.2s ease-in-out 1.2s infinite; }
+:root.no-motion .review-card .rv-glyph { animation: none; }
+@media (prefers-reduced-motion: reduce) { .review-card .rv-glyph { animation: none; } }
+/* Écran d'accueil : écriture de chaque langue assez contrastée sur sa carte teintée (lisibilité) */
+.w-native { color: color-mix(in srgb, var(--tc) 72%, #000); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .w-native { color: var(--tc); } }
+:root[data-theme="dark"] .w-native { color: var(--tc); }
+
+/* ---------- Lisibilité (WCAG AA, 4,5:1) : mêmes teintes, un peu plus profondes pour le texte ---------- */
+/* Mode clair : couleurs assez sombres pour porter du texte blanc ; l'orange garde sa teinte (texte foncé dessus). */
+:root {
+  --c-hangul: #b84d3f; --c-words: #0c7f5c; --c-guide: #c13d6c; --c-stats: #2672b2;
+  --ok: #1b875b; --ko: #cf4248; --muted: #5f5b6c;
+  --ink-phrases: #9a6010; --ink-gold: #976406;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --c-hangul: #ff8a78; --c-words: #38d9a9; --c-guide: #f783ac; --c-stats: #74c0fc; --ok: #3cc58d; --ko: #ff6b71; --muted: #a9a59e; --ink-phrases: var(--c-phrases); --ink-gold: var(--gold); }
+}
+:root[data-theme="dark"] { --c-hangul: #ff8a78; --c-words: #38d9a9; --c-guide: #f783ac; --c-stats: #74c0fc; --ok: #3cc58d; --ko: #ff6b71; --muted: #a9a59e; --ink-phrases: var(--c-phrases); --ink-gold: var(--gold); }
+/* Texte coloré posé sur un fond teinté : la même couleur, un cran plus foncée (mode clair) */
+body { --ink-accent: color-mix(in srgb, var(--accent) 82%, #000); }
+body[data-tab="phrases"] { --ink-accent: var(--ink-phrases); }
+.eyebrow, .lv-xp, .guide-sec span, .ex-say, .g-pr, .explain-box summary, .gloss .link, .pill, .seg-sym, .course-chip { color: var(--ink-accent); }
+.tl-kr, .gl, .ch-glyph, .tt-glyph, .tact-g, .theme-resume .eyebrow { color: color-mix(in srgb, var(--tc, var(--accent)) 80%, #000); }
+.l-glyph { color: var(--ink-accent); }
+.ch-n, .chapter .ch-glyph { color: color-mix(in srgb, var(--c-home) 88%, #000); }
+#tabs a[data-tab="phrases"].on { color: var(--ink-phrases); }
+.daily-cta .eyebrow, .final-card .eyebrow { color: var(--ink-gold); }
+.credit { opacity: 1; }
+.ach.t0 .ach-medal { opacity: 1; color: var(--muted); }
+/* Bandeau du module : texte bien opaque */
+.ru-n, .ru-sub { opacity: 1; }
+.ru-glyph { background: rgb(0 0 0 / .14); }
+/* Mode sombre : les couleurs sont claires, le texte posé dessus devient foncé */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body { --ink-accent: var(--accent); }
+  :root:not([data-theme="light"]) :is(.tl-kr, .gl, .ch-glyph, .tt-glyph, .tact-g, .theme-resume .eyebrow) { color: var(--tc, var(--accent)); }
+  :root:not([data-theme="light"]) .ch-n, :root:not([data-theme="light"]) .chapter .ch-glyph { color: var(--c-home); }
+  :root:not([data-theme="light"]) .ru:not(.locked):not(.plat) .ru-head, :root:not([data-theme="light"]) .rn-label > .rn-go:not(.plat), :root:not([data-theme="light"]) .rn.done:not(.exam) .rn-btn, :root:not([data-theme="light"]) .rv-glyph { color: #15131c; }
+}
+:root[data-theme="dark"] body { --ink-accent: var(--accent); }
+:root[data-theme="dark"] :is(.tl-kr, .gl, .ch-glyph, .tt-glyph, .tact-g, .theme-resume .eyebrow) { color: var(--tc, var(--accent)); }
+:root[data-theme="dark"] .ch-n, :root[data-theme="dark"] .chapter .ch-glyph { color: var(--c-home); }
+:root[data-theme="dark"] .ru:not(.locked):not(.plat) .ru-head, :root[data-theme="dark"] .rn-label > .rn-go:not(.plat), :root[data-theme="dark"] .rn.done:not(.exam) .rn-btn, :root[data-theme="dark"] .rv-glyph { color: #15131c; }
+/* Orange : le texte orange posé sur un fond clair prend sa version foncée */
+[style*="--tc: var(--c-phrases)"] .tl-kr, [style*="--tc: var(--c-phrases)"].theme-tile .tt-glyph, [style*="--tc: var(--c-phrases)"] > summary .gl, .theme-resume[style*="--tc: var(--c-phrases)"] :is(.gl, .eyebrow), .tsheet[style*="--tc: var(--c-phrases)"] :is(.gl, .tact-g) { color: var(--ink-phrases); }
+/* Médailles bronze : métal plus sombre, lisible sous le texte blanc */
+.ach.t1 { --m: #9a622e; --m2: #6e4420; }
+/* Mode sombre : texte foncé sur le sceau doré de l'examen final */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .final-seal { color: #15131c; } }
+:root[data-theme="dark"] .final-seal { color: #15131c; }
+:root { --c-home: #6354d4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-home: #9d8cff; } :root:not([data-theme="light"]) .ach.t1 .ach-tier { color: #d39a63; } }
+:root[data-theme="dark"] { --c-home: #9d8cff; }
+:root[data-theme="dark"] .ach.t1 .ach-tier { color: #d39a63; }
+.final-seal { color: #2b1d00; }

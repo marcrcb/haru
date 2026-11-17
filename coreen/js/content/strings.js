@@ -25,7 +25,7 @@ export const STRINGS = {
 
     'words.quiz': 'Quiz mélangé', 'words.pairsSub': 'Contre la montre', 'words.due1': '{n} mot à revoir', 'words.dueN': '{n} mots à revoir',
     'words.consolidate': 'Mots à consolider', 'words.err1': '{n} faute à revoir', 'words.errN': '{n} fautes à revoir', 'words.noErr': 'Aucune faute en attente',
-    'pic.which': 'Lequel correspond ?', 'kb.toggle': 'Activer ou désactiver le clavier', 'peek.help': 'Touche un mot pour voir son sens', 'peek.hold': 'Appui long sur un mot : son sens', 'review.none': 'Aucune faute à réviser', 'review.noneSub': 'Les mots ratés dans les exercices reviendront ici, une question par faute.', 'review.next1': 'Séance suivante · {n} faute', 'review.nextN': 'Séance suivante · {n} fautes', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
+    'pic.which': 'Lequel correspond ?', 'kb.toggle': 'Activer ou désactiver le clavier', 'peek.help': 'Touche un mot pour voir son sens', 'peek.hold': 'Appui long sur un mot : son sens', 'review.none': 'Tout est à jour', 'review.noneSub': 'Rien à réviser aujourd’hui. Les mots, lettres et kanji reviennent ici quand il est temps de les revoir, et chaque faute aussi.', 'review.next1': 'Séance suivante · {n} à revoir', 'review.nextN': 'Séance suivante · {n} à revoir', 'words.count': '{n} mots', 'words.byTheme': 'Par thème', 'words.mastered': '{m} / {n} maîtrisés', 'words.cards': 'Cartes',
 
     'script.quizSet': 'Quiz sur ces lettres', 'script.rules': 'Règles de prononciation',
     'script.rulesSub.ko': 'Liaisons, consonnes finales, ㅎ, nasalisation…', 'script.rulesSub.ja': 'Petit っ, voyelles longues, は / を, accent…',
@@ -107,7 +107,9 @@ export const STRINGS = {
     'words.type': 'Écrire', 'words.typeSub': 'Traduction → clavier', 'words.dictation': 'Dictée', 'words.dictationSub': 'Écouter et écrire',
     'words.typeShort': 'Écrire', 'words.dictShort': 'Dictée',
     'misses.title': 'À retenir', 'misses.sub': '{n} à revoir',
-    'words.resume': 'Reprendre', 'words.nThemes': '{n} thèmes', 'words.catMastered': '{m} / {n} mots maîtrisés', 'words.pick': 'Choisis un exercice',
+    'review.dueTitle': 'Révisions du jour', 'review.due1': '{n} à revoir aujourd’hui', 'review.dueN': '{n} à revoir aujourd’hui', 'review.dueSub': 'Ce que tu risques d’oublier, juste à temps',
+    'review.upToDate': 'Tout est à jour', 'review.nextDay': 'Prochaine révision : demain', 'review.nextIn': 'Prochaine révision dans {n} jours', 'words.retained': '{m} / {n} retenus',
+    'words.resume': 'Reprendre', 'words.nThemes': '{n} thèmes', 'words.catMastered': '{m} / {n} mots retenus', 'words.pick': 'Choisis un exercice',
     'words.quizSub': 'Choisir, écrire, remettre en ordre', 'words.cardsSub': 'Retourner, puis glisser', 'words.close': 'Fermer',
     'cat.essentials': 'Les essentiels', 'cat.people': 'Les gens et les émotions', 'cat.body': 'Corps et santé', 'cat.home': 'Maison et quotidien',
     'cat.food': 'Manger et boire', 'cat.city': 'Ville, voyage et démarches', 'cat.leisure': 'Loisirs et culture', 'cat.study': 'Études et travail',
@@ -190,7 +192,7 @@ export const STRINGS = {
 
     'words.quiz': 'Mixed quiz', 'words.pairsSub': 'Against the clock', 'words.due1': '{n} word to review', 'words.dueN': '{n} words to review',
     'words.consolidate': 'Words to strengthen', 'words.err1': '{n} mistake to review', 'words.errN': '{n} mistakes to review', 'words.noErr': 'No mistakes waiting',
-    'pic.which': 'Which one is it?', 'kb.toggle': 'Turn the keyboard on or off', 'peek.help': 'Tap a word to see its meaning', 'peek.hold': 'Press and hold a word to see its meaning', 'review.none': 'No mistakes to review', 'review.noneSub': 'Words you miss in the exercises come back here, one question per mistake.', 'review.next1': 'Next session · {n} mistake', 'review.nextN': 'Next session · {n} mistakes', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
+    'pic.which': 'Which one is it?', 'kb.toggle': 'Turn the keyboard on or off', 'peek.help': 'Tap a word to see its meaning', 'peek.hold': 'Press and hold a word to see its meaning', 'review.none': 'All caught up', 'review.noneSub': 'Nothing to review today. Words, letters and kanji come back here when it is time to see them again, and so does every mistake.', 'review.next1': 'Next session · {n} to review', 'review.nextN': 'Next session · {n} to review', 'words.count': '{n} words', 'words.byTheme': 'By theme', 'words.mastered': '{m} / {n} mastered', 'words.cards': 'Cards',
 
     'script.quizSet': 'Quiz on these letters', 'script.rules': 'Pronunciation rules',
     'script.rulesSub.ko': 'Linking, final consonants, ㅎ, nasalization…', 'script.rulesSub.ja': 'Small っ, long vowels, は / を, pitch…',
@@ -272,7 +274,9 @@ export const STRINGS = {
     'words.type': 'Write', 'words.typeSub': 'Translation → keyboard', 'words.dictation': 'Dictation', 'words.dictationSub': 'Listen and write',
     'words.typeShort': 'Write', 'words.dictShort': 'Dictation',
     'misses.title': 'To remember', 'misses.sub': '{n} to review',
-    'words.resume': 'Pick up', 'words.nThemes': '{n} topics', 'words.catMastered': '{m} / {n} words mastered', 'words.pick': 'Choose an exercise',
+    'review.dueTitle': 'Today’s reviews', 'review.due1': '{n} to review today', 'review.dueN': '{n} to review today', 'review.dueSub': 'What you are about to forget, just in time',
+    'review.upToDate': 'All caught up', 'review.nextDay': 'Next review: tomorrow', 'review.nextIn': 'Next review in {n} days', 'words.retained': '{m} / {n} learnt',
+    'words.resume': 'Pick up', 'words.nThemes': '{n} topics', 'words.catMastered': '{m} / {n} words learnt', 'words.pick': 'Choose an exercise',
     'words.quizSub': 'Choose, type, put in order', 'words.cardsSub': 'Flip, then swipe', 'words.close': 'Close',
     'cat.essentials': 'The essentials', 'cat.people': 'People and feelings', 'cat.body': 'Body and health', 'cat.home': 'Home and daily life',
     'cat.food': 'Food and drink', 'cat.city': 'City, travel and errands', 'cat.leisure': 'Leisure and culture', 'cat.study': 'School and work',

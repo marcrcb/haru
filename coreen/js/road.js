@@ -4,6 +4,7 @@ import * as store from './store.js';
 import { course, t, tr, lang } from './course.js';
 import { ALL_THEMES, themeGlyph, themeShort } from './content/lexicon.js';
 import { ROADMAP, CHAPTERS } from './content/roadmap.js';
+import { reviewCount } from './review.js';
 
 export const roadUnits = () => ROADMAP[course().id] || [];
 export const roadChapters = () => CHAPTERS[course().id] || [];
@@ -21,12 +22,11 @@ const GEM = '<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d=
 
 const lessons = () => course().guide[lang()] || course().guide.fr;
 
-// Étape « objectif » : retenir 60 % des mots d'un thème (boîte 2 ou plus dans la répétition espacée).
+// Étape « objectif » : retenir 60 % des mots d'un thème (réussis au moins deux fois d'affilée).
 const GOAL_RATIO = 0.6;
-const GOAL_BOX = 2;
 function goal(theme, st = store.get()) {
   const ws = course().words.filter((w) => w.t === theme);
-  return { n: Math.min(Math.ceil(ws.length * GOAL_RATIO), ws.filter((w) => (st.srs?.[w.id]?.b ?? -1) >= GOAL_BOX).length), total: Math.ceil(ws.length * GOAL_RATIO) };
+  return { n: Math.min(Math.ceil(ws.length * GOAL_RATIO), ws.filter((w) => store.retained(st.srs?.[w.id])).length), total: Math.ceil(ws.length * GOAL_RATIO) };
 }
 
 /** Une étape est-elle terminée ? Les leçons, les paires et le défi se lisent dans la progression existante. */
@@ -186,8 +186,15 @@ export function roadScreen(el) {
       </section>`;
 
   const fin = st.final || {};
+  const due = reviewCount();
   el.innerHTML = `
     <div class="screen road">
+      ${due ? `
+      <a class="card review-card" href="#/quiz?mode=review">
+        <span class="rv-glyph kr">${ja ? '復習' : '복습'}</span>
+        <span class="rv-text"><span class="eyebrow">${t('review.dueTitle')}</span><b>${t(due > 1 ? 'review.dueN' : 'review.due1', { n: due })}</b><span class="muted small">${t('review.dueSub')}</span></span>
+        <span class="chev">›</span>
+      </a>` : ''}
       <section class="card road-top">
         <div><b>${t('road.steps', { n: R.done, total: R.total })}</b><span class="muted small">${t('road.modules', { n: R.units.filter((u) => u.complete).length, total: R.units.length })}</span></div>
         <div class="mini-bar"><i style="--w:${R.done / R.total}"></i></div>

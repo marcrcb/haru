@@ -20,6 +20,7 @@ const COURSE = () => ({
   exams: {}, // examens de module : id du module → meilleur score (0 à 100)
   final: { best: 0, n: 0, last: 0, date: '' }, // examen final
   stats: {}, // compteurs pour les succès : typed, traced, dictation, perfect, phrases, combo, streak
+  srsV: 2, // version de la répétition espacée (2 : intervalles longs, jusqu'à 6 mois)
   ach: {}, // succès : id → palier déjà fêté
 });
 const DAILY_GOAL = 30; // XP par jour pour compter dans la série (le réglage n'existe plus)
@@ -42,14 +43,28 @@ export function normalize(s) {
   const r = ROOT();
   if (s.v === 2) {
     r.settings = { ...r.settings, ...(s.settings || {}) };
-    for (const k of Object.keys(r.courses)) r.courses[k] = { ...COURSE(), ...(s.courses?.[k] || {}) };
+    for (const k of Object.keys(r.courses)) r.courses[k] = migrateSrs({ ...COURSE(), srsV: 1, ...(s.courses?.[k] || {}) });
     return r;
   }
   // Ancien format : tout appartenait au cours de coréen.
   r.settings = { ...r.settings, ...(s.settings || {}), course: 'ko' };
   const { settings, goal, ...rest } = s;
-  r.courses.ko = { ...COURSE(), ...rest };
+  r.courses.ko = migrateSrs({ ...COURSE(), srsV: 1, ...rest });
   return r;
+}
+
+/**
+ * Passage aux intervalles longs (version 2). Ancienne boîte 0-5 (intervalles 0, 1, 2, 4, 8, 16 jours)
+ * → nouvelle boîte 0-7 (0, 1, 3, 7, 16, 35, 90, 180 jours) ; l'ancienne boîte devient la série de bonnes réponses.
+ */
+function migrateSrs(c) {
+  if (c.srsV >= 2) return c;
+  for (const x of Object.values(c.srs || {})) {
+    x.s ??= x.err ? 0 : x.b;
+    x.b = [0, 1, 2, 3, 3, 4][x.b] ?? Math.min(x.b, 4);
+  }
+  c.srsV = 2;
+  return c;
 }
 
 function bind(c) {
@@ -181,27 +196,48 @@ export function streak() {
   return n;
 }
 
-// ---------- Répétition espacée (boîtes de Leitner) ----------
-const INTERVALS = [0, 1, 2, 4, 8, 16];
+// ---------- Répétition espacée (boîtes de Leitner, intervalles longs) ----------
+// Boîte 0 → 7 : on revoit l'élément après 0, 1, 3, 7, 16, 35, 90 puis 180 jours.
+const INTERVALS = [0, 1, 3, 7, 16, 35, 90, 180];
+const MAX_BOX = INTERVALS.length - 1;
+/** « Maîtrisé » : l'élément a tenu au moins trois semaines (réussi à la révision de 16 jours). */
+export const MASTER_BOX = 5;
 
+/**
+ * Enregistre une réponse. On ne monte d'une boîte que si la révision était due (ou pour un élément nouveau) :
+ * réussir dix fois le même jour ne vaut pas une révision espacée. Une faute fait redescendre de deux boîtes.
+ * s : bonnes réponses d'affilée (sert aux objectifs du parcours et à la difficulté des exercices).
+ */
 export function review(id, correct) {
   const today = dayNumber();
-  const c = state.srs[id] || { b: 0, due: today, ok: 0, ko: 0 };
+  const old = state.srs[id];
+  const c = old || { b: 0, due: today, ok: 0, ko: 0, s: 0 };
   if (correct) {
-    c.b = Math.min(5, c.b + 1);
     c.ok++;
+    c.s = (c.s || 0) + 1;
     c.err = 0; // faute corrigée
+    if (!old || c.due <= today) {
+      c.b = Math.min(MAX_BOX, c.b + 1);
+      c.due = today + INTERVALS[c.b];
+    }
   } else {
-    c.b = Math.max(0, c.b - 2);
     c.ko++;
+    c.s = 0;
     c.err = 1; // faute à réviser
+    c.b = Math.max(0, c.b - 2);
+    c.due = today + INTERVALS[c.b];
   }
-  c.due = today + INTERVALS[c.b];
   state.srs[id] = c;
   save();
 }
 
 export const box = (id) => state.srs[id]?.b ?? -1;
+/** Bonnes réponses d'affilée (-1 : jamais vu). */
+export const streakOf = (id) => (state.srs[id] ? state.srs[id].s ?? 0 : -1);
+/** Retenu : réussi au moins deux fois d'affilée (ou déjà espacé). C'est ce que demandent les objectifs du parcours. */
+export const retained = (c) => !!c && ((c.s ?? 0) >= 2 || c.b >= 2);
+export const isRetained = (id) => retained(state.srs[id]);
+export const isMastered = (id) => (state.srs[id]?.b ?? -1) >= MASTER_BOX;
 
 /** Choisit n mots : d'abord ceux à revoir, puis des nouveaux, puis les autres. */
 export function pickForReview(words, n, random = Math.random) {
@@ -223,4 +259,4 @@ export const dueCount = (words) => {
   return words.filter((w) => state.srs[w.id] && state.srs[w.id].due <= today).length;
 };
 
-export const mastered = () => Object.values(state.srs).filter((c) => c.b >= 3).length;
+export const mastered = () => Object.values(state.srs).filter((c) => c.b >= MASTER_BOX).length;
