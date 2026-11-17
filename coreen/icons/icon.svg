@@ -1,11 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#3d5af1"/>
-  <path d="M152 292a104 104 0 0 1 208 0z" fill="#ffffff"/>
-  <rect x="104" y="316" width="304" height="22" rx="11" fill="#ffffff"/>
-  <rect x="164" y="364" width="184" height="22" rx="11" fill="#ffffff" opacity=".7"/>
-  <g stroke="#ffffff" stroke-width="20" stroke-linecap="round" opacity=".9">
-    <line x1="256" y1="110" x2="256" y2="150"/>
-    <line x1="128" y1="164" x2="154" y2="190"/>
-    <line x1="384" y1="164" x2="358" y2="190"/>
-  </g>
+  <!-- Haru : le ciel du soir, son soleil, et 하루 (« une journée ») -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3d3a8f"/>
+      <stop offset=".5" stop-color="#8a5aa8"/>
+      <stop offset="1" stop-color="#f08d6c"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffe0b8"/>
+      <stop offset=".45" stop-color="#ffc59a"/>
+      <stop offset=".46" stop-color="#ffb37f" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffb37f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+  <circle cx="372" cy="150" r="118" fill="url(#sun)"/>
+  <text x="256" y="330" text-anchor="middle" font-family="'Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif" font-size="158" font-weight="800" fill="#ffffff">하루</text>
 </svg>

@@ -1710,3 +1710,287 @@ body[data-tab="phrases"] { --ink-accent: var(--ink-phrases); }
 :root.no-motion .st-line.fresh { animation: none; }
 .st-bubble > * { min-width: 0; }
 .st-tl, .st-rom { overflow-wrap: anywhere; }
+
+/* =====================================================================
+   Version 69 : « Washi & Sumi » — papier, encre, ciel du jour
+   Une couleur par rôle : indigo (agir), vermillon (célébrer, signaler), vert (juste).
+   Le relief est réservé à ce qu'on touche (boutons, réponses) ; le contenu est posé à plat.
+   ===================================================================== */
+:root {
+  --paper: #f8f4ec; --card: #fffdf9; --ink: #1f1c26; --ink-2: #5e5866; --hair: #ebe4d8;
+  --ai: #3c4fd0; --ai-deep: #2a3aa6; --ai-soft: #e8ebfb;
+  --shu: #c43c20; --shu-deep: #8f2a15; --shu-soft: #fbe7e1;
+  --matcha: #2c7048; --matcha-deep: #1f5133; --matcha-soft: #e4f1e8;
+  --lift: 0 1px 1px rgb(60 45 20 / .04), 0 6px 18px -6px rgb(60 45 20 / .14);
+  --bg: var(--paper); --surface: var(--card); --surface-2: #f1ebe0; --line: var(--hair); --muted: var(--ink-2);
+  --ok: var(--matcha); --ok-soft: var(--matcha-soft); --ko: var(--shu); --ko-soft: var(--shu-soft); --gold: #c98a0b; --ink-gold: #8a5f06;
+  --c-home: var(--ai); --c-hangul: var(--shu); --c-words: var(--matcha); --c-phrases: #b8740f; --c-guide: #a2477a; --c-stats: var(--ai); --ink-phrases: #8a5608;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #131419; --card: #1b1d24; --ink: #f1ede4; --ink-2: #a39e94; --hair: #2a2c35;
+    --ai: #8d9bff; --ai-deep: #5f6fe0; --ai-soft: #252a45; --shu: #ff7a5c; --shu-deep: #c4502f; --shu-soft: #3a2220;
+    --matcha: #6fcf94; --matcha-deep: #3f9a65; --matcha-soft: #1d3326;
+    --lift: 0 1px 1px rgb(0 0 0 / .3), 0 8px 22px -8px rgb(0 0 0 / .6);
+    --bg: var(--paper); --surface: var(--card); --surface-2: #23252e; --line: var(--hair); --muted: var(--ink-2);
+    --ok: var(--matcha); --ok-soft: var(--matcha-soft); --ko: var(--shu); --ko-soft: var(--shu-soft); --gold: #f2b83a; --ink-gold: #f2b83a;
+    --c-home: var(--ai); --c-hangul: var(--shu); --c-words: var(--matcha); --c-phrases: #ffb347; --c-guide: #f783ac; --c-stats: var(--ai); --ink-phrases: #ffb347;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #131419; --card: #1b1d24; --ink: #f1ede4; --ink-2: #a39e94; --hair: #2a2c35;
+  --ai: #8d9bff; --ai-deep: #5f6fe0; --ai-soft: #252a45; --shu: #ff7a5c; --shu-deep: #c4502f; --shu-soft: #3a2220;
+  --matcha: #6fcf94; --matcha-deep: #3f9a65; --matcha-soft: #1d3326;
+  --lift: 0 1px 1px rgb(0 0 0 / .3), 0 8px 22px -8px rgb(0 0 0 / .6);
+  --bg: var(--paper); --surface: var(--card); --surface-2: #23252e; --line: var(--hair); --muted: var(--ink-2);
+  --ok: var(--matcha); --ok-soft: var(--matcha-soft); --ko: var(--shu); --ko-soft: var(--shu-soft); --gold: #f2b83a; --ink-gold: #f2b83a;
+  --c-home: var(--ai); --c-hangul: var(--shu); --c-words: var(--matcha); --c-phrases: #ffb347; --c-guide: #f783ac; --c-stats: var(--ai); --ink-phrases: #ffb347;
+}
+/* Une seule couleur d'action, quel que soit l'onglet */
+body, body[data-tab] { --accent: var(--ai); --accent-ink: #fff; --accent-soft: var(--ai-soft); --accent-deep: var(--ai-deep); --ink-accent: var(--ai); --press: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body, :root:not([data-theme="light"]) body[data-tab] { --accent-ink: #11131a; --ink-accent: var(--ai); } }
+:root[data-theme="dark"] body, :root[data-theme="dark"] body[data-tab] { --accent-ink: #11131a; --ink-accent: var(--ai); }
+html, body { background: var(--paper); }
+body { color: var(--ink); font-weight: 500; }
+[style*="--tc"] { --tc: var(--ai) !important; }
+
+/* Typographie : trois graisses, des titres resserrés */
+#title { font-size: 1.65rem; font-weight: 800; letter-spacing: -.03em; }
+#title::after { width: 7px; height: 7px; margin-left: 5px; background: var(--shu); }
+h2 { font-weight: 800; letter-spacing: -.01em; }
+b, strong { font-weight: 700; }
+.eyebrow { font-weight: 800; font-size: .66rem; letter-spacing: .14em; color: var(--ink-2); }
+
+/* En-tête : niveau, guide et réglages dans une seule capsule */
+.topbar { background: var(--paper); border-bottom: 0; }
+.top-actions { gap: 0; padding: 3px; border-radius: 99px; background: var(--card); border: 1px solid var(--hair); box-shadow: var(--lift); }
+.top-actions .icon-btn, .lv-chip { background: transparent; border: 0; box-shadow: none; height: 36px; }
+.top-actions .icon-btn { width: 36px; color: var(--ink); }
+.top-actions .icon-btn.on, .top-actions .icon-btn[data-top="guide"].on { color: var(--ai); background: var(--ai-soft); border: 0; box-shadow: none; }
+.lv-chip { padding: 0 8px 0 3px; }
+.lv-n, .lv-meter i { background: var(--ai); }
+.lv-n { color: var(--accent-ink); }
+.lv-meter { width: 34px; height: 5px; }
+
+/* Surfaces : papier, filet fin, ombre douce */
+.card, .theme-row, .row, .stat, .stat-pill, .cat-head, .lesson-row, .guide-link, .ach, .tile-link, .ch-head, .final-card, .st-bubble, .qcard, .face, .match-card, .misses li, .theme-tile, .tact, .onb-level, .w-choice, .exam-rules li, .g-ex li, .write-char {
+  background: var(--card); border: 1px solid var(--hair); box-shadow: var(--lift);
+}
+.card, .tile-link, .cat-head, .ch-head, .qcard, .st-bubble, .w-choice { border-radius: 20px; }
+.tile-link.pressed, .card.pressed, .theme-tile.pressed, .tact:active, .cat-head:active, .w-choice.pressed, .onb-level.pressed { transform: scale(.985); box-shadow: var(--lift); }
+.btn { box-shadow: none; border: 1px solid var(--hair); background: var(--card); font-weight: 700; border-radius: 14px; }
+.btn.primary { background: var(--ai); color: var(--accent-ink); border-color: transparent; box-shadow: 0 3px 0 var(--ai-deep); }
+.btn.primary.pressed { box-shadow: 0 1px 0 var(--ai-deep); }
+.btn.danger { color: var(--shu); border-color: color-mix(in srgb, var(--shu) 40%, transparent); box-shadow: none; }
+.seg-btn { box-shadow: none; border: 1px solid var(--hair); background: var(--card); font-weight: 700; }
+.seg-btn.on { background: var(--ink); color: var(--paper); border-color: transparent; box-shadow: none; }
+.seg-sym { background: var(--surface-2); color: var(--ink); }
+.seg-btn.on .seg-sym { background: rgb(255 255 255 / .18); color: inherit; }
+.pill { background: var(--surface-2); color: var(--ink-2); }
+.chip.on { box-shadow: 0 3px 0 var(--ai-deep); }
+.mini-bar i, .xp-bar i, .progress i, .theme-row .mini-bar i, .cat-text .mini-bar i, .theme-tile .mini-bar i, .tsheet-title .mini-bar i, .theme-resume .mini-bar i { background: var(--ai); }
+.progress i::after { display: none; }
+.badge { background: var(--shu); color: #fff; box-shadow: none; }
+.switch input:checked + i { background: var(--ai); }
+
+/* Barre d'onglets (téléphone) : une capsule posée sur le papier */
+@media (max-width: 899px) {
+  #tabs { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 10px); padding: 6px; border: 1px solid var(--hair); border-radius: 26px; background: color-mix(in srgb, var(--card) 94%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 10px 30px -10px rgb(40 30 10 / .3); }
+  #view { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
+  body.focus #tabs { transform: translateY(140%); }
+}
+#tabs a { color: var(--ink-2); font-weight: 700; --t: var(--ai); }
+#tabs a.on, #tabs a[data-tab="phrases"].on { color: var(--ai); }
+#tabs a.on .ti { background: var(--ai-soft); }
+@media (min-width: 900px) { #tabs { background: var(--paper); border-right-color: var(--hair); } #tabs a.on { background: var(--ai-soft); color: var(--ai); } }
+
+/* ---------- Ciel du jour (Parcours et Profil) ---------- */
+.sky-morning { --sky-bg: linear-gradient(160deg, #ffd6a5 0%, #ffb4a2 45%, #f28f8f 100%); --sky-sun: radial-gradient(circle, #fff3c4, rgb(255 230 160 / .4) 45%, transparent 70%); --sky-ink: #4a1f17; --sky-chip: rgb(255 255 255 / .5); --sky-track: rgb(74 31 23 / .16); --sky-fill: #4a1f17; --sky-go: #4a1f17; --sky-hole: rgb(255 255 255 / .6); --sky-shadow: rgb(200 100 80 / .45); }
+.sky-day { --sky-bg: linear-gradient(160deg, #2a5bc0 0%, #3477d0 55%, #4f97d6 100%); --sky-sun: radial-gradient(circle, #fffbe0, rgb(255 250 210 / .45) 40%, transparent 70%); --sky-ink: #fff; --sky-chip: rgb(255 255 255 / .18); --sky-track: rgb(255 255 255 / .25); --sky-fill: #fff; --sky-go: #1d4f9a; --sky-hole: rgb(20 50 110 / .45); --sky-shadow: rgb(40 90 180 / .55); }
+.sky-evening { --sky-bg: linear-gradient(160deg, #3d3a8f 0%, #8a5aa8 46%, #f08d6c 100%); --sky-sun: radial-gradient(circle, rgb(255 214 170 / .95), rgb(255 170 120 / .3) 45%, transparent 70%); --sky-ink: #fff; --sky-chip: rgb(255 255 255 / .16); --sky-track: rgb(255 255 255 / .25); --sky-fill: #fff; --sky-go: #3d3a8f; --sky-hole: rgb(40 30 80 / .5); --sky-shadow: rgb(80 40 90 / .6); }
+.sky-night { --sky-bg: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 60% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 82% 62%, #fff, transparent), radial-gradient(1px 1px at 38% 70%, #fff, transparent), radial-gradient(1px 1px at 8% 75%, #fff, transparent), linear-gradient(165deg, #10153a 0%, #23285e 55%, #3b2f6b 100%); --sky-sun: radial-gradient(circle at 40% 40%, #fff7dc 0 22%, rgb(255 240 200 / .25) 30%, transparent 60%); --sky-ink: #fff; --sky-chip: rgb(255 255 255 / .14); --sky-track: rgb(255 255 255 / .22); --sky-fill: #fff; --sky-go: #23285e; --sky-hole: rgb(10 14 40 / .55); --sky-shadow: rgb(10 14 40 / .7); }
+/* En mode sombre, le ciel est toujours la nuit */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.sky, .hero-card) { --sky-bg: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 60% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 82% 62%, #fff, transparent), radial-gradient(1px 1px at 38% 70%, #fff, transparent), radial-gradient(1px 1px at 8% 75%, #fff, transparent), linear-gradient(165deg, #10153a 0%, #23285e 55%, #3b2f6b 100%); --sky-sun: radial-gradient(circle at 40% 40%, #fff7dc 0 22%, rgb(255 240 200 / .25) 30%, transparent 60%); --sky-ink: #fff; --sky-chip: rgb(255 255 255 / .14); --sky-track: rgb(255 255 255 / .22); --sky-fill: #fff; --sky-go: #23285e; --sky-hole: rgb(10 14 40 / .55); --sky-shadow: rgb(0 0 0 / .7); } }
+:root[data-theme="dark"] :is(.sky, .hero-card) { --sky-bg: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 60% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 82% 62%, #fff, transparent), radial-gradient(1px 1px at 38% 70%, #fff, transparent), radial-gradient(1px 1px at 8% 75%, #fff, transparent), linear-gradient(165deg, #10153a 0%, #23285e 55%, #3b2f6b 100%); --sky-sun: radial-gradient(circle at 40% 40%, #fff7dc 0 22%, rgb(255 240 200 / .25) 30%, transparent 60%); --sky-ink: #fff; --sky-chip: rgb(255 255 255 / .14); --sky-track: rgb(255 255 255 / .22); --sky-fill: #fff; --sky-go: #23285e; --sky-hole: rgb(10 14 40 / .55); --sky-shadow: rgb(0 0 0 / .7); }
+
+.sky, .hero-card { position: relative; overflow: hidden; isolation: isolate; color: var(--sky-ink); background: var(--sky-bg); border: 0; box-shadow: 0 18px 40px -18px var(--sky-shadow); }
+.sky { margin: 2px 0 18px; padding: 18px 18px 16px; border-radius: 26px; display: grid; gap: 14px; }
+.sky::before, .hero-card::before { content: ''; position: absolute; z-index: -1; width: 150px; height: 150px; right: -36px; top: -40px; border-radius: 50%; background: var(--sky-sun); animation: none; }
+.sky::after { content: ''; position: absolute; z-index: -1; left: -10%; right: -10%; bottom: -30px; height: 70px; background: radial-gradient(60% 100% at 30% 100%, rgb(255 255 255 / .16), transparent 70%), radial-gradient(50% 100% at 80% 100%, rgb(255 255 255 / .12), transparent 70%); }
+.hero-card::after { display: none; }
+.sky-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sky-text { display: grid; gap: 2px; min-width: 0; }
+.sky-date { font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.sky-hello { font-size: calc(1.6rem * var(--krs)); font-weight: 800; line-height: 1.15; }
+.sky-sub { font-size: .88rem; }
+.sky-ring { flex: 0 0 auto; width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--sky-fill) calc(var(--p) * 1%), var(--sky-track) 0); }
+.sky-ring > span { width: 54px; height: 54px; border-radius: 50%; display: grid; place-content: center; text-align: center; background: var(--sky-hole); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); font-size: .62rem; font-weight: 700; line-height: 1.1; }
+.sky-ring b { font-size: 1.05rem; }
+.sky-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sky-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border-radius: 14px; background: var(--sky-chip); color: inherit; font-size: .8rem; font-weight: 700; }
+.sky-chip svg { width: 15px; height: 15px; fill: currentColor; stroke: none; }
+.sky-chip b { font-size: .95rem; }
+.sky-go { margin-left: auto; background: #fff; color: var(--sky-go); box-shadow: 0 3px 0 rgb(0 0 0 / .12); }
+.sky-go:active { transform: translateY(2px); box-shadow: none; }
+.sky-progress { height: 4px; border-radius: 99px; background: var(--sky-track); overflow: hidden; }
+.sky-progress i { display: block; height: 100%; min-width: 4px; border-radius: inherit; background: var(--sky-fill); }
+.hero-card .muted, .hero-card .goal-ring span { color: var(--sky-ink); opacity: .85; }
+.hero-card .goal-ring circle { stroke: var(--sky-track); }
+.hero-card .goal-ring .val { stroke: var(--sky-fill); }
+
+/* ---------- Parcours ---------- */
+.ch-head { border-radius: 22px; }
+.ch-glyph, .chapter .ch-glyph { background: var(--surface-2); color: var(--ink); }
+.ch-n, .chapter .ch-n { color: var(--shu); }
+.chapter.complete > .ch-head { border-color: color-mix(in srgb, var(--matcha) 45%, var(--hair)); }
+.ru-stick { background: var(--paper); }
+.ru:not(.plat) .ru-head { position: relative; color: var(--ink); background: var(--card); border: 1px solid var(--hair); box-shadow: var(--lift); }
+.ru:not(.plat):not(.locked) .ru-head::before { content: ''; position: absolute; left: -1px; top: 14px; bottom: 14px; width: 4px; border-radius: 0 4px 4px 0; background: var(--ai); }
+.ru:not(.plat) .ru-glyph { background: var(--ai-soft); color: var(--ai); }
+.ru:not(.plat) .ru-n { color: var(--ai); opacity: 1; }
+.ru:not(.plat) .ru-sub { color: var(--ink-2); opacity: 1; }
+.ru:not(.plat) .ru-count { background: var(--surface-2); color: var(--ink); }
+.ru.locked .ru-head { background: var(--card); box-shadow: none; }
+.ru.locked .ru-glyph { background: var(--surface-2); color: var(--ink-2); }
+.ru.locked .ru-n { color: var(--ink-2); }
+.ru-line path { stroke: color-mix(in srgb, var(--ink-2) 35%, var(--paper)); stroke-width: 3; stroke-dasharray: .1 9; }
+.ru-line path.on { stroke: var(--shu); }
+.rn-btn { background: var(--card); color: var(--ink); border: 1.5px solid var(--hair); box-shadow: var(--lift); }
+a.rn:active .rn-btn { transform: scale(.95); box-shadow: var(--lift); }
+.ru.locked .rn-btn { background: var(--paper); color: var(--ink-2); border: 1.5px dashed var(--hair); box-shadow: none; }
+/* Étape réussie : sceau vermillon 완 / 済, légèrement incliné */
+.ru:not(.plat) .rn.done:not(.exam) .rn-btn { position: relative; color: var(--shu); background: radial-gradient(circle, var(--shu-soft) 0 55%, transparent 56%); border: 0; box-shadow: none; transform: rotate(-8deg); }
+.ru:not(.plat) .rn.done:not(.exam) .rn-btn::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; border: 3px solid var(--shu); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4.5px var(--shu); opacity: .9; }
+.seal-mark { font-size: 1.35rem; font-weight: 900; line-height: 1; }
+/* Étape en cours : disque indigo et halo */
+.ru:not(.plat) .rn.cur:not(.exam) .rn-btn { color: var(--accent-ink); background: var(--ai); border-color: var(--ai); box-shadow: 0 0 0 6px var(--ai-soft), 0 10px 22px -8px color-mix(in srgb, var(--ai) 70%, transparent); animation: popIn .45s var(--spring) both; }
+.rn-label > .rn-go { background: var(--ai); color: var(--accent-ink); }
+.rn-label b { font-weight: 800; }
+.rn-stars i.on svg { stroke: var(--gold); fill: var(--gold); }
+.rn.exam:not(.done):not(.wait) .rn-btn { box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--plat-deep); }
+.final-card { box-shadow: var(--lift); border-color: color-mix(in srgb, var(--gold) 45%, var(--hair)); }
+.final-seal { color: #fff; background: var(--shu); box-shadow: inset 0 0 0 3px rgb(255 255 255 / .35); transform: rotate(-6deg); }
+.final-card .eyebrow { color: var(--shu); }
+
+/* ---------- Mots ---------- */
+.tile-link { position: relative; }
+.tile-link .tl-kr, .tl-kr { color: var(--ink); font-size: calc(1.25rem * var(--krs)); }
+.tile-link b { font-weight: 800; }
+.tile-link::after { content: ''; position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--hair)); }
+.tile-link[href="#/quiz?t=all"] { --dot: var(--ai); }
+.tile-link[href="#/pairs"] { --dot: var(--c-guide); }
+.tile-link[href*="mode=type"] { --dot: var(--shu); }
+.tile-link[href*="dictation"] { --dot: var(--c-phrases); }
+.tile-link[href*="mode=speak"] { --dot: var(--matcha); }
+.tile-link[href="#/quiz?mode=review"] { background: var(--ai); color: var(--accent-ink); border-color: transparent; box-shadow: 0 14px 28px -14px color-mix(in srgb, var(--ai) 80%, transparent); }
+.tile-link[href="#/quiz?mode=review"] :is(.tl-kr, .muted) { color: var(--accent-ink); opacity: .9; }
+.tile-link[href="#/quiz?mode=review"]::after { display: none; }
+.tile-link[href="#/quiz?mode=review"] .badge { box-shadow: 0 0 0 3px var(--ai); }
+.cat-head .gl, .theme-tile .tt-glyph, .gl, .tact-g, .theme-resume .gl { background: var(--surface-2); color: var(--ink); }
+.theme-tile { background: var(--card); }
+.tact.main { background: var(--ai-soft); border-color: transparent; box-shadow: none; }
+.theme-resume { background: var(--card); border-color: var(--hair); box-shadow: var(--lift); }
+.theme-resume .eyebrow { color: var(--shu); }
+.cat[open] > .cat-head { border-color: color-mix(in srgb, var(--ai) 40%, var(--hair)); box-shadow: var(--lift); }
+
+/* ---------- Quiz ---------- */
+.qbar .progress { height: 8px; background: var(--surface-2); }
+.qcard { border-radius: 26px; }
+.tag { color: var(--shu); }
+.combo { color: var(--shu); }
+/* Mot nouveau : une syllabe par case du papier quadrillé (원고지, 原稿用紙) */
+.teach-tag { color: var(--shu); }
+.teach-grid { display: flex; justify-content: center; margin: 8px 0 4px; animation: popIn .45s var(--spring) both; }
+.teach-grid .cell { width: 62px; height: 70px; display: grid; place-items: center; margin-left: -1.5px; font-family: var(--tl-font); font-size: calc(2.5rem * var(--krs)); font-weight: 700; color: var(--ink);
+  border: 1.5px solid color-mix(in srgb, var(--shu) 38%, transparent);
+  background: linear-gradient(color-mix(in srgb, var(--shu) 14%, transparent), color-mix(in srgb, var(--shu) 14%, transparent)) center / 100% 1px no-repeat,
+              linear-gradient(90deg, color-mix(in srgb, var(--shu) 14%, transparent), color-mix(in srgb, var(--shu) 14%, transparent)) center / 1px 100% no-repeat; }
+.teach-grid .cell:first-child { margin-left: 0; border-radius: 10px 0 0 10px; }
+.teach-grid .cell:last-child { border-radius: 0 10px 10px 0; }
+.teach-grid .cell:only-child { border-radius: 10px; width: 92px; height: 100px; font-size: calc(3.4rem * var(--krs)); }
+.teach-grid .cell.pair { margin-left: 12px; border-radius: 10px; color: var(--ai); }
+.teach-grid:has(.pair) .cell:first-child { border-radius: 10px; width: 80px; height: 88px; font-size: calc(3rem * var(--krs)); }
+.teach-grid .cell.pair { width: 80px; height: 88px; font-size: calc(3rem * var(--krs)); }
+@media (max-width: 380px) { .teach-grid .cell { width: 52px; height: 60px; font-size: calc(2.1rem * var(--krs)); } }
+.teach-rom { color: var(--ai); }
+.teach-mean { font-weight: 700; }
+.btn.big.teach-next { background: var(--ink); color: var(--paper); border-color: transparent; box-shadow: 0 3px 0 color-mix(in srgb, var(--ink) 60%, #000); }
+.btn.big.teach-next:focus { outline: none; }
+.btn.primary::after { display: none; }
+.opt { background: var(--card); border: 1.5px solid var(--hair); box-shadow: 0 3px 0 var(--hair); border-radius: 18px; }
+.opt.right { background: var(--matcha-soft); border-color: var(--matcha); color: var(--matcha); box-shadow: 0 3px 0 var(--matcha); }
+.opt.wrong { background: var(--shu-soft); border-color: var(--shu); color: var(--shu); box-shadow: 0 3px 0 var(--shu); }
+.opt.right::after { display: none; }
+.chip, .mt, .tile, .jamo, .kb-key { box-shadow: 0 3px 0 var(--hair); border-color: var(--hair); }
+.chip.on, .mt.sel, .tile.sel { box-shadow: 0 3px 0 var(--ai-deep); }
+.type-box { border-color: var(--hair); background: var(--card); }
+.type-box.filled { border-color: color-mix(in srgb, var(--ai) 55%, var(--hair)); }
+.kb { background: var(--surface-2); }
+/* Correction : carte claire, sceau, un seul aplat de couleur (le bouton) */
+.sheet { grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; background: var(--card); color: var(--ink); border: 1px solid var(--hair); border-radius: 24px; box-shadow: 0 -10px 40px -12px rgb(40 30 10 / .35); }
+.sheet > * { grid-column: 2; max-width: none; margin: 0; }
+.sheet::before { content: '!'; grid-column: 1; grid-row: 1; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 1.15rem; color: #fff; background: var(--shu); transform: rotate(-8deg); }
+.sheet.ok::before { content: '✓'; background: var(--matcha); }
+.sheet .sheet-next { grid-column: 1 / -1; }
+.sheet.ok, .sheet.ko { background: var(--card); color: var(--ink); }
+.sheet.ok .sheet-msg strong { color: var(--matcha); }
+.sheet.ko .sheet-msg strong { color: var(--shu); }
+.sheet.ok .btn { background: var(--matcha); color: #fff; box-shadow: 0 3px 0 var(--matcha-deep); }
+.sheet.ko .btn { background: var(--shu); color: #fff; box-shadow: 0 3px 0 var(--shu-deep); }
+.sheet .explain { color: var(--ink-2); opacity: 1; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sheet :is(.ok, .ko) .btn, :root:not([data-theme="light"]) .sheet.ok .btn, :root:not([data-theme="light"]) .sheet.ko .btn, :root:not([data-theme="light"]) .sheet::before { color: #11131a; } }
+:root[data-theme="dark"] .sheet.ok .btn, :root[data-theme="dark"] .sheet.ko .btn, :root[data-theme="dark"] .sheet::before { color: #11131a; }
+.xp-won { --gold: #c98a0b; }
+
+/* ---------- Écriture ---------- */
+.jamo { background: var(--card); border-radius: 16px; }
+.jamo .kr { font-weight: 600; }
+.jamo.on { background: var(--ai-soft); border-color: var(--ai); box-shadow: 0 3px 0 var(--ai-deep); }
+.jd-big, .built, .wc-big, .jamo .k2, .jd-big .k2 { color: var(--ai); }
+
+/* ---------- Profil ---------- */
+.hero-card { border-radius: 26px; }
+.lv-badge { background: var(--ink); color: var(--paper); border-radius: 50%; box-shadow: none; }
+.lv-xp { color: var(--ai); }
+.stat b { font-size: 1.55rem; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stats3 .stat:first-child b { color: var(--shu); }
+.cefr-card .eyebrow { color: var(--shu); }
+.heat i { border-radius: 7px; }
+.heat i.h1, .heat-legend i.h1 { background: color-mix(in srgb, var(--ai) 25%, var(--surface-2)); }
+.heat i.h2, .heat-legend i.h2 { background: color-mix(in srgb, var(--ai) 55%, var(--surface-2)); }
+.heat i.h3, .heat-legend i.h3 { background: var(--ai); }
+.ach.t3 { --m: #b8800a; --m2: #8a5f06; }
+
+/* ---------- Histoires : une conversation ---------- */
+.st-glyph { color: #fff; background: var(--shu); box-shadow: none; border-radius: 50%; transform: rotate(-6deg); }
+.st-head .eyebrow, .st-who { color: var(--shu); }
+.st-line.me .st-bubble { margin-left: 26px; background: var(--ai-soft); border-color: transparent; box-shadow: none; }
+.st-line.me .st-who { text-align: right; padding-right: 6px; color: var(--ai); }
+.st-line:not(.me):not(.narration) .st-bubble { margin-right: 26px; }
+.st-say { color: var(--ai); }
+.reveal { background: var(--surface-2); }
+
+/* ---------- Accueil et premiers pas ---------- */
+.welcome h1 { letter-spacing: -.04em; }
+.w-logo img { box-shadow: 0 18px 36px -14px rgb(80 40 90 / .7); border-radius: 26px; }
+.w-native { color: var(--ink) !important; font-weight: 800; }
+.w-native::after { content: ''; display: block; width: 26px; height: 3px; margin: 8px auto 0; border-radius: 3px; background: var(--shu); }
+.w-choice[data-c="ja"] .w-native::after { background: var(--ai); }
+.w-choices.goals .w-native::after { display: none; }
+.w-last { background: var(--ink); color: var(--paper); }
+.onb-dots i.on { background: var(--ai); }
+
+/* ---------- Divers ---------- */
+.review-card { display: none; }
+.celebrate .cel-card { background: var(--card); border-color: var(--hair); box-shadow: 0 30px 70px -20px rgb(20 15 30 / .5); }
+.cel-glyph { color: var(--shu); background: var(--shu-soft); }
+.toast { background: var(--ink); color: var(--paper); }
+.misses li { border-left: 4px solid var(--shu); }
+.misses .m-ans, .misses .icon-btn { color: var(--shu); }
+.g-tip { background: var(--ai-soft); }
+.l-glyph { background: var(--surface-2); color: var(--ink); }
+.guide-sec span, .ex-say, .g-pr, .explain-box summary, .gloss .link { color: var(--ai); }
+/* Sombre : l'en-tête de module reste à l'encre claire, le sceau d'histoire passe à l'encre foncée */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ru:not(.locked):not(.plat) .ru-head { color: var(--ink); } :root:not([data-theme="light"]) .st-glyph { color: #2a0f08; } }
+:root[data-theme="dark"] .ru:not(.locked):not(.plat) .ru-head { color: var(--ink); }
+:root[data-theme="dark"] .st-glyph { color: #2a0f08; }

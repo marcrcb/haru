@@ -1,5 +1,5 @@
 // Haru (하루) — application d'entraînement au coréen et au japonais. Navigation et écrans principaux.
-import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices } from './ui.js';
+import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices, skyTime } from './ui.js';
 import * as store from './store.js';
 import { ALL_THEMES, isPhraseTheme, themeGlyph, themeColor, themeShort } from './content/lexicon.js';
 import { course, hasCourse, setCourse, COURSES, t, tr, lang, gloss } from './course.js';
@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '68'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '69'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -709,7 +709,7 @@ function profile(el) {
 
   el.innerHTML = `
     <div class="screen progress-screen">
-      <section class="hero-card">
+      <section class="hero-card sky-${skyTime()}">
         <div>
           <p class="muted small cap">${esc(date)}</p>
           <h1 class="kr">${esc(C.greeting(new Date().getHours()))}</h1>
@@ -1038,7 +1038,7 @@ const toggle = (name, label, on) => `
   </label>`;
 
 /** Applique thème, taille du texte, animations et police de la langue apprise. */
-const THEME_BG = { light: '#f7f5fb', dark: '#15131c' };
+const THEME_BG = { light: '#f8f4ec', dark: '#131419' };
 function applySettings() {
   const s = store.get().settings;
   const root = document.documentElement;

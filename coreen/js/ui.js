@@ -7,6 +7,13 @@ export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
+/** Moment de la journée (ciel de la carte d'accueil) : matin, journée, soir ou nuit. */
+export function skyTime(h = new Date().getHours()) {
+  if (h >= 5 && h < 12) return 'morning';
+  if (h >= 12 && h < 18) return 'day';
+  if (h >= 18 && h < 22) return 'evening';
+  return 'night';
+}
 export const reducedMotion = () => !get().settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Synthèse vocale (langue du cours actif) ----------

@@ -80,6 +80,13 @@ export function withTeaching(questions) {
   return out;
 }
 
+/** Le mot posé case par case sur le papier quadrillé des cahiers d'écriture (원고지, 原稿用紙). */
+function gridWord(s, pair = '') {
+  const chars = [...s];
+  if (!chars.length || chars.length > 6 || /\s/.test(s)) return null;
+  return `<div class="teach-grid kr" aria-label="${esc(s)}">${chars.map((c) => `<span class="cell">${esc(c)}</span>`).join('')}${pair ? `<span class="cell pair">${esc(pair)}</span>` : ''}</div>`;
+}
+
 function teachCard(L) {
   const C = course();
   const roman = get().settings.roman;
@@ -90,7 +97,7 @@ function teachCard(L) {
     return {
       type: 'teach', say: w.tl,
       html: `${pic ? `<div class="teach-pic" aria-hidden="true">${pic}</div>` : ''}
-        <div class="teach-main kr ${sizeCls(w.tl)}">${esc(w.tl)}</div>
+        ${gridWord(w.tl) || `<div class="teach-main kr ${sizeCls(w.tl)}">${esc(w.tl)}</div>`}
         ${read ? `<div class="teach-read kr">${esc(read)}</div>` : ''}
         ${roman ? `<div class="teach-rom">${esc(C.wordRom(w))}</div>` : ''}
         <div class="teach-mean">${esc(gloss(w))}</div>`,
@@ -102,7 +109,7 @@ function teachCard(L) {
     const pair = x.j2 || (x.base ? x.j : '');
     return {
       type: 'teach', say: x.say, stroke: x.j,
-      html: `<div class="teach-main kr">${esc(main)}${pair && pair !== main ? `<span class="teach-pair">${esc(pair)}</span>` : ''}</div>
+      html: `${gridWord(main, pair && pair !== main ? pair : '')}
         <div class="teach-rom">${esc(romLabel(x))}</div>
         ${x.tip ? `<p class="teach-tip">${esc(tr(x.tip))}</p>` : ''}`,
     };
@@ -110,7 +117,7 @@ function teachCard(L) {
   const k = L.k;
   return {
     type: 'teach', say: k.say, stroke: k.j,
-    html: `<div class="teach-main kr">${esc(k.j)}</div>
+    html: `${gridWord(k.j)}
       <div class="teach-mean">${esc(tr(k.mean))}</div>
       <div class="teach-reads"><span><small>${t('teach.on')}</small> <b class="kr">${esc(k.on)}</b></span><span><small>${t('teach.kun')}</small> <b class="kr">${esc(k.kun)}</b></span></div>
       <p class="teach-tip"><small>${t('teach.example')}</small> <b class="kr">${esc(k.ex[0])}</b> <span class="kr">${esc(k.ex[1])}</span> · ${esc(tr({ fr: k.ex[2], en: k.ex[3] }))}</p>`,

@@ -1,5 +1,5 @@
 // Parcours : chapitres, modules et étapes de difficulté croissante, examens de module et examen final.
-import { $, $$, esc, sfx, celebrate, ICONS } from './ui.js';
+import { $, $$, esc, sfx, celebrate, ICONS, skyTime } from './ui.js';
 import * as store from './store.js';
 import { course, t, tr, lang } from './course.js';
 import { ALL_THEMES, themeGlyph, themeShort } from './content/lexicon.js';
@@ -167,6 +167,42 @@ const OFFSETS = [-1, -0.4, 0.4, 1, 0.4, -0.4]; // tracé sinueux : jamais au cen
 const openChapters = {}; // chapitres dépliés à la main pendant la séance
 let ignite = null; // chapitre qui vient de passer au platine : son titre s'embrase une fois
 
+/**
+ * Carte « ciel du jour » : salutation dans la langue apprise, objectif du jour, série, module en cours,
+ * et l'action du moment (réviser s'il y a des révisions, sinon continuer). Son ciel suit l'heure.
+ */
+function skyCard(R, due) {
+  const C = course();
+  const st = store.get();
+  const time = skyTime();
+  const today = store.todayXp();
+  const left = Math.max(0, st.goal - today);
+  const streak = store.streak();
+  const date = new Date().toLocaleDateString(lang() === 'en' ? 'en-GB' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const next = R.next ? stepInfo(R.next).href : null;
+  const action = due
+    ? `<a class="sky-chip sky-go" href="#/quiz?mode=review">${t('sky.review')} <b>${due}</b> ›</a>`
+    : next ? `<a class="sky-chip sky-go" href="${next}">${t(R.done ? 'road.continue' : 'road.start')} ›</a>` : '';
+  const unit = R.cur ? R.units.indexOf(R.cur) + 1 : 0;
+  return `
+      <section class="sky sky-${time}" aria-label="${t('home.goal')}">
+        <div class="sky-top">
+          <div class="sky-text">
+            <span class="sky-date">${esc(date)} · ${t('sky.' + time)}</span>
+            <span class="sky-hello kr">${esc(C.greeting(new Date().getHours()))}</span>
+            <span class="sky-sub">${left ? t('sky.left', { n: left }) : t('sky.done')}</span>
+          </div>
+          <div class="sky-ring" style="--p:${Math.min(100, Math.round((today / st.goal) * 100))}"><span><b>${today}</b>/${st.goal} XP</span></div>
+        </div>
+        <div class="sky-row">
+          <span class="sky-chip" title="${t('progress.rest')}">${ICONS.flame}<b>${streak}</b> ${t(streak > 1 ? 'sky.days' : 'sky.oneday')}</span>
+          ${unit ? `<span class="sky-chip">${t('sky.module')} <b>${unit}</b></span>` : ''}
+          ${action}
+        </div>
+        <div class="sky-progress" title="${t('road.steps', { n: R.done, total: R.total })}"><i style="width:${(R.done / R.total) * 100}%"></i></div>
+      </section>`;
+}
+
 /** Récompenses en attente (bonus d'un module terminé, passage au platine) : annoncées une fois. Renvoie l'état à jour. */
 export function roadRewards() {
   const st = store.get();
@@ -226,7 +262,7 @@ export function roadScreen(el) {
             const cur = R.next && s.id === R.next.id && u === R.cur;
             const x = OFFSETS[n % OFFSETS.length];
             const inner = `
-              <span class="rn-btn kr ${info.glyph.length > 2 ? 'long' : ''}">${s.done ? ICONS.check : u.open ? esc(info.glyph) : LOCK}</span>
+              <span class="rn-btn kr ${info.glyph.length > 2 ? 'long' : ''}">${s.done ? (u.plat ? ICONS.check : `<span class="seal-mark">${ja ? '済' : '완'}</span>`) : u.open ? esc(info.glyph) : LOCK}</span>
               <span class="rn-label"><b>${esc(info.title)}</b><span>${esc(info.type)}</span>${s.stars ? starRow(s.stars) : ''}${cur ? `<span class="rn-go">${R.done ? t('road.continue') : t('road.start')}</span>` : ''}</span>`;
             const cls = `rn ${x > 0 ? 'right' : 'left'} ${s.done ? 'done' : ''} ${cur ? 'cur' : ''}`;
             return u.open
@@ -251,16 +287,7 @@ export function roadScreen(el) {
   const due = reviewCount();
   el.innerHTML = `
     <div class="screen road">
-      ${due ? `
-      <a class="card review-card" href="#/quiz?mode=review">
-        <span class="rv-glyph kr">${ja ? '復習' : '복습'}</span>
-        <span class="rv-text"><span class="eyebrow">${t('review.dueTitle')}</span><b>${t(due > 1 ? 'review.dueN' : 'review.due1', { n: due })}</b><span class="muted small">${t('review.dueSub')}</span></span>
-        <span class="chev">›</span>
-      </a>` : ''}
-      <section class="card road-top">
-        <div><b>${t('road.steps', { n: R.done, total: R.total })}</b><span class="muted small">${t('road.modules', { n: R.units.filter((u) => u.complete).length, total: R.units.length })}</span></div>
-        <div class="mini-bar"><i style="--w:${R.done / R.total}"></i></div>
-      </section>
+      ${skyCard(R, due)}
       ${R.chapters.map((c, k) => {
         const here = c.list.includes(R.cur) || (!R.cur && k === 0);
         const open = openChapters[c.id] ?? here;

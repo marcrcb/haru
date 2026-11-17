@@ -24,7 +24,7 @@ function lineHtml(l, i, fix) {
   const particle = (r) => r.replace(/(.)は([、。！？」]*)$/u, '$1わ$2').replace(/(.)へ([、。！？」]*)$/u, '$1え$2');
   const rom = roman ? (ja ? l.tokens.map((x) => C.romanize(particle(x.r))).join(' ') : C.romanize(l.tl)) : '';
   return `
-    <li class="st-line ${l.who ? '' : 'narration'}" style="--i:${i}">
+    <li class="st-line ${l.who ? '' : 'narration'} ${l.who === '레오' || l.who === 'レオ' ? 'me' : ''}" style="--i:${i}">
       ${l.who ? `<span class="st-who kr">${esc(l.who)}</span>` : ''}
       <div class="st-bubble">
         <div class="st-tl kr ${ja ? 'has-ruby' : ''}">${l.tokens.map((x) => token(x, fix)).join(ja ? '' : ' ')}</div>
