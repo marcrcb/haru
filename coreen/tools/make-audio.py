@@ -110,6 +110,12 @@ def resample(a: np.ndarray) -> np.ndarray:
     return np.interp(np.linspace(0, len(a) - 1, n), np.arange(len(a)), a).astype(np.float32)
 
 
+# ---------- Index : empreintes des enregistrements publiés (l'application ne demande que ceux-là) ----------
+def write_index():
+    valid = sorted(v['h'] for k, v in qa.items() if v.get('ok') and seen.get(v['h']) == k and (out_dir / f"{v['h']}.mp3").exists())
+    (out_dir / 'index.json').write_text(json.dumps(valid))
+
+
 # ---------- Boucle ----------
 items = json.loads(list_path.read_text())[course]
 seen, todo = {}, []
@@ -136,10 +142,9 @@ for n, (h, it) in enumerate(todo, 1):
         qa[it['key']] = {'h': h, 'say': it['say'], 'error': str(ex)[:200], 'ok': False}
     if n % 25 == 0 or n == len(todo):
         qa_path.write_text(json.dumps(qa, ensure_ascii=False, indent=0))
+        write_index()  # utilisable même si la génération est interrompue
         good = sum(1 for v in qa.values() if v.get('ok'))
         print(f'{n}/{len(todo)} · {good}/{len(qa)} validés · {(time.time() - t0) / n:.2f} s/texte', flush=True)
 
-# Index : empreintes des enregistrements publiés (l'application ne demande que ceux-là)
-valid = sorted(v['h'] for k, v in qa.items() if v.get('ok') and seen.get(v['h']) == k and (out_dir / f"{v['h']}.mp3").exists())
-(out_dir / 'index.json').write_text(json.dumps(valid))
-print('index :', len(valid), 'enregistrements')
+write_index()
+print('index :', len(json.loads((out_dir / 'index.json').read_text())), 'enregistrements')
