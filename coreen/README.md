@@ -53,6 +53,17 @@ node --test tests/*.test.js      # tests du moteur coréen
 2. Pousser sur la branche : le workflow `.github/workflows/haru-pages.yml` lance les tests puis publie le dossier `coreen/`. Il est aussi possible de le lancer à la main dans l’onglet **Actions**.
 3. L’adresse s’affiche dans le résultat du workflow, par exemple `https://<utilisateur>.github.io/<dépôt>/`.
 
+## Publier sur le Play Store (Android)
+
+**Les mises à jour ne changent pas** : l'application du Play Store est une « Trusted Web Activity », une coque Android qui affiche ce site en plein écran. Chaque modification publiée ici (GitHub Pages) apparaît donc aussi dans l'application du Play Store, sans rien republier. Il ne faut renvoyer un paquet que pour changer le nom, l'icône, ou quand Google demande une version plus récente d'Android (environ une fois par an).
+
+Ce qui ne peut être fait que par le titulaire du compte :
+
+1. **Compte développeur Google Play** ([play.google.com/console](https://play.google.com/console)) : 25 $ une seule fois et vérification d'identité. Un compte personnel récent doit d'abord faire un test fermé avec au moins 12 testeurs pendant 14 jours avant la publication.
+2. **Paquet Android** : sur [pwabuilder.com](https://www.pwabuilder.com), saisir `https://marcrcb.github.io/haru/`, puis « Package for stores » → Android. On obtient le paquet `.aab`, la clé de signature (à garder précieusement) et un fichier `assetlinks.json`.
+3. **Lien site ↔ application** : `assetlinks.json` doit être servi à la racine du domaine, `https://marcrcb.github.io/.well-known/assetlinks.json`. Pour un site `github.io`, il faut donc un dépôt `marcrcb.github.io` contenant `.well-known/assetlinks.json` (et un fichier `.nojekyll`). Sans ce fichier, l'application s'ouvre avec une barre d'adresse.
+4. **Fiche Play Store** : captures d'écran, description, classification du contenu, et l'adresse de la politique de confidentialité : `https://marcrcb.github.io/haru/confidentialite.html` (déjà en ligne : aucune donnée collectée).
+
 ## Installer sur le téléphone
 
 - **iPhone (Safari)** : ouvrir l’adresse → bouton Partager → « Sur l’écran d’accueil ».

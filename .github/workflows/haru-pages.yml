@@ -28,11 +28,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Tests
+      - name: Tests du moteur
         run: node --test coreen/tests/*.test.js
+      - name: Outils (minification, navigateur de test, contrôle du contraste)
+        run: |
+          npm i --no-save --prefix /tmp/ci esbuild@0.24.2 playwright@1.49.1 axe-core@4.10.2
+          /tmp/ci/node_modules/.bin/playwright install --with-deps chromium
+      - name: Version publiée (JavaScript et CSS minifiés)
+        working-directory: coreen
+        run: cp tools/build.mjs /tmp/ci/build.mjs && node /tmp/ci/build.mjs ../dist
+      - name: Tests d'écrans sur la version publiée
+        run: |
+          python3 -m http.server 8090 --directory dist > /dev/null 2>&1 &
+          sleep 1
+          NODE_PATH=/tmp/ci/node_modules node coreen/tests/e2e/smoke.cjs http://localhost:8090
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: coreen
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

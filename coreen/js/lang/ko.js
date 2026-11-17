@@ -11,6 +11,7 @@ import { GUIDE_KO_PRON, KO_SECTIONS } from '../content/guide.pron.js';
 import { localize, arrange } from '../content/guide.util.js';
 import { pick } from '../generator.js';
 import { LEXICON } from '../content/lexicon.js';
+import { AWKWARD_EN } from '../content/awkward.en.js';
 
 const L = (fr, en) => ({ fr, en });
 
@@ -132,33 +133,7 @@ function dedupe(notes) {
 
 // ---------- Phrases « gênantes » ----------
 // Traductions anglaises, dans l'ordre de AWKWARD (contrôlé par les tests).
-export const AWKWARD_EN = [
-  { en: { present: 'I talk to my fridge every day.', past: 'I used to talk to my fridge every day.', future: 'I’m going to talk to my fridge every day.' }, w: ['fridge', 'to (someone)', 'to talk to'] },
-  { en: { present: 'I secretly eat my friend’s cake.', past: 'I secretly ate my friend’s cake.', future: 'I’m going to secretly eat my friend’s cake.' }, w: ['cake', 'secretly', 'to eat'] },
-  { en: { present: 'I dance all alone in front of the mirror.', past: 'I danced all alone in front of the mirror.', future: 'I’m going to dance all alone in front of the mirror.' }, w: ['mirror', 'in front of', 'alone', 'to dance'] },
-  { en: { present: 'I sing at the top of my lungs on the subway.', past: 'I sang at the top of my lungs on the subway.', future: 'I’m going to sing at the top of my lungs on the subway.' }, w: ['subway', 'loudly', 'to sing'], note: '부르다 is irregular (르): 부르 + 어요 → 불러요.' },
-  { en: { present: 'I cry at yogurt commercials.', past: 'I cried at a yogurt commercial.', future: 'I’m going to cry at a yogurt commercial.' }, w: ['yogurt', 'commercial', 'and (then)', 'to cry'] },
-  { en: { present: 'I call my teacher “Mom”.', past: 'I called my teacher “Mom”.', future: 'I’m going to call my teacher “Mom”.' }, w: ['teacher', 'mom', 'to call (someone) “…”'] },
-  { en: { present: 'I sniff my socks.', past: 'I sniffed my socks.', future: 'I’m going to sniff my socks.' }, w: ['socks', 'smell', 'to sniff'] },
-  { en: { present: 'I interview myself in the shower.', past: 'I interviewed myself in the shower.', future: 'I’m going to interview myself in the shower.' }, w: ['to shower', 'while (doing)', 'interview'], note: '-면서: “while doing”.' },
-  { en: { present: 'I forget my best friend’s name.', past: 'I forgot my best friend’s name.', future: 'I’m going to forget my best friend’s name.' }, w: ['to be close', 'name', 'to forget (casual)'] },
-  { en: { present: 'I eat tons of garlic on a first date.', past: 'I ate tons of garlic on a first date.', future: 'I’m going to eat tons of garlic on a first date.' }, w: ['first', 'date', 'garlic', 'a lot'] },
-  { en: { present: 'I fart in the middle of meetings.', past: 'I farted in the middle of a meeting.', future: 'I’m going to fart in the middle of the meeting.' }, w: ['meeting', 'during', 'to fart'] },
-  { en: { present: 'I pick my nose in front of guests.', past: 'I picked my nose in front of the guests.', future: 'I’m going to pick my nose in front of the guests.' }, w: ['guest, customer', 'nose', 'to pick one’s nose'] },
-  { en: { present: 'I send the text meant for my mom to the group chat.', past: 'I sent the text meant for my mom to the group chat.', future: 'I’m going to send the text meant for my mom to the group chat.' }, w: ['text message', 'group chat', 'to send'] },
-  { en: { present: 'I trip in the street and act like nothing happened.', past: 'I tripped in the street and acted like nothing happened.' }, w: ['street', 'to fall', 'to be fine', 'to pretend'], note: '-(으)ㄴ 척하다: “to pretend to…”.' },
-  { en: { present: 'I go to the office in my pajamas.', past: 'I went to the office in my pajamas.', future: 'I’m going to go to the office in my pajamas.' }, w: ['pajamas', 'to wear', 'and (then)', 'office'] },
-  { en: { present: 'I snore my way through class.', past: 'I snored my way through class.', future: 'I’m going to snore my way through class.' }, w: ['class', 'to snore', 'to sleep'] },
-  { en: { present: 'Have you ever smelled your toes?' }, w: ['toe', 'to have ever done'], note: '-아/어 본 적(이) 있다: “to have ever tried…”.' },
-  { en: { present: 'Why do you still live with your parents?' }, w: ['why', 'still', 'parents', 'to live'] },
-  { en: { present: 'Why do you keep staring at me like that?' }, w: ['like that', 'constantly', 'to look'] },
-  { en: { present: 'Are you standing on my foot right now?' }, w: ['now', 'foot', 'to step on', 'to be …-ing'], note: '-고 있다: “to be doing”.' },
-  { en: { past: 'Do I have something on my face?' }, w: ['face', 'something', 'to be stuck on'], note: '묻었어요 is past tense: the stain happened before, you see the result now.' },
-  { en: { past: 'Did you read my diary yesterday?' }, w: ['yesterday', 'diary', 'to read'] },
-  { en: { past: 'Did you just forget my name?' }, w: ['just now', 'name', 'to forget'] },
-  { en: { past: 'Did you eat all my snacks, by any chance?' }, w: ['by any chance', 'snacks', 'all'] },
-  { en: { past: 'Why did you ignore me yesterday?' }, w: ['to ignore', 'why'] },
-];
+export { AWKWARD_EN }; // phrases insolites en anglais (partagées avec le japonais)
 
 const MARKERS = {
   polite: { je: '저는', moi: '저를', mon: '제' },

@@ -9,7 +9,7 @@ import { GUIDE_JA_ADV } from '../content/guide.ja.adv.js';
 import { GUIDE_JA_PRON, JA_SECTIONS } from '../content/guide.ja.pron.js';
 import { localize, arrange } from '../content/guide.util.js';
 import { AWKWARD } from '../content/awkward.js';
-import { AWKWARD_EN } from './ko.js';
+import { AWKWARD_EN } from '../content/awkward.en.js';
 import { pick } from '../generator.js';
 import { LEXICON } from '../content/lexicon.js';
 

@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '65'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '66'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -157,8 +157,8 @@ function welcome(el) {
     sfx.tap();
     route();
   });
-  $$('.w-choice', el).forEach((b) => b.addEventListener('click', () => {
-    setCourse(b.dataset.c);
+  $$('.w-choice', el).forEach((b) => b.addEventListener('click', async () => {
+    await setCourse(b.dataset.c);
     applySettings();
     sfx.win();
     if (store.get().settings.onboarded) return finishWelcome('#/road');
@@ -897,15 +897,16 @@ function settings(el) {
       <p class="muted small center version">Haru · 하루 · ${t('set.haru')} · v${APP_VERSION}</p>
     </div>`;
 
-  $$('.set-seg', el).forEach((g) => g.addEventListener('click', (e) => {
+  $$('.set-seg', el).forEach((g) => g.addEventListener('click', async (e) => {
     const b = e.target.closest('.seg-btn');
     if (!b) return;
     const k = g.dataset.key;
     const v = b.dataset.v;
     sfx.tap();
     if (k === 'course') {
-      setCourse(v);
+      await setCourse(v);
       applySettings();
+      preloadVoices();
       toast(t('set.switched', { lang: tr(course().name) }));
       return route();
     }
