@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '67'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '68'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -67,7 +67,7 @@ function route() {
   path = ALIASES[path] || path;
   let name = SCREENS[path] ? path : 'road';
   if (!hasCourse() || choosing) name = 'welcome';
-  if (name !== 'settings' && name !== 'welcome') lastHash = location.hash || '#/road';
+  if (name !== 'settings' && name !== 'guide' && name !== 'welcome') lastHash = location.hash || '#/road';
   const params = Object.fromEntries(new URLSearchParams(query));
   const s = SCREENS[name];
   stopSpeaking();
@@ -1123,9 +1123,11 @@ if (hasCourse()) {
 }
 route();
 
-// La roue des réglages ouvre les réglages ; touchée de nouveau, elle les referme (retour à l'écran précédent).
-$('[data-top="settings"]').addEventListener('click', (e) => {
-  if (!location.hash.startsWith('#/settings')) return;
-  e.preventDefault();
-  location.hash = lastHash;
-});
+// La roue des réglages et le livre du guide ouvrent leur page ; touchés de nouveau, ils la referment (retour à l'écran précédent).
+for (const [top, prefix] of [['settings', '#/settings'], ['guide', '#/guide']]) {
+  $(`[data-top="${top}"]`).addEventListener('click', (e) => {
+    if (!location.hash.startsWith(prefix)) return;
+    e.preventDefault();
+    location.hash = lastHash;
+  });
+}
