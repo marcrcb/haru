@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '54'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '55'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -623,9 +623,17 @@ function settings(el) {
       </div>
 
       <h2>${t('set.appearance')}</h2>
-      <div class="card settings">
-        <div class="set-row col"><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
+      <div class="card settings luxe-card">
+        <label class="set-row switch">
+          <span class="luxe-title"><span class="luxe-mark" aria-hidden="true">H</span><b>${t('set.luxe')}</b></span>
+          <input type="checkbox" name="luxe" ${s.luxe ? 'checked' : ''}><i></i>
+        </label>
+        <div class="set-row col"><span class="muted small">${t('set.luxeHelp')}</span></div>
+      </div>
+      <div class="card settings set-after-luxe">
+        <div class="set-row col set-theme" ${s.luxe ? 'hidden' : ''}><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
           <span class="muted small">${t('set.autoHelp')}</span></div>
+        <div class="set-row col set-theme-luxe" ${s.luxe ? '' : 'hidden'}><span class="muted small">${t('set.luxeTheme')}</span></div>
         <div class="set-row col"><span>${t('set.textSize', { lang: tr(C.name).toLowerCase() })}</span>${seg('krLarge', [['false', t('set.normal')], ['true', t('set.large')]], s.krLarge)}</div>
         ${toggle('motion', t('set.motion'), s.motion)}
       </div>
@@ -701,6 +709,11 @@ function settings(el) {
     s[inp.name] = inp.checked;
     store.save();
     applySettings();
+    if (inp.name === 'luxe') {
+      $('.set-theme', el).hidden = inp.checked;
+      $('.set-theme-luxe', el).hidden = !inp.checked;
+      toast(t(inp.checked ? 'set.luxeOn' : 'set.luxeOff'));
+    }
     dispatchEvent(new Event('haru:settings'));
     sfx.tap();
   }));
@@ -776,6 +789,7 @@ const toggle = (name, label, on) => `
 
 /** Applique thème, taille du texte, animations et police de la langue apprise. */
 const THEME_BG = { light: '#f7f5fb', dark: '#15131c' };
+const LUXE_BG = '#0b0b0c'; // édition Noir & Or (toujours sombre)
 function applySettings() {
   const s = store.get().settings;
   const root = document.documentElement;
@@ -784,9 +798,12 @@ function applySettings() {
   root.dataset.course = course().id;
   root.classList.toggle('kr-large', !!s.krLarge);
   root.classList.toggle('no-motion', !s.motion);
+  // Édition Noir & Or : un attribut à part ; sans lui, css/luxe.css n'a aucun effet.
+  if (s.luxe) root.dataset.skin = 'luxe';
+  else delete root.dataset.skin;
   $$('meta[name="theme-color"]').forEach((m) => {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
-    m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];
+    m.content = s.luxe ? LUXE_BG : THEME_BG[s.theme === 'auto' ? scheme : s.theme];
   });
 }
 

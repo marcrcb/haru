@@ -6,6 +6,8 @@ export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
+/** Édition Noir & Or activée dans les réglages ? */
+export const luxe = () => !!get().settings.luxe;
 export const reducedMotion = () => !get().settings.motion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Synthèse vocale (langue du cours actif) ----------
@@ -104,11 +106,12 @@ function tone(freqs, dur = 0.12, type = 'sine', gain = 0.06) {
     }
   } catch { /* audio indisponible */ }
 }
+// Édition Noir & Or : des sons plus feutrés, façon carillon.
 export const sfx = {
-  ok: () => tone([660, 880], 0.1),
-  ko: () => tone([220, 180], 0.14, 'triangle', 0.05),
-  tap: () => tone([520], 0.04, 'sine', 0.025),
-  win: () => tone([523, 659, 784, 1047], 0.12),
+  ok: () => (luxe() ? tone([1046.5, 1568], 0.16, 'sine', 0.04) : tone([660, 880], 0.1)),
+  ko: () => (luxe() ? tone([233, 196], 0.18, 'sine', 0.045) : tone([220, 180], 0.14, 'triangle', 0.05)),
+  tap: () => (luxe() ? tone([880], 0.03, 'sine', 0.016) : tone([520], 0.04, 'sine', 0.025)),
+  win: () => (luxe() ? tone([523.25, 659.25, 783.99, 1046.5, 1318.5], 0.14, 'sine', 0.045) : tone([523, 659, 784, 1047], 0.12)),
 };
 
 
@@ -184,7 +187,9 @@ export function confetti() {
   const g = c.getContext('2d');
   g.scale(dpr, dpr);
   const css = getComputedStyle(document.documentElement);
-  const colors = ['--accent', '--ok', '--gold', '--rose'].map((v) => css.getPropertyValue(v).trim() || '#888');
+  const colors = luxe()
+    ? ['#8c6b2c', '#e9cf8b', '#c69d4c', '#f1dca1', '#f4efe4'] // paillettes d'or
+    : ['--accent', '--ok', '--gold', '--rose'].map((v) => css.getPropertyValue(v).trim() || '#888');
   const parts = Array.from({ length: 90 }, () => ({
     x: innerWidth / 2 + (Math.random() - 0.5) * 80,
     y: innerHeight * 0.35,

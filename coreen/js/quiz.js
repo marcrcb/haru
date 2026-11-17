@@ -1,7 +1,7 @@
 // Moteur d'exercices : réponses à écrire au clavier, dictées, prononciation à voix haute,
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, luxe } from './ui.js';
 import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, bump, record } from './store.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
@@ -71,6 +71,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
   let xp = 0;
   let onNext = null;
   let listening = null;
+  const misses = []; // erreurs de la série (bilan de fin, édition Noir & Or)
 
   el.innerHTML = `
     <div class="quiz screen ${exam ? 'exam-mode' : ''}">
@@ -350,6 +351,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       combo = 0;
     }
     if (!q.retry) q.onAnswer?.(okNow);
+    if (!okNow && answer) noteMiss(q, answer, kr);
     comboEl.textContent = combo >= 3 ? t('quiz.combo', { n: combo }) : '';
     if (combo >= 3) pulse(comboEl, 'bump');
 
@@ -384,6 +386,27 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     }
   };
   document.addEventListener('keydown', onKey, true);
+
+  /** Retient une erreur pour le bilan : la bonne réponse, ce qui était demandé, et de quoi l'écouter. */
+  function noteMiss(q, answer, kr) {
+    if (misses.some((m) => m.answer === answer)) return;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = q.prompt || '';
+    const asked = (tmp.textContent || '').replace(/\s+/g, ' ').trim() || q.sub || '';
+    misses.push({ answer, kr, asked: asked === answer ? '' : asked, say: q.say || (kr ? answer : '') });
+  }
+  /** Bilan des erreurs : chaque réponse ratée, à relire (et à écouter) avant de quitter la série. */
+  function missesHtml() {
+    if (!luxe() || !misses.length) return '';
+    return `<section class="misses">
+        <div class="misses-head"><b>${t('misses.title')}</b><span class="muted small">${t('misses.sub', { n: misses.length })}</span></div>
+        <ul>${misses.map((m, i) => `
+          <li style="--i:${i}">
+            <div class="m-txt"><span class="m-ans ${m.kr ? 'kr' : ''}">${esc(m.answer)}</span>${m.asked ? `<span class="m-q">${esc(m.asked)}</span>` : ''}</div>
+            ${m.say && canSpeak() ? `<button class="icon-btn m-say" data-i="${i}" aria-label="${t('listen')}">${ICONS.sound}</button>` : ''}
+          </li>`).join('')}</ul>
+      </section>`;
+  }
 
   function finish() {
     bar.style.width = '100%';
@@ -421,7 +444,9 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
           ${again2 === null ? '' : `<button class="btn primary again">${exam ? t(passed ? 'exam.again' : 'exam.retry') : again2 || t('playAgain')}</button>`}
           <a class="btn ghost" href="${step || exam ? '#/road' : back}">${step || exam ? t('road.back') : backLabel || t('finish')}</a>
         </div>
+        ${missesHtml()}
       </div>`;
+    $$('.m-say', el).forEach((b) => b.addEventListener('click', () => speak(misses[b.dataset.i].say)));
     countUp($('.xp-won .n', el), xp);
     requestAnimationFrame(() => $('.score-ring', el)?.classList.add('go'));
     $('.again', el)?.addEventListener('click', again);
