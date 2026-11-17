@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '57'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '58'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -64,6 +64,7 @@ function route() {
   const s = SCREENS[name];
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   $$('.celebrate').forEach((c) => c.remove()); // ferme une célébration restée ouverte
+  closeSheet(); // et le volet des exercices d'un thème
   renderChrome();
   titleEl.textContent = s.title();
   document.title = name === 'welcome' ? 'Haru' : `${s.title()} · Haru`;
@@ -171,28 +172,20 @@ function words(el) {
   const C = course();
   const ja = C.id === 'ja';
   const due = store.mistakes(C.words).length; // fautes en attente
-  // Une ligne par thème ; les phrases toutes faites sont listées à part.
-  const themeRows = (phrases) => Object.entries(ALL_THEMES).filter(([k]) => isPhraseTheme(k) === phrases).map(([k, label], i) => {
+  const st = store.get();
+  const stat = (k) => {
     const ws = wordsOf(k);
-    if (!ws.length) return '';
-    const m = ws.filter((w) => store.box(w.id) >= 3).length;
-    return `
-          <li class="theme-row" style="--i:${Math.min(i, 12)}; --tc: ${themeColor(k)}">
-            <span class="gl kr">${esc(themeGlyph(k, ja))}</span>
-            <div class="theme-info">
-              <b>${esc(themeShort(tr(label)))}</b>
-              <span class="muted small">${t('words.mastered', { m, n: ws.length })}</span>
-              <div class="mini-bar"><i style="--w:${m / ws.length}"></i></div>
-            </div>
-            <div class="theme-actions">
-              <a class="btn small ghost" href="#/cards?t=${k}">${t('words.cards')}</a>
-              <a class="btn small primary" href="#/quiz?t=${k}">${t('title.quiz')}</a>
-              <a class="btn small ghost" href="#/quiz?t=${k}&mode=type">${t('words.typeShort')}</a>
-              <a class="btn small ghost" href="#/quiz?t=${k}&mode=dictation">${t('words.dictShort')}</a>
-              <a class="btn small ghost" href="#/quiz?t=${k}&mode=speak">${t('words.speakShort')}</a>
-            </div>
-          </li>`;
-  }).join('');
+    return { n: ws.length, m: ws.filter((w) => store.box(w.id) >= 3).length };
+  };
+  const bar = (m, n) => `<div class="mini-bar"><i style="--w:${n ? m / n : 0}"></i></div>`;
+  // Thèmes rangés par grandes familles, repliées : on ouvre seulement celle qui intéresse.
+  const cats = themeCats().map((c) => {
+    const ks = c.keys.filter((k) => stat(k).n);
+    const tot = ks.reduce((a, k) => { const x = stat(k); return { m: a.m + x.m, n: a.n + x.n }; }, { m: 0, n: 0 });
+    return { ...c, ks, ...tot };
+  }).filter((c) => c.ks.length);
+  const last = st.lastTheme && ALL_THEMES[st.lastTheme] && stat(st.lastTheme).n ? st.lastTheme : null;
+  const lastStat = last ? stat(last) : null;
   el.innerHTML = `
     <div class="screen words">
       <div class="grid2">
@@ -201,15 +194,136 @@ function words(el) {
         <a class="tile-link" href="#/quiz?t=all&mode=type" style="--i:2; --tc: var(--c-hangul)"><span class="tl-kr kr">${ja ? '書く' : '쓰기'}</span><b>${t('words.type')}</b><span class="muted small">${t('words.typeSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=dictation" style="--i:3; --tc: var(--c-phrases)"><span class="tl-kr kr">${ja ? '聞く' : '듣기'}</span><b>${t('words.dictation')}</b><span class="muted small">${t('words.dictationSub')}</span></a>
         <a class="tile-link" href="#/quiz?t=all&mode=speak" style="--i:4; --tc: var(--c-guide)"><span class="tl-kr kr">${ja ? '話す' : '말하기'}</span><b>${t('words.speak')}</b><span class="muted small">${t(listenSupported() ? 'words.speakSub' : 'words.speakNo')}</span></a>
-        <a class="tile-link" href="#/quiz?mode=review" style="--i:2; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'words.errN' : 'words.err1', { n: due }) : t('words.noErr')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
-        <a class="tile-link" href="#/lexicon" style="--i:3; --tc: var(--c-stats)"><span class="tl-kr kr">${ja ? '単語' : '단어'}</span><b>${t('title.lexicon')}</b><span class="muted small">${t('words.count', { n: C.words.length })}</span></a>
+        <a class="tile-link" href="#/quiz?mode=review" style="--i:5; --tc: var(--c-home)"><span class="tl-kr kr">${ja ? '復習' : '복습'}</span><b>${t('review')}</b><span class="muted small">${due ? t(due > 1 ? 'words.errN' : 'words.err1', { n: due }) : t('words.noErr')}</span>${due ? `<span class="badge">${due}</span>` : ''}</a>
+        <a class="tile-link wide" href="#/lexicon" style="--i:6; --tc: var(--c-stats)"><span class="tl-kr kr">${ja ? '単語' : '단어'}</span><b>${t('title.lexicon')}</b><span class="muted small">${t('words.count', { n: C.words.length })}</span></a>
       </div>
       <h2>${t('words.byTheme')}</h2>
-      <ul class="list themes">${themeRows(false)}</ul>
-      <h2>${t('words.phrases')}</h2>
-      <ul class="list themes">${themeRows(true)}</ul>
+      ${last ? `
+      <button class="card theme-resume" data-k="${last}" style="--tc: ${themeColor(last)}">
+        <span class="gl kr">${esc(themeGlyph(last, ja))}</span>
+        <span class="tr-text"><span class="eyebrow">${t('words.resume')}</span><b>${esc(themeShort(tr(ALL_THEMES[last])))}</b>${bar(lastStat.m, lastStat.n)}</span>
+        <span class="chev">›</span>
+      </button>` : ''}
+      <div class="cats">
+        ${cats.map((c, i) => `
+        <details class="cat" data-c="${c.id}" style="--i:${i}; --tc: ${themeColor(c.ks[0])}" ${openCats.has(c.id) ? 'open' : ''}>
+          <summary class="cat-head">
+            <span class="gl kr">${esc(ja ? c.ja : c.ko)}</span>
+            <span class="cat-text"><b>${t('cat.' + c.id)}</b><span class="muted small">${t('words.nThemes', { n: c.ks.length })} · ${t('words.catMastered', { m: c.m, n: c.n })}</span>${bar(c.m, c.n)}</span>
+            <span class="cat-chev" aria-hidden="true">›</span>
+          </summary>
+          <div class="theme-grid">
+            ${c.ks.map((k, j) => {
+              const x = stat(k);
+              return `<button class="theme-tile" data-k="${k}" style="--j:${j}; --tc: ${themeColor(k)}">
+                <span class="tt-glyph kr">${esc(themeGlyph(k, ja))}</span>
+                <b>${esc(themeShort(tr(ALL_THEMES[k])))}</b>
+                <span class="muted small">${x.m} / ${x.n}</span>
+                ${bar(x.m, x.n)}
+              </button>`;
+            }).join('')}
+          </div>
+        </details>`).join('')}
+      </div>
     </div>`;
+  const grow = (root) => requestAnimationFrame(() => requestAnimationFrame(() => $$('.mini-bar', root).forEach((b) => b.classList.add('go'))));
+  $$('.cat', el).forEach((d) => d.addEventListener('toggle', () => {
+    if (d.open) { openCats.add(d.dataset.c); grow(d); sfx.tap(); } else openCats.delete(d.dataset.c);
+  }));
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('.theme-tile, .theme-resume');
+    if (!b) return;
+    sfx.tap();
+    themeSheet(b.dataset.k);
+  });
   requestAnimationFrame(() => requestAnimationFrame(() => $$('.mini-bar', el).forEach((b) => b.classList.add('go'))));
+}
+
+// Familles de thèmes de l'onglet Mots (un thème absent de cette liste va dans « Autres thèmes »).
+const CATS = [
+  { id: 'essentials', ko: '기본', ja: '基本', keys: ['basics', 'linkers', 'numbers', 'colors', 'time', 'eras', 'describe', 'actions', 'moves'] },
+  { id: 'people', ko: '사람', ja: '人', keys: ['family', 'feelings', 'looks', 'love'] },
+  { id: 'body', ko: '몸', ja: '体', keys: ['body', 'health', 'care'] },
+  { id: 'home', ko: '집', ja: '家', keys: ['daily', 'home', 'housing', 'clothes', 'kitchen'] },
+  { id: 'food', ko: '밥', ja: '食', keys: ['food', 'fruitveg', 'cooking'] },
+  { id: 'city', ko: '도시', ja: '町', keys: ['city', 'places', 'transport', 'rail', 'trip', 'bank', 'admin', 'online'] },
+  { id: 'leisure', ko: '놀이', ja: '遊', keys: ['leisure', 'hobbies', 'sports', 'music', 'culture', 'events', 'beach', 'media', 'tech'] },
+  { id: 'study', ko: '공부', ja: '学', keys: ['study', 'school', 'work', 'office'] },
+  { id: 'nature', ko: '자연', ja: '自然', keys: ['nature', 'animals', 'weather', 'environment', 'science2'] },
+  { id: 'further', ko: '고급', ja: '上級', keys: ['verbs2', 'adj2', 'ideas'] },
+];
+/** Familles avec leurs thèmes ; les phrases toutes faites forment la dernière famille. */
+function themeCats() {
+  const all = Object.keys(ALL_THEMES);
+  const known = new Set(CATS.flatMap((c) => c.keys));
+  const cats = CATS.map((c) => ({ ...c, keys: c.keys.filter((k) => ALL_THEMES[k]) }));
+  const other = all.filter((k) => !known.has(k) && !isPhraseTheme(k));
+  if (other.length) cats.push({ id: 'other', ko: '기타', ja: '他', keys: other });
+  cats.push({ id: 'phrases', ko: '문장', ja: '文', keys: all.filter(isPhraseTheme) });
+  return cats;
+}
+const openCats = new Set(); // familles ouvertes (le temps de la session)
+
+/** Volet du bas : les cinq exercices d'un thème, chacun avec une ligne d'explication. */
+function themeSheet(k) {
+  closeSheet();
+  const C = course();
+  const ja = C.id === 'ja';
+  const ws = wordsOf(k);
+  const m = ws.filter((w) => store.box(w.id) >= 3).length;
+  const name = themeShort(tr(ALL_THEMES[k]));
+  const acts = [
+    ['quiz', `#/quiz?t=${k}`, t('title.quiz'), t('words.quizSub'), ja ? 'クイズ' : '퀴즈'],
+    ['cards', `#/cards?t=${k}`, t('title.cards'), t('words.cardsSub'), ja ? 'カード' : '카드'],
+    ['type', `#/quiz?t=${k}&mode=type`, t('words.type'), t('words.typeSub'), ja ? '書く' : '쓰기'],
+    ['dict', `#/quiz?t=${k}&mode=dictation`, t('words.dictation'), t('words.dictationSub'), ja ? '聞く' : '듣기'],
+    ['speak', `#/quiz?t=${k}&mode=speak`, t('words.speak'), t(listenSupported() ? 'words.speakSub' : 'words.speakNo'), ja ? '話す' : '말하기'],
+  ];
+  const box = document.createElement('div');
+  box.className = 'tsheet-back';
+  box.innerHTML = `
+    <div class="tsheet" role="dialog" aria-modal="true" aria-label="${esc(name)}" style="--tc: ${themeColor(k)}">
+      <span class="tsheet-grab" aria-hidden="true"></span>
+      <div class="tsheet-head">
+        <span class="gl kr">${esc(themeGlyph(k, ja))}</span>
+        <div class="tsheet-title"><b>${esc(name)}</b><span class="muted small">${t('words.mastered', { m, n: ws.length })}</span><div class="mini-bar"><i style="--w:${ws.length ? m / ws.length : 0}"></i></div></div>
+        <button class="icon-btn tsheet-close" aria-label="${t('words.close')}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <p class="muted small tsheet-pick">${t('words.pick')}</p>
+      <div class="tsheet-acts">
+        ${acts.map(([id, href, title, sub, g], i) => `
+        <a class="tact ${id === 'quiz' ? 'main' : ''}" href="${href}" style="--i:${i}">
+          <span class="tact-g kr">${g}</span>
+          <span class="tact-text"><b>${title}</b><span class="small">${sub}</span></span>
+          <span class="chev">›</span>
+        </a>`).join('')}
+      </div>
+    </div>`;
+  document.body.append(box);
+  document.body.classList.add('sheet-open');
+  requestAnimationFrame(() => requestAnimationFrame(() => $('.mini-bar', box)?.classList.add('go')));
+  const close = () => {
+    if (!box.isConnected || box.classList.contains('out')) return;
+    box.classList.add('out');
+    document.body.classList.remove('sheet-open');
+    setTimeout(() => box.remove(), 220);
+    removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  addEventListener('keydown', onKey);
+  box.addEventListener('click', (e) => {
+    if (e.target === box || e.target.closest('.tsheet-close')) { sfx.tap(); return close(); }
+    if (e.target.closest('.tact')) {
+      store.get().lastTheme = k; // « Reprendre » le retrouvera en haut de la liste
+      store.save();
+    }
+  });
+  $('.tsheet-close', box).focus({ preventScroll: true });
+}
+/** Ferme tout de suite le volet des exercices (changement d'écran). */
+function closeSheet() {
+  $$('.tsheet-back').forEach((b) => b.remove());
+  document.body.classList.remove('sheet-open');
 }
 
 // ---------- Écriture : hangeul (coréen) ou kana (japonais) ----------
@@ -623,17 +737,9 @@ function settings(el) {
       </div>
 
       <h2>${t('set.appearance')}</h2>
-      <div class="card settings luxe-card">
-        <label class="set-row switch">
-          <span class="luxe-title"><span class="luxe-mark" aria-hidden="true">H</span><b>${t('set.luxe')}</b></span>
-          <input type="checkbox" name="luxe" ${s.luxe ? 'checked' : ''}><i></i>
-        </label>
-        <div class="set-row col"><span class="muted small">${t('set.luxeHelp')}</span></div>
-      </div>
-      <div class="card settings set-after-luxe">
-        <div class="set-row col set-theme" ${s.luxe ? 'hidden' : ''}><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
+      <div class="card settings">
+        <div class="set-row col"><span>${t('set.theme')}</span>${seg('theme', [['auto', t('set.auto')], ['light', t('set.light')], ['dark', t('set.dark')]], s.theme)}
           <span class="muted small">${t('set.autoHelp')}</span></div>
-        <div class="set-row col set-theme-luxe" ${s.luxe ? '' : 'hidden'}><span class="muted small">${t('set.luxeTheme')}</span></div>
         <div class="set-row col"><span>${t('set.textSize', { lang: tr(C.name).toLowerCase() })}</span>${seg('krLarge', [['false', t('set.normal')], ['true', t('set.large')]], s.krLarge)}</div>
         ${toggle('motion', t('set.motion'), s.motion)}
       </div>
@@ -709,11 +815,6 @@ function settings(el) {
     s[inp.name] = inp.checked;
     store.save();
     applySettings();
-    if (inp.name === 'luxe') {
-      $('.set-theme', el).hidden = inp.checked;
-      $('.set-theme-luxe', el).hidden = !inp.checked;
-      toast(t(inp.checked ? 'set.luxeOn' : 'set.luxeOff'));
-    }
     dispatchEvent(new Event('haru:settings'));
     sfx.tap();
   }));
@@ -789,7 +890,6 @@ const toggle = (name, label, on) => `
 
 /** Applique thème, taille du texte, animations et police de la langue apprise. */
 const THEME_BG = { light: '#f7f5fb', dark: '#15131c' };
-const LUXE_BG = '#0b0b0c'; // édition Noir & Or (toujours sombre)
 function applySettings() {
   const s = store.get().settings;
   const root = document.documentElement;
@@ -798,12 +898,9 @@ function applySettings() {
   root.dataset.course = course().id;
   root.classList.toggle('kr-large', !!s.krLarge);
   root.classList.toggle('no-motion', !s.motion);
-  // Édition Noir & Or : un attribut à part ; sans lui, css/luxe.css n'a aucun effet.
-  if (s.luxe) root.dataset.skin = 'luxe';
-  else delete root.dataset.skin;
   $$('meta[name="theme-color"]').forEach((m) => {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
-    m.content = s.luxe ? LUXE_BG : THEME_BG[s.theme === 'auto' ? scheme : s.theme];
+    m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];
   });
 }
 

@@ -20,9 +20,7 @@ export const lang = () => (store.get().settings.lang === 'en' ? 'en' : 'fr');
 
 /** Texte de l'interface : t('clé', { variable }) ; la clé elle-même s'affiche si elle manque. */
 export function t(key, vars) {
-  // Édition Noir & Or : certains textes ont une variante (les modules passent à l'or au lieu du platine)
-  const or = store.get().settings.luxe ? STRINGS[lang()][key + '@or'] : undefined;
-  const d = or ?? STRINGS[lang()][key] ?? STRINGS.fr[key] ?? key;
+  const d = STRINGS[lang()][key] ?? STRINGS.fr[key] ?? key;
   return vars ? d.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '') : d;
 }
 

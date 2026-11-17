@@ -1,13 +1,12 @@
 // Moteur d'exercices : réponses à écrire au clavier, dictées, prononciation à voix haute,
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, luxe } from './ui.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
 import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, bump, record } from './store.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
 import { pictureOf } from './content/pictures.js';
-import { goldPicture } from './goldpic.js';
 import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
 import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
@@ -62,12 +61,6 @@ export function seeBeforeSaying(questions) {
   return [...out, ...later];
 }
 
-/** Dessin d'un mot : l'emoji d'origine, ou sa gravure au trait doré dans l'édition Noir & Or. */
-function picHtml(pic) {
-  const gold = luxe() ? goldPicture(pic) : null;
-  return gold ? `<img class="pic pic-gold" src="${gold}" alt="" aria-hidden="true">` : `<span class="pic" aria-hidden="true">${pic}</span>`;
-}
-
 export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
   if (!exam) questions = seeBeforeSaying(questions);
   let queue = questions.map((q) => ({ ...q, retry: false }));
@@ -78,7 +71,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
   let xp = 0;
   let onNext = null;
   let listening = null;
-  const misses = []; // erreurs de la série (bilan de fin, édition Noir & Or)
+  const misses = []; // erreurs de la série (bilan de fin)
 
   el.innerHTML = `
     <div class="quiz screen ${exam ? 'exam-mode' : ''}">
@@ -176,7 +169,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       stage.innerHTML = `${head}
         <div class="options ${q.options.length > 4 ? 'many' : ''} ${q.pics ? 'pics' : ''}">
           ${q.options.map((o, i) => (o.pic
-            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}">${picHtml(o.pic)}<span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
+            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}"><span class="pic" aria-hidden="true">${o.pic}</span><span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
             : `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${esc(o.label)}</button>`)).join('')}
         </div>`;
       $$('.opt', stage).forEach((b) => b.addEventListener('click', () => {
@@ -404,7 +397,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
   }
   /** Bilan des erreurs : chaque réponse ratée, à relire (et à écouter) avant de quitter la série. */
   function missesHtml() {
-    if (!luxe() || !misses.length) return '';
+    if (!misses.length) return '';
     return `<section class="misses">
         <div class="misses-head"><b>${t('misses.title')}</b><span class="muted small">${t('misses.sub', { n: misses.length })}</span></div>
         <ul>${misses.map((m, i) => `

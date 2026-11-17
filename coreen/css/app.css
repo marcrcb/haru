@@ -1402,3 +1402,167 @@ body.bare .topbar { border-bottom-color: transparent; }
 .options.tiles-opts { grid-template-columns: 1fr 1fr; }
 .tiles-opts .opt { text-align: center; }
 
+
+/* ================= Version 58 : onglet Mots en familles, animations ================= */
+
+/* Changement d'onglet : entrée plus douce (petit glissement, sans rebond ni zoom) */
+.screen { animation: screenIn .3s var(--ease) backwards; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(5px); } }
+
+/* Mots : la tuile Lexique prend toute la largeur (plus de case vide à côté) */
+.grid2 .tile-link.wide { grid-column: 1 / -1; }
+
+/* Mots : reprendre le dernier thème */
+.theme-resume {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin-bottom: 12px; text-align: left;
+  border-color: color-mix(in srgb, var(--tc) 40%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--tc) 40%, var(--line));
+  background: color-mix(in srgb, var(--tc) 8%, var(--surface));
+}
+.theme-resume .eyebrow { color: var(--tc); margin: 0; }
+.tr-text { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.tr-text b { font-size: 1.05rem; }
+.theme-resume .mini-bar i { background: var(--tc); }
+
+/* Mots : familles de thèmes repliables */
+.cats { display: grid; gap: 10px; }
+.cat { animation: rise .4s var(--ease) both; animation-delay: calc(var(--i, 0) * 35ms); }
+.cat-head {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; list-style: none;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; box-shadow: 0 4px 0 var(--line);
+  transition: border-color .2s, transform .12s var(--ease), box-shadow .12s;
+  -webkit-user-select: none; user-select: none;
+}
+.cat-head::-webkit-details-marker { display: none; }
+.cat-head:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.cat-text { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.cat-text b { font-size: 1.02rem; line-height: 1.2; }
+.cat-text .mini-bar i { background: var(--tc); }
+.cat-chev { flex: 0 0 auto; font-size: 1.5rem; font-weight: 900; color: var(--muted); transition: transform .25s var(--ease); }
+.cat[open] > .cat-head { border-color: color-mix(in srgb, var(--tc) 45%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--tc) 40%, var(--line)); }
+.cat[open] > .cat-head .cat-chev { transform: rotate(90deg); color: var(--tc); }
+.theme-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px 0 8px; }
+.theme-tile {
+  display: grid; align-content: start; gap: 3px; padding: 11px 12px 12px; min-width: 0; text-align: left;
+  border-radius: 16px; background: color-mix(in srgb, var(--tc) 8%, var(--surface));
+  border: 1.5px solid color-mix(in srgb, var(--tc) 30%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--tc) 35%, var(--line));
+  animation: popIn .35s var(--spring) both; animation-delay: calc(var(--j, 0) * 30ms);
+  transition: transform .12s var(--ease), box-shadow .12s;
+}
+.theme-tile.pressed { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--tc) 35%, var(--line)); }
+.tt-glyph { font-size: calc(1.15rem * var(--krs)); font-weight: 800; color: var(--tc); line-height: 1.2; }
+.theme-tile b { font-size: .92rem; line-height: 1.2; overflow-wrap: anywhere; }
+.theme-tile .mini-bar { margin-top: 3px; }
+.theme-tile .mini-bar i { background: var(--tc); }
+@media (min-width: 900px) { .theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Volet du bas : les exercices d'un thème */
+.tsheet-back {
+  position: fixed; inset: 0; z-index: 65; display: flex; align-items: flex-end; justify-content: center;
+  background: rgb(10 8 20 / .45); animation: fadeIn .2s ease;
+}
+.tsheet-back.out { animation: fadeIn .2s ease reverse forwards; }
+.tsheet-back.out .tsheet { transform: translateY(40px); transition: transform .2s ease-in; }
+.tsheet {
+  width: min(560px, 100%); max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 16px calc(env(safe-area-inset-bottom) + 18px);
+  background: var(--bg); border-radius: 26px 26px 0 0; box-shadow: 0 -10px 40px rgb(0 0 0 / .25);
+  animation: sheetUp .38s var(--ease);
+}
+.tsheet-grab { display: block; width: 42px; height: 5px; margin: 0 auto 12px; border-radius: 99px; background: var(--line); }
+.tsheet-head { display: flex; align-items: center; gap: 12px; }
+.tsheet-head .gl { min-width: 52px; height: 52px; font-size: 1.1rem; }
+.tsheet-title { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.tsheet-title b { font-size: 1.25rem; font-weight: 900; line-height: 1.2; }
+.tsheet-title .mini-bar i { background: var(--tc); }
+.tsheet-close { flex: 0 0 auto; }
+.tsheet-pick { margin: 16px 2px 8px; font-weight: 700; }
+.tsheet-acts { display: grid; gap: 9px; }
+.tact {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px;
+  background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 4px 0 var(--line);
+  animation: rise .35s var(--ease) both; animation-delay: calc(var(--i, 0) * 40ms + 60ms);
+  transition: transform .12s var(--ease), box-shadow .12s;
+}
+.tact:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.tact.main { background: color-mix(in srgb, var(--tc) 12%, var(--surface)); border-color: color-mix(in srgb, var(--tc) 45%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--tc) 45%, var(--line)); }
+.tact-g { flex: 0 0 auto; display: grid; place-items: center; min-width: 56px; height: 44px; padding: 0 6px; border-radius: 12px; font-size: .95rem; font-weight: 900; white-space: nowrap; color: var(--tc); background: color-mix(in srgb, var(--tc) 15%, var(--surface)); }
+.tact-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.tact-text b { font-size: 1rem; }
+.tact-text span { color: var(--muted); }
+body.sheet-open { overflow: hidden; }
+
+/* Bilan « À retenir » en fin de série */
+.misses { width: 100%; margin-top: 18px; text-align: left; }
+.misses-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.misses-head b { font-size: 1.1rem; font-weight: 900; }
+.misses ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.misses li {
+  display: flex; align-items: center; gap: 10px; padding: 10px 6px 10px 14px; border-radius: 14px;
+  background: var(--surface); border: 1.5px solid var(--line); border-left: 4px solid var(--accent); box-shadow: 0 3px 0 var(--line);
+  animation: rise .4s var(--ease) both; animation-delay: calc(var(--i, 0) * 50ms + 300ms);
+}
+.misses .m-txt { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.misses .m-ans { font-size: calc(1.15rem * var(--krs)); font-weight: 800; color: var(--accent); overflow-wrap: anywhere; }
+.misses .m-q { font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.misses .icon-btn { flex: 0 0 auto; color: var(--accent); }
+
+/* ---------- Animations ---------- */
+/* Exercices d'un module platine : le métal défile comme sur l'examen (en plus du reflet) */
+.ru.plat .rn.done .rn-btn { animation: popIn .45s var(--spring) both, shimmer 3.2s linear infinite; }
+/* Un reflet traverse les boutons principaux et la pastille de niveau de temps en temps */
+.btn.primary { position: relative; overflow: hidden; isolation: isolate; }
+.btn.primary::after, .lv-n::after {
+  content: ''; position: absolute; z-index: -1; top: -20%; bottom: -20%; left: 0; width: 40%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .4) 50%, transparent);
+  animation: glint 4.6s ease-in-out 1.2s infinite;
+}
+.lv-n { position: relative; overflow: hidden; isolation: isolate; }
+.lv-n::after { width: 45%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .55), transparent); animation-duration: 5s; animation-delay: 1s; }
+/* Le point du titre s'illumine de temps en temps */
+#title::after { animation: popIn .5s var(--spring), dotGlow 3.6s ease-in-out .8s infinite; }
+@keyframes dotGlow { 0%, 72%, 100% { transform: none; box-shadow: none; } 82% { transform: scale(1.35); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); } }
+/* Barres de progression : un reflet glisse dessus */
+.mini-bar i, .xp-bar i { position: relative; overflow: hidden; }
+.progress i::before, .mini-bar i::before, .xp-bar i::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 35%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .45), transparent);
+  animation: barSheen 2.8s ease-in-out 1s infinite;
+}
+@keyframes barSheen { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(320%); } }
+/* Bonne réponse : un éclat traverse la case */
+.opt.right { position: relative; overflow: hidden; }
+.opt.right::after {
+  content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 45%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .55) 50%, transparent);
+  animation: okSweep .9s ease-out .1s both;
+}
+@keyframes okSweep { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
+/* Dessins des mots : ils arrivent avec un petit rebond */
+.opt.pic-opt .pic { display: block; animation: picIn .5s var(--spring) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+@keyframes picIn { from { opacity: 0; transform: scale(.5) rotate(-10deg); } }
+/* Résultat : XP qui miroite, score qui rayonne */
+.xp-won {
+  background: linear-gradient(100deg, var(--gold) 0%, var(--gold) 35%, color-mix(in srgb, var(--gold) 30%, #fff) 50%, var(--gold) 65%, var(--gold) 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: popIn .5s var(--spring) .2s both, titleShine 3s ease-in-out 1s infinite;
+}
+.score-ring.go svg { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--ok) 40%, transparent)); }
+.float-xp { text-shadow: 0 0 12px color-mix(in srgb, var(--gold) 60%, transparent); }
+/* Célébration : des rayons tournent derrière le symbole */
+.celebrate .cel-card { position: relative; overflow: hidden; isolation: isolate; }
+.celebrate .cel-card::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 76px; width: 420px; height: 420px; margin: -210px 0 0 -210px; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 16%, transparent) 0deg 7deg, transparent 7deg 22deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 62%); mask: radial-gradient(circle, #000 18%, transparent 62%);
+  animation: celRays 14s linear infinite;
+}
+@keyframes celRays { to { transform: rotate(360deg); } }
+
+/* Animations coupées (réglage ou téléphone) : les effets en boucle s'arrêtent net, sans clignoter */
+:root.no-motion .ru.plat .rn.done .rn-btn, :root.no-motion #title::after, :root.no-motion .xp-won, :root.no-motion .celebrate .cel-card::before { animation: none; }
+:root.no-motion .btn.primary::after, :root.no-motion .lv-n::after, :root.no-motion .opt.right::after,
+:root.no-motion .progress i::before, :root.no-motion .mini-bar i::before, :root.no-motion .xp-bar i::before { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ru.plat .rn.done .rn-btn, #title::after, .xp-won, .celebrate .cel-card::before { animation: none; }
+  .btn.primary::after, .lv-n::after, .opt.right::after, .progress i::before, .mini-bar i::before, .xp-bar i::before { display: none; }
+}

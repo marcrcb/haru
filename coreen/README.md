@@ -27,7 +27,8 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Sans clavier** : un bouton clavier, en haut des exercices à écrire, remplace le clavier par les morceaux de la réponse à remettre dans l’ordre (ou, pour une seule lettre, à choisir). Le choix est mémorisé.
 - **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
 - **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
-- **Édition Noir & Or** (Réglages → Apparence) : design luxe en option, noir mat, or et bronze, avec les mêmes reliefs 3D, la même police et les mêmes animations que le design d'origine, plus des effets dorés (reflets, rayons de célébration). Les dessins des mots deviennent des gravures au trait fin doré (`js/goldpic.js`), les modules maîtrisés passent à l'or au lieu du platine, et un bilan « À retenir » clôt chaque série. Tout le style est dans `css/luxe.css`, limité à `:root[data-skin="luxe"]` : désactivée, l'application garde exactement son design d'origine.
+- **Mots par familles** : les thèmes sont rangés en grandes familles repliables (essentiels, gens, maison, ville et voyage…), chacune avec sa progression ; toucher un thème ouvre un volet avec ses cinq exercices expliqués, et « Reprendre » ramène au dernier thème travaillé. Les familles se règlent dans `CATS` (`js/app.js`).
+- **À retenir** : à la fin de chaque série, les réponses ratées sont listées, à relire et à réécouter.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
 
 ## Organisation du code
