@@ -132,13 +132,16 @@ function compose(src, n, depth = 1) {
   return shuffle(out);
 }
 
+/** Erreurs permises au plus pour réussir n questions avec le seuil pass (0 à 1). */
+export const maxErrors = (n, pass) => n - Math.ceil(n * pass - 1e-9);
+
 /** Écran d'examen. q.u : identifiant du module, ou « final ». */
 export function examScreen(el, q) {
   const R = roadState();
   const st = store.get();
   const final = q.u === 'final';
   const unit = R.units.find((u) => u.id === q.u);
-  if (!final && (!unit || !unit.complete)) {
+  if (!final && (!unit || !unit.stepsDone)) {
     location.hash = '#/road';
     return;
   }
@@ -184,7 +187,7 @@ export function examScreen(el, q) {
             store.markFinal(pct);
             return passed ? (first ? 30 : 10) : 0;
           }
-          const first = !store.examPassed(unit.id);
+          const first = !store.examPassed(unit.id); // bonus de validation du module, une seule fois
           store.markExam(unit.id, pct);
           return passed && first ? UNIT_BONUS : 0;
         },
@@ -200,10 +203,10 @@ export function examScreen(el, q) {
       <p class="muted">${final ? t('final.intro') : t('exam.intro')}</p>
       <ul class="exam-rules">
         <li><b>${probe.length}</b><span>${t('exam.rQuestions')}</span></li>
-        <li><b>${Math.round(pass * 100)} %</b><span>${t('exam.rPass')}</span></li>
+        <li><b>${maxErrors(probe.length, pass)}</b><span>${t('exam.rErrors')}</span></li>
         <li><b>0</b><span>${t('exam.rHints')}</span></li>
       </ul>
-      ${score ? `<p class="muted small">${t('exam.best', { n: score })}${final && st.final?.n ? ` · ${t('final.count', { n: st.final.n })}` : ''}</p>` : ''}
+      ${final ? (st.final?.n ? `<p class="muted small">${score >= pass * 100 ? `${t('exam.passed')} · ` : ''}${t('final.count', { n: st.final.n })}</p>` : '') : store.examPassed(unit.id) ? `<p class="muted small">${t('exam.done')}</p>` : ''}
       <div class="stack">
         <button class="btn primary big start">${t('exam.start')}</button>
         <a class="btn ghost" href="#/road">${t('road.back')}</a>

@@ -78,7 +78,11 @@ export function roadState() {
     const steps = u.steps.map((s) => ({ ...s, done: stepDone(s, st), stars: stars(s, st) }));
     const done = steps.filter((s) => s.done).length;
     const score = st.exams?.[u.id] || 0;
-    return { ...u, steps, done, complete: done === steps.length, score, plat: score >= store.EXAM_PASS };
+    // Un module n'est validé qu'une fois son examen réussi (toutes les étapes faites ne suffisent plus) ;
+    // le réussir le fait aussi passer au platine.
+    const stepsDone = done === steps.length;
+    const plat = score >= store.EXAM_PASS;
+    return { ...u, steps, done, stepsDone, complete: stepsDone && plat, score, plat };
   });
   units.forEach((u, k) => {
     u.open = k === 0 || units[k - 1].complete || u.done > 0 || !!st.road?.[`open:${u.id}`];
@@ -108,17 +112,17 @@ export function roadRewards() {
   let R = roadState();
 
   // Module terminé : bonus d'XP (une seule fois)
-  const fresh = R.units.find((u) => u.complete && !st.road[`bonus:${u.id}`]);
+  const fresh = R.units.find((u) => u.complete && !st.road[`bonus:${u.id}`] && !st.road[`plat:${u.id}`]);
   // Examen réussi : le module passe au platine
   const shiny = R.units.find((u) => u.plat && !st.road[`plat:${u.id}`]);
   // Tous les modules d'un chapitre en platine : le chapitre entier est maîtrisé
   const crowned = R.chapters.find((c) => c.allPlat && !st.road[`platch:${c.id}`]);
   if (fresh) {
-    R.units.filter((u) => u.complete).forEach((u) => { st.road[`bonus:${u.id}`] = true; });
+    // Examen réussi : module validé (le bonus d'XP est donné par l'examen lui-même)
+    R.units.filter((u) => u.complete).forEach((u) => { st.road[`bonus:${u.id}`] = true; st.road[`plat:${u.id}`] = true; });
     store.save();
-    store.addXp(UNIT_BONUS);
-    celebrate({ glyph: fresh.glyph, title: t('road.unitComplete'), text: t('road.unitBonus', { name: tr(fresh.title), xp: UNIT_BONUS }), button: t('continue') });
-    R = roadState();
+    celebrate({ glyph: fresh.glyph, title: t('road.unitComplete'), text: t('road.unitValid', { name: tr(fresh.title) }), button: t('continue') });
+    document.querySelector('.celebrate .cel-card')?.classList.add('plat');
   } else if (crowned) {
     R.units.filter((u) => u.plat).forEach((u) => { st.road[`plat:${u.id}`] = true; });
     R.chapters.filter((c) => c.allPlat).forEach((c) => { st.road[`platch:${c.id}`] = true; });
@@ -150,7 +154,7 @@ export function roadScreen(el) {
             <b>${esc(tr(u.title))}</b>
             <span class="ru-sub">${esc(tr(u.sub))}</span>
           </div>
-          <span class="ru-count">${u.plat ? GEM : u.complete ? ICONS.check : u.open ? `${u.done} / ${u.steps.length}` : LOCK}</span>
+          <span class="ru-count">${u.plat ? GEM : u.open ? `${u.done} / ${u.steps.length}` : LOCK}</span>
         </header></div>
         ${u.open ? '' : `<div class="ru-lock"><span class="muted small">${t('road.locked')}</span><button class="btn small ghost ru-open">${t('road.unlock')}</button></div>`}
         <div class="ru-path">
@@ -170,22 +174,22 @@ export function roadScreen(el) {
           ${(() => {
             // Examen du module : accessible une fois toutes les étapes terminées
             const x = OFFSETS[u.steps.length % OFFSETS.length];
-            const cls = `rn exam ${x > 0 ? 'right' : 'left'} ${u.plat ? 'done' : ''} ${u.complete ? '' : 'wait'}`;
-            const sub = u.plat ? t('exam.scoreDone', { n: u.score }) : u.score ? t('exam.scoreTry', { n: u.score }) : u.complete ? t('exam.ready') : t('exam.locked');
+            const now = u === R.cur && u.stepsDone && !u.plat; // l'examen est la prochaine chose à faire
+            const cls = `rn exam ${x > 0 ? 'right' : 'left'} ${u.plat ? 'done' : ''} ${u.stepsDone ? '' : 'wait'} ${now ? 'cur' : ''}`;
+            const sub = u.plat ? t('exam.scoreDone') : u.score ? t('exam.scoreTry') : u.stepsDone ? t('exam.ready') : t('exam.locked');
             const inner = `
-              <span class="rn-btn kr">${u.plat ? GEM : u.complete ? (ja ? '試験' : '시험') : LOCK}</span>
-              <span class="rn-label"><b>${t('exam.node')}</b><span>${sub}</span>${u.complete && !u.plat ? `<span class="rn-go plat">${t('exam.go')}</span>` : ''}</span>`;
-            return u.complete ? `<a class="${cls}" href="#/exam?u=${u.id}" style="--x:${x}; --k:${u.steps.length}">${inner}</a>` : `<div class="${cls}" style="--x:${x}">${inner}</div>`;
+              <span class="rn-btn kr">${u.plat ? GEM : u.stepsDone ? (ja ? '試験' : '시험') : LOCK}</span>
+              <span class="rn-label"><b>${t('exam.node')}</b><span>${sub}</span>${u.stepsDone && !u.plat ? `<span class="rn-go plat">${t('exam.go')}</span>` : ''}</span>`;
+            return u.stepsDone ? `<a class="${cls}" href="#/exam?u=${u.id}" style="--x:${x}; --k:${u.steps.length}">${inner}</a>` : `<div class="${cls}" style="--x:${x}">${inner}</div>`;
           })()}
         </div>
       </section>`;
 
-  const platAll = R.units.filter((u) => u.plat).length;
   const fin = st.final || {};
   el.innerHTML = `
     <div class="screen road">
       <section class="card road-top">
-        <div><b>${t('road.steps', { n: R.done, total: R.total })}</b><span class="muted small">${t('road.modules', { n: R.units.filter((u) => u.complete).length, total: R.units.length })}${platAll ? ` · ${t('road.platN', { n: platAll })}` : ''}</span></div>
+        <div><b>${t('road.steps', { n: R.done, total: R.total })}</b><span class="muted small">${t('road.modules', { n: R.units.filter((u) => u.complete).length, total: R.units.length })}</span></div>
         <div class="mini-bar"><i style="--w:${R.done / R.total}"></i></div>
       </section>
       ${R.chapters.map((c, k) => {
@@ -202,7 +206,7 @@ export function roadScreen(el) {
             <b>${esc(tr(c.title))}</b>
             <span class="ch-sub">${esc(tr(c.sub))}</span>
           </span>
-          <span class="ch-count"><b>${c.complete} / ${c.list.length}</b>${c.plat ? `<span class="ch-plat">${GEM}${c.plat}</span>` : ''}</span>
+          <span class="ch-count"><b>${c.complete} / ${c.list.length}</b></span>
           <span class="ch-chev">›</span>
         </summary>
         <div class="ch-body">${c.list.map(unitHtml).join('')}</div>
@@ -214,7 +218,7 @@ export function roadScreen(el) {
         <span class="final-text">
           <span class="eyebrow">${t('final.eyebrow')}</span>
           <b>${t('final.title')}</b>
-          <span class="muted small">${fin.n ? t('final.summary', { best: fin.best, n: fin.n }) : t('final.sub')}</span>
+          <span class="muted small">${fin.n ? t(fin.best >= 70 ? 'final.summaryOk' : 'final.summary', { n: fin.n }) : t('final.sub')}</span>
         </span>
         <span class="chev">›</span>
       </a>

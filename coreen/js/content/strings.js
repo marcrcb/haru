@@ -18,7 +18,7 @@ export const STRINGS = {
     'road.title': 'Parcours', 'road.unitN': 'Module {n} / {total}', 'road.unitShort': 'module {n}', 'road.steps': '{n} / {total} étapes', 'road.modules': '{n} / {total} modules terminés',
     'road.start': 'Commencer', 'road.continue': 'Continuer', 'road.back': 'Retour au parcours', 'road.nextStep': 'Prochaine étape : {name}',
     'road.unitDone': 'Module terminé, le suivant t’attend', 'road.allDone': 'Parcours terminé, bravo !', 'road.locked': 'Termine le module précédent pour continuer.', 'road.unlock': 'Je connais déjà : débloquer',
-    'road.unitComplete': 'Module terminé !', 'road.unitBonus': '{name} · +{xp} XP',
+    'road.unitComplete': 'Module validé !', 'road.unitBonus': '{name} · +{xp} XP', 'road.unitValid': '{name} · examen réussi : le module passe en platine et la suite se débloque.',
     'road.lesson': 'Leçon', 'road.quiz': 'Quiz', 'road.cards': 'Cartes mémoire', 'road.phrases': '3 phrases', 'road.game': 'Jeu', 'road.challenge': 'Défi',
     'home.pod': 'Phrase du jour', 'home.tapTranslate': 'Toucher pour voir la traduction', 'home.train': 'On s’entraîne ?',
     'home.wordsOfDay': 'Mots du jour', 'home.generate': 'Générer', 'home.generateSub': 'Une phrase sur mesure',
@@ -140,15 +140,15 @@ export const STRINGS = {
     'crit.time': 'Moment', 'crit.tAuto': 'Selon le niveau', 'crit.tYes': 'Avec', 'crit.tNo': 'Sans', 'crit.tAutoHelp': 'hier, demain, ce soir… à partir du niveau intermédiaire',
 
     // ---------- Examens ----------
-    'exam.node': 'Examen du module', 'exam.locked': 'Termine les étapes pour y accéder', 'exam.ready': '80 % pour le platine', 'exam.go': 'Passer l’examen',
-    'exam.scoreDone': 'Réussi · {n} %', 'exam.scoreTry': 'Meilleur score : {n} %',
+    'exam.node': 'Examen du module', 'exam.locked': 'Termine les étapes pour y accéder', 'exam.ready': 'À réussir pour valider le module', 'exam.go': 'Passer l’examen',
+    'exam.scoreDone': 'Réussi', 'exam.scoreTry': 'Pas encore réussi', 'exam.done': 'Examen déjà réussi : module validé.',
     'exam.eyebrow': 'Examen de module', 'exam.intro': 'Tout le module, sans filet : mots à écrire, dictées, lettres, leçons et phrases.',
-    'exam.rQuestions': 'questions', 'exam.rPass': 'pour réussir', 'exam.rHints': 'indice, une seule chance',
+    'exam.rQuestions': 'questions', 'exam.rErrors': 'erreurs permises au plus', 'exam.rHints': 'indice, une seule chance',
     'exam.start': 'Commencer l’examen', 'exam.best': 'Meilleur score : {n} %', 'exam.passed': 'Réussi', 'exam.failed': 'Pas encore',
-    'exam.need': 'il faut {n} % pour réussir', 'exam.platText': 'module en platine', 'exam.again': 'Repasser l’examen', 'exam.retry': 'Réessayer',
+    'exam.need': 'au plus {n} erreurs pour réussir', 'exam.platText': 'module validé', 'exam.bravo': 'Bravo !', 'exam.almost': 'Encore un effort', 'exam.again': 'Repasser l’examen', 'exam.retry': 'Réessayer',
     'final.eyebrow': 'Test de connaissances', 'final.title': 'Examen final', 'final.sub': 'Teste tout ce que tu as terminé jusqu’ici, quand tu veux.',
     'final.intro': 'Il porte sur toutes les étapes terminées et les leçons lues à cet instant. Plus tu avances, plus il s’enrichit.',
-    'final.summary': 'Meilleur score : {best} % · passé {n} fois', 'final.count': 'passé {n} fois',
+    'final.summary': 'Passé {n} fois', 'final.summaryOk': 'Réussi · passé {n} fois', 'final.count': 'passé {n} fois',
     'final.empty': 'Termine d’abord quelques étapes du parcours : l’examen portera sur ce que tu as déjà appris.',
 
     // ---------- Succès ----------
@@ -177,7 +177,7 @@ export const STRINGS = {
     'road.title': 'Path', 'road.unitN': 'Unit {n} / {total}', 'road.unitShort': 'unit {n}', 'road.steps': '{n} / {total} steps', 'road.modules': '{n} / {total} units completed',
     'road.start': 'Start', 'road.continue': 'Continue', 'road.back': 'Back to the path', 'road.nextStep': 'Next step: {name}',
     'road.unitDone': 'Unit completed, the next one is waiting', 'road.allDone': 'Path completed, well done!', 'road.locked': 'Finish the previous unit to continue.', 'road.unlock': 'I already know this: unlock',
-    'road.unitComplete': 'Unit completed!', 'road.unitBonus': '{name} · +{xp} XP',
+    'road.unitComplete': 'Unit validated!', 'road.unitBonus': '{name} · +{xp} XP', 'road.unitValid': '{name} · exam passed: the unit turns platinum and the next one unlocks.',
     'road.lesson': 'Lesson', 'road.quiz': 'Quiz', 'road.cards': 'Flashcards', 'road.phrases': '3 sentences', 'road.game': 'Game', 'road.challenge': 'Challenge',
     'home.pod': 'Sentence of the day', 'home.tapTranslate': 'Tap to see the translation', 'home.train': 'Ready to practise?',
     'home.wordsOfDay': 'Today’s words', 'home.generate': 'Generate', 'home.generateSub': 'A custom sentence',
@@ -299,15 +299,15 @@ export const STRINGS = {
     'crit.time': 'Time word', 'crit.tAuto': 'By level', 'crit.tYes': 'With', 'crit.tNo': 'Without', 'crit.tAutoHelp': 'yesterday, tomorrow, tonight… from the intermediate level up',
 
     // ---------- Exams ----------
-    'exam.node': 'Module exam', 'exam.locked': 'Finish the steps to unlock it', 'exam.ready': '80% for platinum', 'exam.go': 'Take the exam',
-    'exam.scoreDone': 'Passed · {n}%', 'exam.scoreTry': 'Best score: {n}%',
+    'exam.node': 'Module exam', 'exam.locked': 'Finish the steps to unlock it', 'exam.ready': 'Pass it to validate the unit', 'exam.go': 'Take the exam',
+    'exam.scoreDone': 'Passed', 'exam.scoreTry': 'Not passed yet', 'exam.done': 'Exam already passed: unit validated.',
     'exam.eyebrow': 'Module exam', 'exam.intro': 'The whole module with no safety net: words to write, dictations, letters, lessons and sentences.',
-    'exam.rQuestions': 'questions', 'exam.rPass': 'to pass', 'exam.rHints': 'hints, one try only',
+    'exam.rQuestions': 'questions', 'exam.rErrors': 'mistakes allowed at most', 'exam.rHints': 'hints, one try only',
     'exam.start': 'Start the exam', 'exam.best': 'Best score: {n}%', 'exam.passed': 'Passed', 'exam.failed': 'Not yet',
-    'exam.need': 'you need {n}% to pass', 'exam.platText': 'module turned platinum', 'exam.again': 'Retake the exam', 'exam.retry': 'Try again',
+    'exam.need': 'at most {n} mistakes to pass', 'exam.platText': 'unit validated', 'exam.bravo': 'Well done!', 'exam.almost': 'Almost there', 'exam.again': 'Retake the exam', 'exam.retry': 'Try again',
     'final.eyebrow': 'Knowledge test', 'final.title': 'Final exam', 'final.sub': 'Test everything you have completed so far, whenever you like.',
     'final.intro': 'It covers every step you have completed and every lesson you have read so far. The further you go, the richer it gets.',
-    'final.summary': 'Best score: {best}% · taken {n} times', 'final.count': 'taken {n} times',
+    'final.summary': 'Taken {n} times', 'final.summaryOk': 'Passed · taken {n} times', 'final.count': 'taken {n} times',
     'final.empty': 'Complete a few steps of the path first: the exam covers what you have already learned.',
 
     // ---------- Achievements ----------

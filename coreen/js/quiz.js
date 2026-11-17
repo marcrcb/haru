@@ -402,8 +402,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     stage.innerHTML = '';
     const head = exam
       ? `<span class="exam-verdict ${passed ? 'pass' : 'fail'}">${passed ? t('exam.passed') : t('exam.failed')}</span>
-         <h2>${pct} %</h2>
-         <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : t('exam.need', { n: Math.round(exam.pass * 100) })}</p>`
+         <h2>${passed ? t('exam.bravo') : t('exam.almost')}</h2>
+         <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : t('exam.need', { n: total - Math.ceil(total * exam.pass - 1e-9) })}</p>`
       : `<h2>${ratio === 1 ? t('quiz.perfect') : ratio >= 0.7 ? t('quiz.great') : ratio >= 0.4 ? t('quiz.good') : t('quiz.keepGoing')}</h2>
          <p class="muted">${esc(title || '')}</p>`;
     // Révision : « Séance suivante (n fautes) », ou rien quand il n'y a plus de faute.
