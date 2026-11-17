@@ -1424,7 +1424,7 @@ body.bare .topbar { border-bottom-color: transparent; }
 .theme-resume .mini-bar i { background: var(--tc); }
 
 /* Mots : familles de thèmes repliables */
-.cats { display: grid; gap: 10px; }
+.word-cats { display: grid; gap: 10px; }
 .cat { animation: rise .4s var(--ease) both; animation-delay: calc(var(--i, 0) * 35ms); }
 .cat-head {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; list-style: none;
@@ -1448,7 +1448,7 @@ body.bare .topbar { border-bottom-color: transparent; }
   transition: transform .12s var(--ease), box-shadow .12s;
 }
 /* Rejouée à chaque ouverture de la famille (classe remise par app.js) */
-.cat.reveal .theme-tile { animation: popIn .35s var(--spring) both; animation-delay: calc(var(--j, 0) * 30ms); }
+.cat.cat-anim .theme-tile { animation: popIn .35s var(--spring) both; animation-delay: calc(var(--j, 0) * 30ms); }
 .theme-tile.pressed { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--tc) 35%, var(--line)); }
 .tt-glyph { font-size: calc(1.15rem * var(--krs)); font-weight: 800; color: var(--tc); line-height: 1.2; }
 .theme-tile b { font-size: .92rem; line-height: 1.2; overflow-wrap: anywhere; }

@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '59'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '60'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -204,7 +204,7 @@ function words(el) {
         <span class="tr-text"><span class="eyebrow">${t('words.resume')}</span><b>${esc(themeShort(tr(ALL_THEMES[last])))}</b>${bar(lastStat.m, lastStat.n)}</span>
         <span class="chev">›</span>
       </button>` : ''}
-      <div class="cats">
+      <div class="word-cats">
         ${cats.map((c, i) => `
         <details class="cat" data-c="${c.id}" style="--i:${i}; --tc: ${themeColor(c.ks[0])}" ${openCats.has(c.id) ? 'open' : ''}>
           <summary class="cat-head">
@@ -234,10 +234,10 @@ function words(el) {
     // À chaque ouverture, les tuiles réapparaissent en rebond et les barres se remplissent de nouveau.
     const fills = $$('.theme-grid .mini-bar i', d);
     fills.forEach((i) => { i.style.transition = 'none'; i.parentNode.classList.remove('go'); }); // barres vidées d'un coup
-    d.classList.remove('reveal');
+    d.classList.remove('cat-anim');
     void d.offsetWidth; // repart de zéro (relance les animations CSS)
     fills.forEach((i) => { i.style.transition = ''; });
-    d.classList.add('reveal');
+    d.classList.add('cat-anim');
     grow(d);
   }));
   el.addEventListener('click', (e) => {
