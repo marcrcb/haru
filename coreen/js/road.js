@@ -69,14 +69,12 @@ export function skipChapters(n) {
       });
       st.exams[u.id] = Math.max(st.exams[u.id] || 0, store.EXAM_PASS);
       st.road[`bonus:${u.id}`] = true;
-      st.road[`plat:${u.id}`] = true;
     });
-    st.road[`platch:${c.id}`] = true;
+    st.road[`chdone:${c.id}`] = true;
   });
   store.save();
 }
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
-const GEM = '<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3 7 9l5 12 5-12-2-6"/></svg>';
 
 const lessons = () => course().guide[lang()] || course().guide.fr;
 
@@ -94,8 +92,6 @@ export function stepDone(s, st = store.get()) {
   if (s.kind === 'mastery') { const g = goal(s.theme, st); return !!st.road?.[s.id] || (g.total > 0 && g.n >= g.total); }
   return !!st.road?.[s.id];
 }
-const STARRED = ['script', 'words', 'cards', 'phrase', 'type', 'dictation', 'ptype', 'speak', 'story'];
-const stars = (s, st) => (STARRED.includes(s.kind) ? st.road?.[s.id] || 0 : 0);
 
 /** Titre, type, pastille et adresse d'une étape. */
 export function stepInfo(s) {
@@ -137,14 +133,13 @@ export function stepInfo(s) {
 export function roadState() {
   const st = store.get();
   const units = roadUnits().map((u) => {
-    const steps = u.steps.map((s) => ({ ...s, done: stepDone(s, st), stars: stars(s, st) }));
+    const steps = u.steps.map((s) => ({ ...s, done: stepDone(s, st) }));
     const done = steps.filter((s) => s.done).length;
     const score = st.exams?.[u.id] || 0;
-    // Un module n'est validé qu'une fois son examen réussi (toutes les étapes faites ne suffisent plus) ;
-    // le réussir le fait aussi passer au platine.
+    // Un module n'est validé qu'une fois son examen réussi (toutes les étapes faites ne suffisent pas).
     const stepsDone = done === steps.length;
-    const plat = u.noExam ? stepsDone : score >= store.EXAM_PASS; // module sans examen (histoire) : validé avec ses étapes
-    return { ...u, steps, done, stepsDone, complete: stepsDone && plat, score, plat };
+    const passed = u.noExam ? stepsDone : score >= store.EXAM_PASS; // module sans examen (histoire) : validé avec ses étapes
+    return { ...u, steps, done, stepsDone, complete: stepsDone && passed, score, passed };
   });
   units.forEach((u, k) => {
     u.open = k === 0 || units[k - 1].complete || u.done > 0 || !!st.road?.[`open:${u.id}`];
@@ -156,16 +151,14 @@ export function roadState() {
   const done = units.reduce((n, u) => n + u.done, 0);
   const chapters = roadChapters().map((c) => {
     const us = units.filter((u) => u.chapter === c.id);
-    const plat = us.filter((u) => u.plat).length;
-    return { ...c, list: us, complete: us.filter((u) => u.complete).length, plat, allPlat: us.length > 0 && plat === us.length };
+    const complete = us.filter((u) => u.complete).length;
+    return { ...c, list: us, complete, full: us.length > 0 && complete === us.length };
   });
-  return { units, chapters, cur, next, total, done, starCount: units.reduce((n, u) => n + u.steps.reduce((m, s) => m + s.stars, 0), 0) };
+  return { units, chapters, cur, next, total, done };
 }
 
-const starRow = (n) => `<span class="rn-stars" aria-label="${n} / 3">${[1, 2, 3].map((k) => `<i class="${k <= n ? 'on' : ''}">${ICONS.star}</i>`).join('')}</span>`;
 const OFFSETS = [-1, -0.4, 0.4, 1, 0.4, -0.4]; // tracé sinueux : jamais au centre, le texte se place du côté libre
 const openChapters = {}; // chapitres dépliés à la main pendant la séance
-let ignite = null; // chapitre qui vient de passer au platine : son titre s'embrase une fois
 
 /**
  * Carte « ciel du jour » : salutation dans la langue apprise, objectif du jour, série, module en cours,
@@ -203,36 +196,24 @@ function skyCard(R, due) {
       </section>`;
 }
 
-/** Récompenses en attente (bonus d'un module terminé, passage au platine) : annoncées une fois. Renvoie l'état à jour. */
+/** Récompenses en attente (module validé, chapitre terminé) : annoncées une fois. Renvoie l'état à jour. */
 export function roadRewards() {
   const st = store.get();
   st.road ||= {};
-  let R = roadState();
-
-  // Module terminé : bonus d'XP (une seule fois)
-  const fresh = R.units.find((u) => u.complete && !st.road[`bonus:${u.id}`] && !st.road[`plat:${u.id}`]);
-  // Examen réussi : le module passe au platine
-  const shiny = R.units.find((u) => u.plat && !st.road[`plat:${u.id}`]);
-  // Tous les modules d'un chapitre en platine : le chapitre entier est maîtrisé
-  const crowned = R.chapters.find((c) => c.allPlat && !st.road[`platch:${c.id}`]);
+  const R = roadState();
+  // (les anciennes clés « plat:… » valent aussi annonce déjà faite)
+  const seen = (u) => st.road[`bonus:${u.id}`] || st.road[`plat:${u.id}`];
+  const fresh = R.units.find((u) => u.complete && !seen(u));
+  const ended = R.chapters.find((c) => c.full && !st.road[`chdone:${c.id}`] && !st.road[`platch:${c.id}`]);
   if (fresh) {
     // Examen réussi : module validé (le bonus d'XP est donné par l'examen lui-même)
-    R.units.filter((u) => u.complete).forEach((u) => { st.road[`bonus:${u.id}`] = true; st.road[`plat:${u.id}`] = true; });
+    R.units.filter((u) => u.complete).forEach((u) => { st.road[`bonus:${u.id}`] = true; });
     store.save();
     celebrate({ glyph: fresh.glyph, title: t('road.unitComplete'), text: t('road.unitValid', { name: tr(fresh.title) }), button: t('continue') });
-    document.querySelector('.celebrate .cel-card')?.classList.add('plat');
-  } else if (crowned) {
-    R.units.filter((u) => u.plat).forEach((u) => { st.road[`plat:${u.id}`] = true; });
-    R.chapters.filter((c) => c.allPlat).forEach((c) => { st.road[`platch:${c.id}`] = true; });
+  } else if (ended) {
+    R.chapters.filter((c) => c.full).forEach((c) => { st.road[`chdone:${c.id}`] = true; });
     store.save();
-    ignite = crowned.id;
-    celebrate({ glyph: crowned.glyph, title: t('road.chPlatTitle'), text: t('road.chPlatText', { name: tr(crowned.title) }), button: t('continue') });
-    document.querySelector('.celebrate .cel-card')?.classList.add('plat');
-  } else if (shiny) {
-    R.units.filter((u) => u.plat).forEach((u) => { st.road[`plat:${u.id}`] = true; });
-    store.save();
-    celebrate({ glyph: shiny.glyph, title: t('road.platTitle'), text: t('road.platText', { name: tr(shiny.title) }), button: t('continue') });
-    document.querySelector('.celebrate .cel-card')?.classList.add('plat');
+    celebrate({ glyph: ended.glyph, title: t('road.chDoneTitle'), text: t('road.chDoneText', { name: tr(ended.title) }), button: t('continue') });
   }
   return R;
 }
@@ -244,15 +225,15 @@ export function roadScreen(el) {
 
   const ja = C.id === 'ja';
   const unitHtml = (u) => `
-      <section class="ru ${u.open ? '' : 'locked'} ${u.complete ? 'complete' : ''} ${u.plat ? 'plat' : ''}" style="--tc: ${u.color}" data-u="${u.id}">
+      <section class="ru ${u.open ? '' : 'locked'} ${u.complete ? 'complete' : ''}" style="--tc: ${u.color}" data-u="${u.id}">
         <div class="ru-stick"><header class="ru-head">
           <span class="ru-glyph kr">${esc(u.glyph)}</span>
           <div class="ru-text">
-            <span class="ru-n">${t('road.unitN', { n: u.n, total: R.units.length })}${u.plat ? ` · ${t('road.plat')}` : ''}</span>
+            <span class="ru-n">${t('road.unitN', { n: u.n, total: R.units.length })}${u.complete ? ` · ${t('road.validated')}` : ''}</span>
             <b>${esc(tr(u.title))}</b>
             <span class="ru-sub">${esc(tr(u.sub))}</span>
           </div>
-          <span class="ru-count">${u.plat ? GEM : u.open ? `${u.done} / ${u.steps.length}` : LOCK}</span>
+          <span class="ru-count">${u.complete ? `<span class="seal-mark">${ja ? '済' : '완'}</span>` : u.open ? `${u.done} / ${u.steps.length}` : LOCK}</span>
         </header></div>
         ${u.open ? '' : `<div class="ru-lock"><span class="muted small">${t('road.locked')}</span><button class="btn small ghost ru-open">${t('road.unlock')}</button></div>`}
         <div class="ru-path">
@@ -262,8 +243,8 @@ export function roadScreen(el) {
             const cur = R.next && s.id === R.next.id && u === R.cur;
             const x = OFFSETS[n % OFFSETS.length];
             const inner = `
-              <span class="rn-btn kr ${info.glyph.length > 2 ? 'long' : ''}">${s.done ? (u.plat ? ICONS.check : `<span class="seal-mark">${ja ? '済' : '완'}</span>`) : u.open ? esc(info.glyph) : LOCK}</span>
-              <span class="rn-label"><b>${esc(info.title)}</b><span>${esc(info.type)}</span>${s.stars ? starRow(s.stars) : ''}${cur ? `<span class="rn-go">${R.done ? t('road.continue') : t('road.start')}</span>` : ''}</span>`;
+              <span class="rn-btn kr ${info.glyph.length > 2 ? 'long' : ''}">${s.done ? `<span class="seal-mark">${ja ? '済' : '완'}</span>` : u.open ? esc(info.glyph) : LOCK}</span>
+              <span class="rn-label"><b>${esc(info.title)}</b><span>${esc(info.type)}</span>${cur ? `<span class="rn-go">${R.done ? t('road.continue') : t('road.start')}</span>` : ''}</span>`;
             const cls = `rn ${x > 0 ? 'right' : 'left'} ${s.done ? 'done' : ''} ${cur ? 'cur' : ''}`;
             return u.open
               ? `<a class="${cls}" href="${info.href}" style="--x:${x}; --k:${n}">${inner}</a>`
@@ -272,12 +253,12 @@ export function roadScreen(el) {
           ${u.noExam ? '' : (() => {
             // Examen du module : accessible une fois toutes les étapes terminées
             const x = OFFSETS[u.steps.length % OFFSETS.length];
-            const now = u === R.cur && u.stepsDone && !u.plat; // l'examen est la prochaine chose à faire
-            const cls = `rn exam ${x > 0 ? 'right' : 'left'} ${u.plat ? 'done' : ''} ${u.stepsDone ? '' : 'wait'} ${now ? 'cur' : ''}`;
-            const sub = u.plat ? t('exam.scoreDone') : u.score ? t('exam.scoreTry') : u.stepsDone ? t('exam.ready') : t('exam.locked');
+            const now = u === R.cur && u.stepsDone && !u.passed; // l'examen est la prochaine chose à faire
+            const cls = `rn exam ${x > 0 ? 'right' : 'left'} ${u.passed ? 'done' : ''} ${u.stepsDone ? '' : 'wait'} ${now ? 'cur' : ''}`;
+            const sub = u.passed ? t('exam.scoreDone') : u.score ? t('exam.scoreTry') : u.stepsDone ? t('exam.ready') : t('exam.locked');
             const inner = `
-              <span class="rn-btn kr">${u.plat ? GEM : u.stepsDone ? (ja ? '試験' : '시험') : LOCK}</span>
-              <span class="rn-label"><b>${t('exam.node')}</b><span>${sub}</span>${u.stepsDone && !u.plat ? `<span class="rn-go plat">${t('exam.go')}</span>` : ''}</span>`;
+              <span class="rn-btn kr">${u.passed ? `<span class="seal-mark">${ja ? '合' : '합'}</span>` : u.stepsDone ? (ja ? '試験' : '시험') : LOCK}</span>
+              <span class="rn-label"><b>${t('exam.node')}</b><span>${sub}</span>${u.stepsDone && !u.passed ? `<span class="rn-go">${t('exam.go')}</span>` : ''}</span>`;
             return u.stepsDone ? `<a class="${cls}" href="#/exam?u=${u.id}" style="--x:${x}; --k:${u.steps.length}">${inner}</a>` : `<div class="${cls}" style="--x:${x}">${inner}</div>`;
           })()}
         </div>
@@ -288,24 +269,24 @@ export function roadScreen(el) {
   el.innerHTML = `
     <div class="screen road">
       ${skyCard(R, due)}
-      ${R.chapters.map((c, k) => {
+      ${R.chapters.map((c, k) => ({ c, k })).sort((a, b) => a.c.full - b.c.full || a.k - b.k).map(({ c, k }) => {
         const here = c.list.includes(R.cur) || (!R.cur && k === 0);
         const open = openChapters[c.id] ?? here;
-        const full = c.complete === c.list.length;
+        const full = c.full;
+        const list = [...c.list.filter((u) => !u.complete), ...c.list.filter((u) => u.complete)];
         return `
-      <details class="chapter ${full ? 'complete' : ''} ${c.allPlat ? 'plat' : ''} ${c.allPlat && ignite === c.id ? 'ignite' : ''}" data-c="${c.id}" ${open ? 'open' : ''}>
+      <details class="chapter ${full ? 'complete' : ''}" data-c="${c.id}" ${open ? 'open' : ''}>
         <summary class="ch-head">
-          ${c.allPlat ? '<span class="ch-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' : ''}
           <span class="ch-glyph kr">${esc(c.glyph)}</span>
           <span class="ch-text">
-            <span class="ch-n">${c.allPlat ? `${GEM}${t('road.chapterN', { n: k + 1 })} · ${t('road.chMastered')}` : t('road.chapterN', { n: k + 1 })}</span>
+            <span class="ch-n">${full ? `${t('road.chapterN', { n: k + 1 })} · ${t('road.chMastered')}` : t('road.chapterN', { n: k + 1 })}</span>
             <b>${esc(tr(c.title))}</b>
             <span class="ch-sub">${esc(tr(c.sub))}</span>
           </span>
           <span class="ch-count"><span class="ch-lvl">${esc(chapterLevel(k))}</span><b>${c.complete} / ${c.list.length}</b></span>
           <span class="ch-chev">›</span>
         </summary>
-        <div class="ch-body">${c.list.map(unitHtml).join('')}</div>
+        <div class="ch-body">${list.map(unitHtml).join('')}</div>
       </details>`;
       }).join('')}
       ${R.done === R.total ? `<p class="center muted road-end">${t('road.allDone')}</p>` : ''}
@@ -358,7 +339,6 @@ export function roadScreen(el) {
   const onResize = () => (el.querySelector('.road') ? draw() : removeEventListener('resize', onResize));
   addEventListener('resize', onResize);
   document.fonts?.ready.then(() => el.querySelector('.road') && draw());
-  ignite = null; // l'embrasement ne se joue qu'une fois
   $$('.chapter', el).forEach((d) => d.addEventListener('toggle', () => {
     openChapters[d.dataset.c] = d.open;
     if (d.open) draw();

@@ -1,6 +1,6 @@
 // Générateur de phrases, exercice « reconstituer » et défi du jour.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, confetti, countUp, pulse, floatXp, toast, burst, ICONS } from './ui.js';
-import { addXp, get, save, dayKey, markRoad, starsFor, bump } from './store.js';
+import { addXp, get, save, dayKey, markRoad, STEP_PASS, bump } from './store.js';
 import { mountTyping, normAnswer } from './keyboard.js';
 import { meaningOf, showPeek, peekAttr } from './peek.js';
 import { generate, TENSE_LABEL, STYLE_LABEL, FORM_LABEL } from './generator.js';
@@ -602,14 +602,19 @@ export function roadPhrases(el, step) {
   phraseSeries(el, list, (clean) => {
     const xp = (typed ? 10 : 6) + clean * (typed ? 3 : 2);
     addXp(xp);
-    markRoad(step.id, starsFor(clean / list.length));
-    sfx.win();
-    confetti();
+    // trois phrases : deux justes suffisent (67 %, l'arrondi le plus proche du seuil de 70 %)
+    const ok = clean >= Math.round(list.length * STEP_PASS);
+    if (ok) {
+      markRoad(step.id);
+      sfx.win();
+      confetti();
+    }
     el.innerHTML = `
       <div class="result screen">
-        <div class="big-glyph kr">${C.id === 'ja' ? '完了！' : '완료!'}</div>
+        <div class="big-glyph kr">${ok ? (C.id === 'ja' ? '完了！' : '완료!') : C.id === 'ja' ? 'もう一度' : '다시 한번'}</div>
         <h2>${esc(tr(step.title))}</h2>
         <p class="muted">${t('daily.summary', { n: clean, total: list.length })}</p>
+        <span class="step-verdict ${ok ? 'pass' : 'fail'}">${ok ? t('step.passed') : t('step.failedN', { n: Math.round(list.length * STEP_PASS), total: list.length })}</span>
         <div class="xp-won">+<span class="n">0</span> XP</div>
         <div class="stack">
           <button class="btn primary again">${t('playAgain')}</button>

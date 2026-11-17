@@ -104,14 +104,15 @@ export function reset() {
 }
 
 // ---------- Dates ----------
-/** Parcours : enregistre une étape réussie (on garde le meilleur nombre d'étoiles). */
-export function markRoad(id, stars = 1) {
+/** Une étape du parcours est validée à partir de 70 % de réponses justes du premier coup. */
+export const STEP_PASS = 0.7;
+/** Parcours : enregistre une étape validée. */
+export function markRoad(id) {
   if (!id) return;
   state.road ||= {};
-  state.road[id] = Math.max(state.road[id] || 0, stars);
+  state.road[id] = 1;
   save();
 }
-export const starsFor = (ratio) => (ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1);
 
 // ---------- Compteurs (succès) ----------
 /** Ajoute n à un compteur. */

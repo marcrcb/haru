@@ -2007,3 +2007,20 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
 @media (min-width: 900px) { #tabs { background-image: var(--wave); background-attachment: fixed; } }
 /* Safari iOS ignore les fonds fixes : le motif défile avec la page et les bandeaux collants restent unis */
 @supports (-webkit-touch-callout: none) { body { background-attachment: scroll; } .topbar, .ru-stick, #tabs { background-image: none !important; } }
+
+/* ===== Version 71 : sans platine ni étoiles =====
+   Examen réussi : sceau 합 / 合 comme les étapes ; module validé : sceau dans l'en-tête ;
+   bandeau « étape validée / à refaire » en fin de série ; cartes mémoire teintées pendant qu'elles penchent. */
+.rn.exam.done .rn-btn { position: relative; color: var(--shu); background: radial-gradient(circle, var(--shu-soft) 0 55%, transparent 56%); border: 0; box-shadow: none; transform: rotate(-8deg); animation: popIn .45s var(--spring) both; }
+.rn.exam.done .rn-btn::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; border: 3px solid var(--shu); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4.5px var(--shu); opacity: .9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rn.exam.done .rn-btn { color: var(--shu); } }
+:root[data-theme="dark"] .rn.exam.done .rn-btn { color: var(--shu); }
+.ru.complete .ru-count { min-width: 0; padding: 0; background: none; color: var(--shu); transform: rotate(-8deg); }
+.ru.complete .ru-count .seal-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 1rem; border: 2px solid var(--shu); box-shadow: inset 0 0 0 2px var(--card), inset 0 0 0 3px var(--shu); }
+.step-verdict, .exam-verdict { display: inline-block; justify-self: center; padding: 5px 14px; border-radius: 99px; font-weight: 800; font-size: .85rem; letter-spacing: .02em; text-transform: none; box-shadow: none; }
+.step-verdict.pass, .exam-verdict.pass { color: var(--ok); background: var(--ok-soft); }
+.step-verdict.fail, .exam-verdict.fail { color: var(--ko); background: var(--ko-soft); }
+.step-verdict.fail { max-width: 32ch; border-radius: 14px; text-align: center; }
+.flip[data-lean="right"] .back { box-shadow: inset 0 0 0 3px var(--ok); background: color-mix(in srgb, var(--ok-soft) 80%, var(--card)); }
+.flip[data-lean="left"] .back { box-shadow: inset 0 0 0 3px var(--ko); background: color-mix(in srgb, var(--ko-soft) 80%, var(--card)); }
+.flip .back { transition: background-color .15s, box-shadow .15s; }

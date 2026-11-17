@@ -1,4 +1,4 @@
-// Examens : un par module (réussi, il fait passer le module au platine) et un examen final
+// Examens : un par module (réussi, il valide le module) et un examen final
 // qui porte sur tout ce qui est terminé au moment où on le lance.
 import { $, esc, shuffle, sfx } from './ui.js';
 import * as store from './store.js';
@@ -196,7 +196,7 @@ export function examScreen(el, q) {
   }
 
   el.innerHTML = `
-    <div class="screen result exam-intro ${!final && store.examPassed(unit.id) ? 'plat' : ''}">
+    <div class="screen result exam-intro">
       <div class="exam-seal"><span class="kr">${course().id === 'ja' ? (final ? '総合' : '試験') : final ? '종합' : '시험'}</span></div>
       <span class="eyebrow">${final ? t('final.eyebrow') : t('exam.eyebrow')}</span>
       <h2>${esc(title)}</h2>

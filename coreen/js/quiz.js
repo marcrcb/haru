@@ -2,7 +2,7 @@
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, stopSpeaking } from './ui.js';
-import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, streakOf, bump, record } from './store.js';
+import { addXp, review, pickForReview, mistakes, get, save, markRoad, STEP_PASS, box, streakOf, bump, record } from './store.js';
 import { reviewItems, reviewCount, nextReviewIn, letterId, kanjiId, REVIEW_MAX } from './review.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
@@ -505,7 +505,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     if (exam) xp += exam.onEnd?.(pct, passed) || 0;
     addXp(xp);
     if (ratio === 1 && total >= 5) bump('perfect');
-    if (step && !exam) markRoad(step, starsFor(ratio));
+    const stepOk = ratio >= STEP_PASS - 1e-9;
+    if (step && !exam && stepOk) markRoad(step);
     if (exam ? passed : ratio >= 0.7) {
       sfx.win();
       confetti();
@@ -516,7 +517,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
          <h2>${passed ? t('exam.bravo') : t('exam.almost')}</h2>
          <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : exam.failText ? esc(exam.failText) : t('exam.need', { n: total - Math.ceil(total * exam.pass - 1e-9) })}</p>`
       : `<h2>${ratio === 1 ? t('quiz.perfect') : ratio >= 0.7 ? t('quiz.great') : ratio >= 0.4 ? t('quiz.good') : t('quiz.keepGoing')}</h2>
-         <p class="muted">${esc(title || '')}</p>`;
+         <p class="muted">${esc(title || '')}</p>
+         ${step ? `<span class="step-verdict ${stepOk ? 'pass' : 'fail'}">${stepOk ? t('step.passed') : t('step.failed', { n: Math.round(STEP_PASS * 100) })}</span>` : ''}`;
     // Révision : « Séance suivante (n fautes) », ou rien quand il n'y a plus de faute.
     const again2 = againLabel ? againLabel() : undefined;
     el.querySelector('.quiz').classList.remove('kb-mode');

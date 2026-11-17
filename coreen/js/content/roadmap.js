@@ -11,7 +11,7 @@
 //   dictation { theme }        dictée : écrire au clavier les mots entendus
 //   ptype   { title, crit }    trois phrases à écrire entièrement au clavier
 //   speak   { set | theme }    prononcer à voix haute les lettres d'un jeu ou les mots d'un thème (le téléphone écoute)
-// Chaque module se termine par un examen (ajouté automatiquement dans road.js) : réussi, il passe au platine.
+// Chaque module se termine par un examen (ajouté automatiquement dans road.js) : réussi, il valide le module.
 // Les modules sont rangés en chapitres (CHAPTERS, en bas du fichier).
 // L'identifiant d'une étape (id) sert de clé de sauvegarde : ne pas le changer.
 

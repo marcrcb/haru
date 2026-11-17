@@ -1,6 +1,6 @@
 // Cartes mémoire (avec glissement) et jeu des paires.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, confetti, countUp, pulse, burst, ICONS } from './ui.js';
-import { addXp, review, pickForReview, get, save, markRoad, starsFor } from './store.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, confetti, countUp, pulse, burst, ICONS, reducedMotion } from './ui.js';
+import { addXp, review, pickForReview, get, save, markRoad } from './store.js';
 import { course, t, gloss } from './course.js';
 import { wordsOf, sizeCls, SERIES } from './quiz.js';
 
@@ -59,7 +59,8 @@ export function flashcards(el, theme, step) {
     drag(card, flip, (right) => decide(right ? 1 : 0));
   }
 
-  function decide(ok) {
+  /** ok : je savais (à droite, vert) ou à revoir (à gauche, rouge). Avec un bouton, la carte penche d'abord comme sous le doigt. */
+  function decide(ok, tapped = false) {
     const card = $('.flip', deckEl);
     if (!card || card.dataset.gone) return;
     card.dataset.gone = '1';
@@ -68,20 +69,30 @@ export function flashcards(el, theme, step) {
       known++;
       sfx.ok();
     } else sfx.ko();
-    card.classList.add(ok ? 'out-right' : 'out-left');
+    const out = () => card.classList.add(ok ? 'out-right' : 'out-left');
+    let wait = 280;
+    if (tapped && !reducedMotion()) {
+      const dx = ok ? 70 : -70;
+      const turn = card.classList.contains('flipped') ? ' rotateY(180deg)' : '';
+      card.dataset.lean = ok ? 'right' : 'left';
+      card.style.transition = 'transform .2s ease-out';
+      card.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)${turn}`;
+      setTimeout(() => { card.style.transition = ''; card.style.transform = ''; out(); }, 230);
+      wait += 230;
+    } else out();
     setTimeout(() => {
       i++;
       if (i < deck.length) show();
       else finish();
-    }, 280);
+    }, wait);
   }
 
-  $$('.card-actions .btn', el).forEach((b) => b.addEventListener('click', () => decide(Number(b.dataset.k))));
+  $$('.card-actions .btn', el).forEach((b) => b.addEventListener('click', () => decide(Number(b.dataset.k), true)));
 
   function finish() {
     const xp = known + 5;
     addXp(xp);
-    if (step) markRoad(step, starsFor(known / deck.length));
+    if (step) markRoad(step); // auto-évaluation : aller au bout du paquet suffit
     if (known / deck.length >= 0.7) confetti();
     sfx.win();
     el.innerHTML = `
