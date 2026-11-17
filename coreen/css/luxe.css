@@ -198,6 +198,10 @@
 :root[data-skin="luxe"] .ru.plat .ru-sub { color: var(--plat-ink); }
 :root[data-skin="luxe"] .ru.plat .ru-count { color: var(--plat-ink); background: rgb(60 40 8 / .14); }
 :root[data-skin="luxe"] .ru.plat .rn.done .rn-btn { color: var(--plat-ink); background: var(--plat); background-size: 200% 100%; border-color: var(--plat-deep); }
+/* Exercices d'un module en or : même animation que l'examen (l'or défile en continu, en plus du reflet) */
+:root[data-skin="luxe"] .ru.plat .rn.done .rn-btn { animation: popIn .45s var(--spring) both, shimmer 3.2s linear infinite; }
+:root[data-skin="luxe"].no-motion .ru.plat .rn.done .rn-btn { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-skin="luxe"] .ru.plat .rn.done .rn-btn { animation: none; } }
 :root[data-skin="luxe"] .rn.exam.wait .rn-btn { color: var(--muted); background: var(--surface-2); }
 :root[data-skin="luxe"] .chapter.complete > .ch-head { border-color: var(--hair-strong); }
 :root[data-skin="luxe"] .chapter.complete > .ch-head .ch-glyph { color: var(--gold-hi); background: var(--accent-soft); }
