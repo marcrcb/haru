@@ -33,9 +33,9 @@ const VIEWPORTS = [[390, 844], [1280, 800]];
           if (!ok) failures.push(`${where} : écran vide`);
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
           if (overflow > 1) failures.push(`${where} : débordement horizontal de ${overflow}px`);
-          if (w < 900) {
+          if (w < 900) { // (les traductions floutées exprès, à dévoiler d'un toucher, ne comptent pas)
             await page.addScriptTag({ content: axeSource });
-            const bad = await page.evaluate(async () => (await axe.run(document, { runOnly: ['color-contrast'] })).violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(' ')} (${n.any[0]?.data?.contrastRatio})`)));
+            const bad = await page.evaluate(async () => (await axe.run({ include: [document], exclude: [['.reveal:not(.shown) .blurred']] }, { runOnly: ['color-contrast'] })).violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(' ')} (${n.any[0]?.data?.contrastRatio})`)));
             if (bad.length) failures.push(`${where} : contraste insuffisant : ${bad.slice(0, 3).join(', ')}`);
           }
           for (const e of errors) failures.push(`${where} : erreur : ${e}`);
