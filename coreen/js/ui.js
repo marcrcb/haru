@@ -77,6 +77,34 @@ export function naturalUrl(text) {
   const h = audioHash(audioKey(text));
   return voiceIndex[id]?.has(h) ? `audio/${id}/${h}.mp3` : null;
 }
+/**
+ * Phrase sans enregistrement entier (phrase générée) : on la découpe en morceaux enregistrés (mot avec sa
+ * particule, verbe conjugué…), du plus long au plus court, pour les enchaîner. null s'il manque un morceau :
+ * on ne mélange pas deux voix dans une même phrase.
+ */
+export function naturalChain(text) {
+  const id = course().id;
+  const idx = voiceIndex[id];
+  if (!idx || get().settings.natural === false) return null;
+  const pieces = String(text).normalize('NFC').split(/[\s.,?!。、？！~〜…]+/).filter(Boolean);
+  const urls = [];
+  for (const piece of pieces) {
+    const ch = [...piece];
+    let i = 0;
+    while (i < ch.length) {
+      let j = ch.length;
+      // un morceau d'au moins deux signes, sauf s'il forme à lui seul un mot de la phrase
+      for (; j > i; j--) {
+        if (j - i < 2 && ch.length > 1) { j = i; break; }
+        if (idx.has(audioHash(ch.slice(i, j).join('')))) break;
+      }
+      if (j <= i) return null;
+      urls.push(`audio/${id}/${audioHash(ch.slice(i, j).join(''))}.mp3`);
+      i = j;
+    }
+  }
+  return urls.length > 1 ? urls : null;
+}
 // Un seul lecteur, réutilisé : sur iPhone, un lecteur débloqué par un premier toucher le reste ensuite.
 let player = null;
 let playing = false;
@@ -98,9 +126,11 @@ export function speak(text, rate) {
   const slow = last.key === key && now - last.at < 4000 && !last.slow;
   last = { key, at: now, slow };
   const url = naturalUrl(text);
-  if (!url) return ttsSpeak(text, rate, slow);
+  const chain = url ? null : naturalChain(text);
+  if (!url && !chain) return ttsSpeak(text, rate, slow);
   const a = voicePlayer();
   if (!a) return ttsSpeak(text, rate, slow);
+  const queue = chain ? chain.slice(1) : [];
   stopSpeaking();
   const turn = ++voiceTurn;
   let failed = false;
@@ -111,8 +141,16 @@ export function speak(text, rate) {
     ttsSpeak(text, rate, slow);
   };
   a.onerror = fallback;
-  a.onended = () => { if (turn === voiceTurn) playing = false; };
-  a.src = url;
+  a.onended = () => {
+    if (turn !== voiceTurn) return;
+    if (!queue.length) { playing = false; return; }
+    // morceau suivant, presque sans blanc (les enregistrements ont déjà un court silence)
+    a.src = queue.shift();
+    a.playbackRate = a.defaultPlaybackRate;
+    const q = a.play();
+    if (q) q.catch((e) => { if (e?.name !== 'AbortError') fallback(); });
+  };
+  a.src = url || chain[0];
   // vitesse du réglage (0,85 = vitesse naturelle de l'enregistrement), plus lente au deuxième toucher
   a.playbackRate = slow ? 0.72 : Math.max(0.7, Math.min(1.25, (rate ?? get().settings.rate) / 0.85));
   a.defaultPlaybackRate = a.playbackRate;

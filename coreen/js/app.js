@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '73'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '74'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -831,6 +831,7 @@ function settings(el) {
           <span class="muted small">${t('set.autoHelp')}</span></div>
         <div class="set-row col"><span>${t('set.textSize', { lang: tr(C.name).toLowerCase() })}</span>${seg('krLarge', [['false', t('set.normal')], ['true', t('set.large')]], s.krLarge)}</div>
         ${toggle('motion', t('set.motion'), s.motion)}
+        ${canFullscreen() ? toggle('fullscreen', t('set.fullscreen'), !!s.fullscreen) : ''}
       </div>
 
       <h2>${t('set.learning')}</h2>
@@ -964,6 +965,7 @@ function settings(el) {
     }
     s[inp.name] = inp.checked;
     store.save();
+    if (inp.name === 'fullscreen') (inp.checked ? enterFullscreen() : exitFullscreen());
     applySettings();
     dispatchEvent(new Event('haru:settings'));
     sfx.tap();
@@ -1053,6 +1055,25 @@ function applySettings() {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
     m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];
   });
+}
+
+// ---------- Plein écran ----------
+// Le navigateur n'accepte le plein écran qu'après un geste : réglage activé, on le remet au premier toucher
+// de chaque lancement. Si on en sort ensuite (geste retour), il ne revient qu'au lancement suivant.
+const fsRoot = document.documentElement;
+function canFullscreen() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
+const isFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function enterFullscreen() {
+  if (isFullscreen() || !canFullscreen()) return;
+  const req = fsRoot.requestFullscreen?.bind(fsRoot) || fsRoot.webkitRequestFullscreen?.bind(fsRoot);
+  try { req?.({ navigationUI: 'hide' })?.catch?.(() => {}); } catch { /* refusé : on restera en fenêtre */ }
+}
+function exitFullscreen() {
+  if (!isFullscreen()) return;
+  (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
+}
+if (store.get().settings.fullscreen) {
+  addEventListener('click', () => { if (store.get().settings.fullscreen) enterFullscreen(); }, { once: true, capture: true });
 }
 
 // ---------- Démarrage ----------

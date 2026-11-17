@@ -7,11 +7,14 @@
 Chaque enregistrement est réécouté par Whisper (faster-whisper « medium ») : il n'est publié que si
 ce qui est entendu correspond au texte (sinon l'application garde la voix du téléphone pour ce texte).
 Relançable : les textes déjà traités (publiés ou écartés) sont sautés.
+Deuxième écoute : Whisper entend mal les mots isolés très courts (밥 → 다). Si la première écoute échoue,
+on réécoute en lui donnant le mot attendu comme indice ; les mêmes seuils s'appliquent.
+RECHECK=1 : repasse une fois les textes écartés avant cette deuxième écoute.
 
 Usage : node tools/audio-list.mjs > list.json
         python tools/make-audio.py ko list.json audio/ko [limite]
 """
-import io, json, re, subprocess, sys, time, unicodedata
+import io, json, os, re, subprocess, sys, time, unicodedata
 from pathlib import Path
 
 import numpy as np
@@ -94,15 +97,21 @@ def cer(a: str, b: str) -> float:
     return d[len(b)] / len(a)
 
 
-def check(a: np.ndarray, say: str):
+def listen(a: np.ndarray, say: str, hint: bool):
     a16 = a.astype(np.float32) if SR == 16000 else resample(a)
     a16 = np.concatenate([np.zeros(8000, np.float32), a16, np.zeros(8000, np.float32)])  # un peu de silence autour : Whisper entend mieux
-    segs, _ = asr.transcribe(a16, language=course, beam_size=5, condition_on_previous_text=False, without_timestamps=True)
+    segs, _ = asr.transcribe(a16, language=course, beam_size=5, condition_on_previous_text=False, without_timestamps=True,
+                             initial_prompt=say if hint else None)
     heard = ''.join(s.text for s in segs).strip()
     target, got = norm(say), norm(heard)
     e = cer(target, got)
     ok = (e == 0) if len(target) <= 2 else e <= (0.2 if course == 'ko' else 0.25)
     return ok, heard, round(e, 3)
+
+
+def check(a: np.ndarray, say: str):
+    first = listen(a, say, False)
+    return first if first[0] else listen(a, say, True)
 
 
 def resample(a: np.ndarray) -> np.ndarray:
@@ -125,7 +134,8 @@ for it in items:
         print('collision ignorée :', it['key'], seen[h])
         continue
     seen[h] = it['key']
-    if it['key'] not in qa:
+    q = qa.get(it['key'])
+    if q is None or (os.environ.get('RECHECK') and not q.get('ok') and not q.get('rechecked')):
         todo.append((h, it))
 if limit:
     todo = todo[:limit]
@@ -137,7 +147,7 @@ for n, (h, it) in enumerate(todo, 1):
         ok, heard, e = check(a, it['say'])
         if ok:
             to_mp3(a, out_dir / f'{h}.mp3')
-        qa[it['key']] = {'h': h, 'say': it['say'], 'heard': heard, 'cer': e, 'ok': ok}
+        qa[it['key']] = {'h': h, 'say': it['say'], 'heard': heard, 'cer': e, 'ok': ok, **({'rechecked': True} if os.environ.get('RECHECK') else {})}
     except Exception as ex:  # un texte qui échoue ne bloque pas les autres
         qa[it['key']] = {'h': h, 'say': it['say'], 'error': str(ex)[:200], 'ok': False}
     if n % 25 == 0 or n == len(todo):
