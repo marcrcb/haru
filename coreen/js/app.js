@@ -43,7 +43,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '58'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '59'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -228,7 +228,17 @@ function words(el) {
     </div>`;
   const grow = (root) => requestAnimationFrame(() => requestAnimationFrame(() => $$('.mini-bar', root).forEach((b) => b.classList.add('go'))));
   $$('.cat', el).forEach((d) => d.addEventListener('toggle', () => {
-    if (d.open) { openCats.add(d.dataset.c); grow(d); sfx.tap(); } else openCats.delete(d.dataset.c);
+    if (!d.open) return openCats.delete(d.dataset.c);
+    openCats.add(d.dataset.c);
+    sfx.tap();
+    // À chaque ouverture, les tuiles réapparaissent en rebond et les barres se remplissent de nouveau.
+    const fills = $$('.theme-grid .mini-bar i', d);
+    fills.forEach((i) => { i.style.transition = 'none'; i.parentNode.classList.remove('go'); }); // barres vidées d'un coup
+    d.classList.remove('reveal');
+    void d.offsetWidth; // repart de zéro (relance les animations CSS)
+    fills.forEach((i) => { i.style.transition = ''; });
+    d.classList.add('reveal');
+    grow(d);
   }));
   el.addEventListener('click', (e) => {
     const b = e.target.closest('.theme-tile, .theme-resume');

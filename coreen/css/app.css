@@ -1445,9 +1445,10 @@ body.bare .topbar { border-bottom-color: transparent; }
   display: grid; align-content: start; gap: 3px; padding: 11px 12px 12px; min-width: 0; text-align: left;
   border-radius: 16px; background: color-mix(in srgb, var(--tc) 8%, var(--surface));
   border: 1.5px solid color-mix(in srgb, var(--tc) 30%, var(--line)); box-shadow: 0 4px 0 color-mix(in srgb, var(--tc) 35%, var(--line));
-  animation: popIn .35s var(--spring) both; animation-delay: calc(var(--j, 0) * 30ms);
   transition: transform .12s var(--ease), box-shadow .12s;
 }
+/* Rejouée à chaque ouverture de la famille (classe remise par app.js) */
+.cat.reveal .theme-tile { animation: popIn .35s var(--spring) both; animation-delay: calc(var(--j, 0) * 30ms); }
 .theme-tile.pressed { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--tc) 35%, var(--line)); }
 .tt-glyph { font-size: calc(1.15rem * var(--krs)); font-weight: 800; color: var(--tc); line-height: 1.2; }
 .theme-tile b { font-size: .92rem; line-height: 1.2; overflow-wrap: anywhere; }
