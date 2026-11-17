@@ -27,7 +27,7 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Sans clavier** : un bouton clavier, en haut des exercices à écrire, remplace le clavier par les morceaux de la réponse à remettre dans l’ordre (ou, pour une seule lettre, à choisir). Le choix est mémorisé.
 - **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
 - **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
-- **Édition Noir & Or** (Réglages → Apparence) : design luxe en option, noir mat et filets dorés, titres en Playfair Display, sons feutrés, et un bilan « À retenir » en fin de série (chaque réponse ratée, à relire et à réécouter). Tout le style est dans `css/luxe.css`, limité à `:root[data-skin="luxe"]` : désactivée, l'application garde exactement son design d'origine.
+- **Édition Noir & Or** (Réglages → Apparence) : design luxe en option, noir mat, or et bronze, avec les mêmes reliefs 3D, la même police et les mêmes animations que le design d'origine, plus des effets dorés (reflets, rayons de célébration). Les dessins des mots deviennent des gravures au trait fin doré (`js/goldpic.js`), les modules maîtrisés passent à l'or au lieu du platine, et un bilan « À retenir » clôt chaque série. Tout le style est dans `css/luxe.css`, limité à `:root[data-skin="luxe"]` : désactivée, l'application garde exactement son design d'origine.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
 
 ## Organisation du code
@@ -64,8 +64,6 @@ Pour la voix : si aucune voix coréenne n’est installée, en ajouter une dans 
 Après une modification, changer `VERSION` dans `sw.js` et `APP_VERSION` dans `js/app.js` (affiché en bas des Réglages) pour que les téléphones récupèrent les nouveaux fichiers.
 
 ## Crédits
-
-La police Playfair Display (`fonts/playfair-*.woff2`, édition Noir & Or) est sous licence [SIL Open Font License 1.1](https://openfontlicense.org).
 
 
 L’ordre des traits des kana et des kanji vient de [KanjiVG](https://kanjivg.tagaini.net) (© Ulrich Apel), sous licence [Creative Commons Attribution-Share Alike 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Les fichiers `js/content/strokes.ja.js` et `js/content/strokes.kanji.js` en sont dérivés et restent sous cette licence.

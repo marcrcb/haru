@@ -7,6 +7,7 @@ import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
 import { THEMES } from './content/concepts.js';
 import { pictureOf } from './content/pictures.js';
+import { goldPicture } from './goldpic.js';
 import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
 import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
@@ -59,6 +60,12 @@ export function seeBeforeSaying(questions) {
     }
   });
   return [...out, ...later];
+}
+
+/** Dessin d'un mot : l'emoji d'origine, ou sa gravure au trait doré dans l'édition Noir & Or. */
+function picHtml(pic) {
+  const gold = luxe() ? goldPicture(pic) : null;
+  return gold ? `<img class="pic pic-gold" src="${gold}" alt="" aria-hidden="true">` : `<span class="pic" aria-hidden="true">${pic}</span>`;
 }
 
 export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
@@ -169,7 +176,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       stage.innerHTML = `${head}
         <div class="options ${q.options.length > 4 ? 'many' : ''} ${q.pics ? 'pics' : ''}">
           ${q.options.map((o, i) => (o.pic
-            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}"><span class="pic" aria-hidden="true">${o.pic}</span><span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
+            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}">${picHtml(o.pic)}<span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
             : `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${esc(o.label)}</button>`)).join('')}
         </div>`;
       $$('.opt', stage).forEach((b) => b.addEventListener('click', () => {

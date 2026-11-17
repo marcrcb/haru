@@ -15,7 +15,7 @@ const DEFS = [
   { id: 'words', g: ['단어', '単語'], title: L('Vocabulaire', 'Vocabulary'), desc: L('Maîtriser {n} mots', 'Master {n} words'), steps: [10, 50, 150, 350, 600], value: () => store.mastered() },
   { id: 'lessons', g: ['공부', '勉強'], title: L('Rat de bibliothèque', 'Bookworm'), desc: L('Lire {n} leçons du guide', 'Read {n} guide lessons'), steps: [5, 15, 25, 40, 50], value: (x) => Object.keys(x.st.read || {}).length },
   { id: 'modules', g: ['길', '道'], title: L('Sur la route', 'On the road'), desc: L('Terminer {n} modules du parcours', 'Complete {n} modules'), steps: [1, 5, 12, 25, 40], value: (x) => x.R.units.filter((u) => u.complete).length },
-  { id: 'plat', g: ['백금', '白金'], title: L('Platine', 'Platinum'), desc: L('Réussir l’examen de {n} modules', 'Pass the exam of {n} modules'), steps: [1, 3, 8, 18, 35], value: (x) => x.R.units.filter((u) => u.plat).length },
+  { id: 'plat', g: ['백금', '白金'], gOr: ['황금', '黄金'], title: L('Platine', 'Platinum'), titleOr: L('Or massif', 'Solid gold'), desc: L('Réussir l’examen de {n} modules', 'Pass the exam of {n} modules'), steps: [1, 3, 8, 18, 35], value: (x) => x.R.units.filter((u) => u.plat).length },
   { id: 'stars', g: ['별', '星'], title: L('Pluie d’étoiles', 'Star shower'), desc: L('Récolter {n} étoiles dans le parcours', 'Collect {n} stars on the path'), steps: [10, 40, 100, 220, 400], value: (x) => x.R.starCount },
   { id: 'typed', g: ['타자', '入力'], title: L('Dactylo', 'Typist'), desc: L('Écrire {n} bonnes réponses au clavier', 'Type {n} correct answers'), steps: [20, 100, 300, 800, 2000], value: () => store.stat('typed') },
   { id: 'dictation', g: ['귀', '耳'], title: L('Oreille fine', 'Sharp ear'), desc: L('Réussir {n} dictées', 'Get {n} dictations right'), steps: [10, 50, 150, 400, 1000], value: () => store.stat('dictation') },
@@ -44,7 +44,8 @@ export function achievements() {
       if (d.lower) progress = value > 0 ? Math.max(0, Math.min(1, (prev - value) / (prev - next))) : 0;
       else progress = Math.max(0, Math.min(1, (value - prev) / (next - prev)));
     }
-    return { ...d, glyph: d.g[ja ? 1 : 0], value, tier, next, progress };
+    const or = store.get().settings.luxe; // édition Noir & Or : le badge des examens devient « Or massif »
+    return { ...d, title: (or && d.titleOr) || d.title, glyph: ((or && d.gOr) || d.g)[ja ? 1 : 0], value, tier, next, progress };
   });
 }
 

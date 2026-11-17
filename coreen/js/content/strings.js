@@ -76,7 +76,7 @@ export const STRINGS = {
     'set.appearance': 'Apparence', 'set.theme': 'Thème', 'set.auto': 'Automatique', 'set.light': 'Clair', 'set.dark': 'Sombre',
     'set.autoHelp': 'Automatique suit le réglage du téléphone.', 'set.textSize': 'Taille du texte en {lang}', 'set.normal': 'Normale', 'set.large': 'Grande',
     'set.motion': 'Animations',
-    'set.luxe': 'Édition Noir & Or', 'set.luxeHelp': 'Design luxe : noir mat, filets dorés, typographie raffinée, et un bilan de tes erreurs à la fin de chaque série. Désactive-la pour retrouver le design d’origine.', 'set.luxeTheme': 'L’édition Noir & Or est toujours sombre.', 'set.luxeOn': 'Édition Noir & Or activée', 'set.luxeOff': 'Design d’origine rétabli',
+    'set.luxe': 'Édition Noir & Or', 'set.luxeHelp': 'Design luxe : noir mat et or, dessins des mots gravés au trait doré, modules maîtrisés en or, et un bilan de tes erreurs à la fin de chaque série. Désactive-la pour retrouver le design d’origine.', 'set.luxeTheme': 'L’édition Noir & Or est toujours sombre.', 'set.luxeOn': 'Édition Noir & Or activée', 'set.luxeOff': 'Design d’origine rétabli',
     'misses.title': 'À retenir', 'misses.sub': '{n} à revoir',
     'set.learning': 'Apprentissage', 'set.goal': 'Objectif quotidien (XP)', 'set.quizLen': 'Questions par série', 'set.quizLenHelp': 'Quiz, cartes mémoire et quiz d’écriture.',
     'set.roman': 'Afficher la romanisation',
@@ -123,6 +123,8 @@ export const STRINGS = {
     'road.write': 'Tracé', 'road.type': 'Au clavier', 'road.dictation': 'Dictée', 'road.ptype': '3 phrases à écrire',
     'road.chapterN': 'Chapitre {n}', 'road.chMastered': 'Maîtrisé', 'road.chPlatTitle': 'Chapitre platine !', 'road.chPlatText': '{name} · tous les modules sont en platine. Chapitre maîtrisé !', 'road.plat': 'Platine', 'road.platN': '{n} en platine',
     'road.platTitle': 'Module platine !', 'road.platText': '{name} · examen réussi, le module brille désormais.',
+    'road.unitValid@or': '{name} · examen réussi : le module passe à l’or et la suite se débloque.', 'road.chPlatTitle@or': 'Chapitre en or !', 'road.chPlatText@or': '{name} · tous les modules sont en or. Chapitre maîtrisé !',
+    'road.plat@or': 'Or', 'road.platN@or': '{n} en or', 'road.platTitle@or': 'Module en or !', 'road.platText@or': '{name} · examen réussi, le module est désormais en or.',
 
     // ---------- Version 31 : oral, paires, clavier latin, critères ----------
     'type.placeholderRom': 'abc', 'type.rom': 'Comment ça se lit ? Écris-le en lettres latines', 'type.romSyl': 'Écris la lecture de cette syllabe', 'type.romWord': 'Écris la lecture de ce mot en lettres latines',
@@ -237,7 +239,7 @@ export const STRINGS = {
     'set.appearance': 'Appearance', 'set.theme': 'Theme', 'set.auto': 'Automatic', 'set.light': 'Light', 'set.dark': 'Dark',
     'set.autoHelp': 'Automatic follows your phone’s setting.', 'set.textSize': '{lang} text size', 'set.normal': 'Normal', 'set.large': 'Large',
     'set.motion': 'Animations',
-    'set.luxe': 'Black & Gold edition', 'set.luxeHelp': 'Luxury design: matte black, gold lines, refined typography, and a review of your mistakes after each set. Turn it off to get the original design back.', 'set.luxeTheme': 'The Black & Gold edition is always dark.', 'set.luxeOn': 'Black & Gold edition on', 'set.luxeOff': 'Original design restored',
+    'set.luxe': 'Black & Gold edition', 'set.luxeHelp': 'Luxury design: matte black and gold, word pictures engraved in gold, mastered modules turned gold, and a review of your mistakes after each set. Turn it off to get the original design back.', 'set.luxeTheme': 'The Black & Gold edition is always dark.', 'set.luxeOn': 'Black & Gold edition on', 'set.luxeOff': 'Original design restored',
     'misses.title': 'To remember', 'misses.sub': '{n} to review',
     'set.learning': 'Learning', 'set.goal': 'Daily goal (XP)', 'set.quizLen': 'Questions per round', 'set.quizLenHelp': 'Quizzes, flashcards and script quizzes.',
     'set.roman': 'Show romanization',
@@ -284,6 +286,8 @@ export const STRINGS = {
     'road.write': 'Tracing', 'road.type': 'Keyboard', 'road.dictation': 'Dictation', 'road.ptype': '3 sentences to write',
     'road.chapterN': 'Chapter {n}', 'road.chMastered': 'Mastered', 'road.chPlatTitle': 'Platinum chapter!', 'road.chPlatText': '{name} · every module is platinum. Chapter mastered!', 'road.plat': 'Platinum', 'road.platN': '{n} platinum',
     'road.platTitle': 'Platinum module!', 'road.platText': '{name} · exam passed, the module now shines.',
+    'road.unitValid@or': '{name} · exam passed: the unit turns gold and the next one unlocks.', 'road.chPlatTitle@or': 'Golden chapter!', 'road.chPlatText@or': '{name} · every module is gold. Chapter mastered!',
+    'road.plat@or': 'Gold', 'road.platN@or': '{n} gold', 'road.platTitle@or': 'Golden module!', 'road.platText@or': '{name} · exam passed, the module is now gold.',
 
     // ---------- Version 31: speaking, pairs, Latin keyboard, criteria ----------
     'type.placeholderRom': 'abc', 'type.rom': 'How is it read? Write it in Latin letters', 'type.romSyl': 'Write the reading of this syllable', 'type.romWord': 'Write the reading of this word in Latin letters',
