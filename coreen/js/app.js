@@ -12,6 +12,8 @@ import { examScreen } from './exam.js';
 import { achievements, newTiers, TIERS } from './achievements.js';
 import { listenSupported } from './speech.js';
 import { reviewCount } from './review.js';
+import { placementScreen } from './placement.js';
+import { officialLevel } from './road.js';
 
 const view = $('#view');
 const titleEl = $('#title');
@@ -33,6 +35,7 @@ const SCREENS = {
   lexicon: { title: () => t('title.lexicon'), tab: 'words', back: '#/words', render: lexicon },
   hquiz: { title: () => t('title.scriptQuiz', { name: tr(course().script.title) }), tab: 'hangul', back: '#/hangul', focus: true, render: (el, q) => scriptQuiz(el, q.set || Object.keys(course().script.sets)[0], q.step, q.mode) },
   exam: { title: () => t('title.exam'), tab: 'road', back: '#/road', focus: true, render: examScreen },
+  placement: { title: () => t('place.title'), tab: 'road', back: '#/road', focus: true, render: placementScreen },
   quiz: { title: () => t('title.quiz'), tab: 'words', back: '#/words', focus: true, render: (el, q) => vocabQuiz(el, q.t || 'all', q.mode, q.step) },
   cards: { title: () => t('title.cards'), tab: 'words', back: '#/words', focus: true, render: (el, q) => flashcards(el, q.t || 'all', q.step) },
   pairs: { title: () => t('title.pairs'), tab: 'words', back: '#/words', focus: true, render: (el, q) => pairs(el, q.step) },
@@ -44,7 +47,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '61'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '62'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -152,11 +155,68 @@ function welcome(el) {
   });
   $$('.w-choice', el).forEach((b) => b.addEventListener('click', () => {
     setCourse(b.dataset.c);
-    choosing = false;
     applySettings();
     sfx.win();
-    location.hash = '#/road';
-    route();
+    if (store.get().settings.onboarded) return finishWelcome('#/road');
+    welcomeGoal(el);
+  }));
+}
+
+/** Fin de l'accueil : on entre dans l'application. */
+function finishWelcome(hash) {
+  store.get().settings.onboarded = true;
+  store.save();
+  choosing = false;
+  location.hash = hash;
+  route();
+}
+
+// Objectif quotidien (en XP : une question réussie rapporte 2 à 4 XP)
+const GOALS = [[10, 5, 'goal.easy'], [20, 10, 'goal.regular'], [30, 15, 'goal.serious'], [50, 20, 'goal.intense']];
+
+function welcomeGoal(el) {
+  el.innerHTML = `
+    <div class="screen welcome onboard">
+      <span class="eyebrow">${t('onb.step', { n: 1, total: 2 })}</span>
+      <h1>${t('onb.goal')}</h1>
+      <p class="muted">${t('onb.goalSub')}</p>
+      <div class="w-choices goals">
+        ${GOALS.map(([xp, min, key], i) => `
+          <button class="w-choice" data-g="${xp}" style="--i:${i}; --tc: ${['var(--c-words)', 'var(--c-stats)', 'var(--c-home)', 'var(--c-hangul)'][i]}">
+            <span class="w-native">${min}<small> min</small></span>
+            <b>${t(key)}</b>
+            <span class="muted small">${t('goal.perDay', { xp })}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  $$('.w-choice', el).forEach((b) => b.addEventListener('click', () => {
+    store.get().goal = Number(b.dataset.g);
+    store.save();
+    sfx.tap();
+    welcomeLevel(el);
+  }));
+}
+
+function welcomeLevel(el) {
+  const script = tr(course().script.title);
+  const opts = [['new', 'onb.new', 'onb.newSub'], ['script', 'onb.script', 'onb.scriptSub'], ['basics', 'onb.basics', 'onb.basicsSub']];
+  el.innerHTML = `
+    <div class="screen welcome onboard">
+      <span class="eyebrow">${t('onb.step', { n: 2, total: 2 })}</span>
+      <h1>${t('onb.level')}</h1>
+      <p class="muted">${t('onb.levelSub')}</p>
+      <div class="onb-levels">
+        ${opts.map(([k, title, sub], i) => `
+          <button class="card onb-level" data-k="${k}" style="--i:${i}">
+            <span class="onb-dots" aria-hidden="true">${[0, 1, 2].map((d) => `<i class="${d <= i ? 'on' : ''}"></i>`).join('')}</span>
+            <span class="onb-text"><b>${t(title, { script })}</b><span class="muted small">${t(sub, { script })}</span></span>
+            <span class="chev">›</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  $$('.onb-level', el).forEach((b) => b.addEventListener('click', () => {
+    sfx.tap();
+    finishWelcome(b.dataset.k === 'new' ? '#/road' : `#/placement?k=${b.dataset.k}`);
   }));
 }
 
@@ -666,6 +726,19 @@ function profile(el) {
         </div>
       </section>
 
+      ${(() => {
+        const L = officialLevel();
+        if (!L.next && !L.reached) return '';
+        return `
+      <section class="card cefr-card">
+        <span class="eyebrow">${t('cefr.eyebrow')}</span>
+        <b>${L.next ? t(L.reached ? 'cefr.towardsFrom' : 'cefr.towards', { level: esc(L.next), from: esc(L.reached || '') }) : t('cefr.reached', { level: esc(L.reached) })}</b>
+        ${L.next ? `<div class="mini-bar"><i style="--w:${L.total ? L.done / L.total : 0}"></i></div>
+        <span class="muted small">${t('cefr.progress', { from: L.from, to: L.to, done: L.done, total: L.total })}</span>` : ''}
+        <span class="muted small">${t('cefr.note')}</span>
+      </section>`;
+      })()}
+
       <div class="stats3">
         <div class="stat"><b>${store.streak()}</b><span>${t('progress.streak')}</span></div>
         <div class="stat"><b>${active}</b><span>${t('progress.active')}</span></div>
@@ -758,6 +831,9 @@ function settings(el) {
 
       <h2>${t('set.learning')}</h2>
       <div class="card settings">
+        <div class="set-row col"><span>${t('set.goal')}</span>${seg('goal', GOALS.map(([xp, min]) => [xp, `${min} min`]), st.goal)}
+          <span class="muted small">${t('set.goalHelp', { xp: st.goal })}</span></div>
+        <a class="set-row set-link" href="#/placement"><span>${t('place.title')}</span><span class="muted small">${t('place.settings')}</span><span class="chev">›</span></a>
         ${toggle('roman', t('set.roman'), s.roman)}
         ${toggle('speech', t('set.speech'), s.speech !== false)}
         <div class="set-row col"><span class="muted small">${t(listenSupported() ? 'set.speechHelp' : 'set.speechNo')}</span></div>
@@ -818,7 +894,10 @@ function settings(el) {
       return route();
     }
     if (k === 'krLarge') s.krLarge = v === 'true';
-    else s[k] = v;
+    else if (k === 'goal') {
+      st.goal = Number(v);
+      g.parentElement.querySelector('.muted.small').textContent = t('set.goalHelp', { xp: st.goal });
+    } else s[k] = v;
     store.save();
     applySettings();
     $$('.seg-btn', g).forEach((x) => x.classList.toggle('on', x === b));

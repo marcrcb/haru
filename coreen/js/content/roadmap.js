@@ -39,7 +39,8 @@ const KO = [
   {
     id: 'ko1', glyph: '한글', color: 'var(--c-hangul)',
     title: L('Les lettres du hangeul', 'The hangul letters'), sub: L('Voyelles, consonnes, premières syllabes', 'Vowels, consonants, first syllables'),
-    steps: [lesson('syllabe'), script('s-vowels', 'vowels'), script('s-consonants', 'consonants'), lesson('ieung'), script('s-syllables', 'syllables')],
+    // Les lettres d'abord (chacune présentée avant d'être demandée), puis la leçon qui les assemble en syllabes.
+    steps: [script('s-vowels', 'vowels'), script('s-consonants', 'consonants'), lesson('syllabe'), lesson('ieung'), script('s-syllables', 'syllables')],
   },
   {
     id: 'ko2', glyph: '읽기', color: 'var(--c-guide)',

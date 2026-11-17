@@ -1634,3 +1634,44 @@ body[data-tab="phrases"] { --ink-accent: var(--ink-phrases); }
 :root[data-theme="dark"] { --c-home: #9d8cff; }
 :root[data-theme="dark"] .ach.t1 .ach-tier { color: #d39a63; }
 .final-seal { color: #2b1d00; }
+
+/* ================= Version 62 : carte « Nouveau », premier lancement, repères officiels ================= */
+.teach-card { gap: 4px; padding: 30px 18px 22px; }
+.teach-tag { color: var(--ink-accent); letter-spacing: .06em; text-transform: uppercase; }
+.teach-pic { font-size: 3.4rem; line-height: 1.1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; animation: picIn .5s var(--spring) both; }
+.teach-main { font-family: var(--tl-font); font-size: calc(3.4rem * var(--krs)); font-weight: 700; line-height: 1.15; animation: popIn .45s var(--spring) both; }
+.teach-main.long { font-size: calc(2.4rem * var(--krs)); }
+.teach-main.xlong { font-size: calc(1.6rem * var(--krs)); }
+.teach-pair { margin-left: 14px; color: var(--ink-accent); }
+.teach-read { font-size: 1.15rem; color: var(--muted); }
+.teach-rom { font-size: 1.05rem; font-weight: 800; color: var(--ink-accent); letter-spacing: .02em; }
+.teach-mean { font-size: 1.35rem; font-weight: 800; margin-top: 4px; }
+.teach-tip { max-width: 34ch; margin-top: 8px; color: var(--muted); font-size: .92rem; line-height: 1.45; }
+.teach-tip small, .teach-reads small { color: var(--muted); font-weight: 700; }
+.teach-reads { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 6px; }
+.teach-reads b { font-size: 1.1rem; }
+.teach-strokes { margin-top: 12px; }
+.teach-strokes .stroke-demo { width: 112px; }
+.teach-next { margin-top: 18px; }
+
+.onboard { justify-content: flex-start; padding-top: 34px; gap: 8px; }
+.onboard h1 { font-size: 1.9rem; margin: 2px 0 2px; }
+.onboard .eyebrow { margin: 0; }
+.w-choices.goals .w-native { font-size: 2rem; }
+.w-choices.goals .w-native small { font-size: .9rem; margin-left: 2px; }
+.onb-levels { display: grid; gap: 10px; width: 100%; margin-top: 14px; }
+.onb-level { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; animation: rise .45s var(--ease) both; animation-delay: calc(var(--i) * 80ms + 120ms); }
+.onb-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.onb-text b { font-size: 1.05rem; }
+.onb-dots { display: flex; gap: 3px; align-items: flex-end; height: 22px; }
+.onb-dots i { width: 6px; border-radius: 3px; background: var(--surface-2); }
+.onb-dots i:nth-child(1) { height: 8px; } .onb-dots i:nth-child(2) { height: 14px; } .onb-dots i:nth-child(3) { height: 20px; }
+.onb-dots i.on { background: var(--c-home); }
+
+.ch-lvl { display: inline-block; white-space: nowrap; padding: 1px 7px; border-radius: 99px; font-size: .62rem; letter-spacing: .04em; color: var(--muted); background: var(--surface-2); }
+.chapter.plat .ch-lvl { color: var(--plat-ink); background: rgb(255 255 255 / .5); }
+.cefr-card { display: grid; gap: 6px; margin-top: 10px; }
+.cefr-card .eyebrow { margin: 0; }
+.cefr-card b { font-size: 1.08rem; }
+.set-link { color: inherit; }
+.set-link > span:first-child { flex: 1; }

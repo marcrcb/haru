@@ -12,6 +12,7 @@ import { mountTyping, normAnswer, normRoman } from './keyboard.js';
 import { reconstruct, phraseFor } from './phrases.js';
 import { CHO, JUNG, decompose, isSyllable } from './hangul.js';
 import { canListen, listen, matchSpoken, muteSpeech } from './speech.js';
+import { strokeDemo, canTrace } from './draw.js';
 import { stepDepth } from './road.js';
 
 const wordsOf = (theme) => (!theme || theme === 'all' ? course().words : course().words.filter((w) => w.t === theme));
@@ -61,10 +62,65 @@ export function seeBeforeSaying(questions) {
   return [...out, ...later];
 }
 
+/**
+ * Apprendre avant d'être interrogé : devant la première question sur un mot, une lettre ou un kanji jamais vu,
+ * une carte « Nouveau » le présente (son, sens, lecture, dessin, ordre des traits). Elle ne compte pas dans le score.
+ */
+export function withTeaching(questions) {
+  const out = [];
+  const taught = new Set();
+  for (const q of questions) {
+    for (const L of q.learn || []) {
+      if (taught.has(L.id) || box(L.id) >= 0) continue;
+      taught.add(L.id);
+      out.push(teachCard(L));
+    }
+    out.push(q);
+  }
+  return out;
+}
+
+function teachCard(L) {
+  const C = course();
+  const roman = get().settings.roman;
+  if (L.w) {
+    const w = L.w;
+    const pic = pictureOf(w);
+    const read = C.wordRead(w);
+    return {
+      type: 'teach', say: w.tl,
+      html: `${pic ? `<div class="teach-pic" aria-hidden="true">${pic}</div>` : ''}
+        <div class="teach-main kr ${sizeCls(w.tl)}">${esc(w.tl)}</div>
+        ${read ? `<div class="teach-read kr">${esc(read)}</div>` : ''}
+        ${roman ? `<div class="teach-rom">${esc(C.wordRom(w))}</div>` : ''}
+        <div class="teach-mean">${esc(gloss(w))}</div>`,
+    };
+  }
+  if (L.x) {
+    const x = L.x;
+    const main = x.base || x.j;
+    const pair = x.j2 || (x.base ? x.j : '');
+    return {
+      type: 'teach', say: x.say, stroke: x.j,
+      html: `<div class="teach-main kr">${esc(main)}${pair && pair !== main ? `<span class="teach-pair">${esc(pair)}</span>` : ''}</div>
+        <div class="teach-rom">${esc(romLabel(x))}</div>
+        ${x.tip ? `<p class="teach-tip">${esc(tr(x.tip))}</p>` : ''}`,
+    };
+  }
+  const k = L.k;
+  return {
+    type: 'teach', say: k.say, stroke: k.j,
+    html: `<div class="teach-main kr">${esc(k.j)}</div>
+      <div class="teach-mean">${esc(tr(k.mean))}</div>
+      <div class="teach-reads"><span><small>${t('teach.on')}</small> <b class="kr">${esc(k.on)}</b></span><span><small>${t('teach.kun')}</small> <b class="kr">${esc(k.kun)}</b></span></div>
+      <p class="teach-tip"><small>${t('teach.example')}</small> <b class="kr">${esc(k.ex[0])}</b> <span class="kr">${esc(k.ex[1])}</span> · ${esc(tr({ fr: k.ex[2], en: k.ex[3] }))}</p>`,
+  };
+}
+
 export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
-  if (!exam) questions = seeBeforeSaying(questions);
+  if (!exam) questions = withTeaching(seeBeforeSaying(questions));
   let queue = questions.map((q) => ({ ...q, retry: false }));
-  let total = questions.length;
+  let total = questions.filter((q) => q.type !== 'teach').length; // les cartes « Nouveau » ne comptent pas
   let done = 0;
   let firstTry = 0;
   let combo = 0;
@@ -105,6 +161,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     const n = exam ? total - queue.length : done;
     bar.style.width = `${(n / total) * 100}%`;
     $('.qcount', el).textContent = `${Math.min(n + 1, total)} / ${total}`;
+    if (q.type === 'teach') return showTeach(q);
     const head = `
       <div class="qcard pop ${q.type === 'input' || q.type === 'speak' ? 'compact' : ''}">
         ${q.retry ? `<span class="tag">${t('quiz.retry')}</span>` : ''}
@@ -185,6 +242,30 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     $('.speak', stage)?.addEventListener('click', () => speak(q.say));
     $('.listen-big', stage)?.addEventListener('click', () => speak(q.say));
     if (q.auto && q.say) setTimeout(() => speak(q.say), 250);
+  }
+
+  // ---------- Carte « Nouveau » : on découvre, puis on continue ----------
+  function showTeach(q) {
+    stage.innerHTML = `
+      <div class="qcard pop teach-card">
+        <span class="tag teach-tag">${t('teach.new')}</span>
+        ${q.say && canSpeak() ? `<button class="icon-btn speak" aria-label="${t('listen')}">${ICONS.sound}</button>` : ''}
+        ${q.html}
+        ${q.stroke && canTrace(q.stroke) ? '<div class="teach-strokes"></div>' : ''}
+      </div>
+      <button class="btn primary big teach-next">${t('teach.next')}</button>`;
+    $('.speak', stage)?.addEventListener('click', () => speak(q.say));
+    if (q.say && get().settings.autoplay) setTimeout(() => speak(q.say), 250);
+    const host = $('.teach-strokes', stage);
+    if (host) strokeDemo(host, q.stroke);
+    const next = $('.teach-next', stage);
+    next.focus({ preventScroll: true });
+    next.addEventListener('click', () => {
+      sfx.tap();
+      queue.shift();
+      if (queue.length) show();
+      else finish();
+    });
   }
 
   // ---------- Sans clavier : la réponse en étiquettes à remettre dans l'ordre (ou à choisir si elle tient en une seule) ----------
@@ -426,7 +507,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     const head = exam
       ? `<span class="exam-verdict ${passed ? 'pass' : 'fail'}">${passed ? t('exam.passed') : t('exam.failed')}</span>
          <h2>${passed ? t('exam.bravo') : t('exam.almost')}</h2>
-         <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : t('exam.need', { n: total - Math.ceil(total * exam.pass - 1e-9) })}</p>`
+         <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : exam.failText ? esc(exam.failText) : t('exam.need', { n: total - Math.ceil(total * exam.pass - 1e-9) })}</p>`
       : `<h2>${ratio === 1 ? t('quiz.perfect') : ratio >= 0.7 ? t('quiz.great') : ratio >= 0.4 ? t('quiz.good') : t('quiz.keepGoing')}</h2>
          <p class="muted">${esc(title || '')}</p>`;
     // Révision : « Séance suivante (n fautes) », ou rien quand il n'y a plus de faute.
@@ -538,6 +619,7 @@ export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true
   const base = {
     wid: w.id,
     say: w.tl,
+    learn: track ? [{ id: w.id, w }] : undefined, // mot jamais vu : présenté avant la question
     onAnswer: track ? (ok) => review(w.id, ok) : undefined,
     explain: `<span class="kr">${esc(w.tl)}</span>${sub ? ` · ${esc(sub)}` : ''} = ${esc(gloss(w))}`,
   };
@@ -607,7 +689,7 @@ export function pictureQuestion(w, pool = []) {
   const answer = opt(w);
   const options = shuffle([answer, ...decoys.map(opt)]);
   return {
-    pics: true, wid: w.id, say: w.tl, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('pic.which'),
+    pics: true, wid: w.id, say: w.tl, learn: [{ id: w.id, w }], prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('pic.which'),
     explain: `<span class="kr">${esc(w.tl)}</span>${roman ? ` · ${esc(C.wordRom(w))}` : ''} = ${esc(gloss(w))}`,
     options, correct: options.indexOf(answer),
   };
@@ -617,7 +699,7 @@ export function pictureQuestion(w, pool = []) {
 export function matchWords(words, track = true) {
   const list = words.slice(0, 4);
   return {
-    type: 'match', sub: t('match.words'), wids: list.map((w) => w.id),
+    type: 'match', sub: t('match.words'), wids: list.map((w) => w.id), learn: track ? list.map((w) => ({ id: w.id, w })) : undefined,
     pairs: list.map((w) => ({ a: w.tl, b: gloss(w), say: w.tl })),
     onAnswer: track ? (ok) => { if (!ok) list.forEach((w) => review(w.id, false)); } : undefined,
   };
@@ -715,8 +797,8 @@ export function reviewQuiz(el) {
     return;
   }
   const questions = pick.map((it, k) => {
-    if (it.x) return tracked(letterQuestion(it.x, k % 2 ? 'rom' : 'type'), letterId(it.x));
-    if (it.k) return tracked(kanjiQuestion(it.k, 'type'), kanjiId(it.k));
+    if (it.x) return tracked(letterQuestion(it.x, k % 2 ? 'rom' : 'type'), letterId(it.x), { x: it.x });
+    if (it.k) return tracked(kanjiQuestion(it.k, 'type'), kanjiId(it.k), { k: it.k });
     const w = it.w;
     return wordQuestion(w, typable(w) ? ['type', 'dict', 'kr2fr', 'type', 'speak', 'fr2kr'][k % 6] : ['order', 'kr2fr', 'speak'][k % 3], { pool: C.words, plain: true, intro: false });
   });
@@ -834,11 +916,12 @@ export function readWordQuestion(w, kind = 'rom', pool = []) {
  * sinon un mélange : lire (clavier latin), écrire (clavier coréen ou japonais), prononcer.
  */
 /** Fait suivre une question de lettre ou de kanji par la répétition espacée (y compris sa version écrite de secours). */
-function tracked(q, id) {
+function tracked(q, id, data) {
   q.onAnswer = (ok) => review(id, ok);
+  q.learn = [{ id, ...data }]; // lettre ou kanji jamais vu : présenté avant la question
   if (q.fallback) {
     const f = q.fallback;
-    q.fallback = () => tracked(f(), id);
+    q.fallback = () => tracked(f(), id, data);
   }
   return q;
 }
@@ -859,8 +942,8 @@ export function scriptQuiz(el, set, step, mode) {
     // Par groupes de quatre : relier les kanji à leur sens, puis écrire ou dire la lecture des mots
     for (let k = 0; k < items.length; k += 4) {
       const group = items.slice(k, k + 4);
-      if (!all && !oral && group.length >= 3) questions.push(matchKanji(group));
-      group.forEach((x, i) => questions.push(tracked(kanjiQuestion(x, oral || (!all && i % 3 === 2) ? 'speak' : 'type'), kanjiId(x))));
+      if (!all && !oral && group.length >= 3) questions.push({ ...matchKanji(group), learn: group.map((x) => ({ id: kanjiId(x), k: x })) });
+      group.forEach((x, i) => questions.push(tracked(kanjiQuestion(x, oral || (!all && i % 3 === 2) ? 'speak' : 'type'), kanjiId(x), { k: x })));
     }
   } else if (S.sets[set]) {
     // Les kana regroupent hiragana (j) et katakana (j2) : chaque question tire l'une des deux formes.
@@ -868,7 +951,7 @@ export function scriptQuiz(el, set, step, mode) {
     const items = S.sets[set].items.map(form);
     title = tr(S.sets[set].label);
     const others = [...items, ...(S.sets[set].decoys || []).map(form)];
-    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => tracked(letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others, 4, { intro: !oral }), letterId(x)));
+    questions = shuffle(items).slice(0, SERIES.letters).map((x, k) => tracked(letterQuestion(x, all ? 'type' : oral ? 'speak' : letterKind(ease, k), others, 4, { intro: !oral }), letterId(x), { x }));
   } else if (set === 'syllables') {
     title = tr(S.syllableLabel);
     const kinds = ease < 0.6 ? ['read', 'type', 'read', 'type'] : ['type', 'read', 'type', 'rom'];

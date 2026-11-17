@@ -43,6 +43,7 @@ export function normalize(s) {
   const r = ROOT();
   if (s.v === 2) {
     r.settings = { ...r.settings, ...(s.settings || {}) };
+    if (Number(s.goal) >= 5 && Number(s.goal) <= 200) r.goal = Number(s.goal); // objectif choisi au premier lancement ou dans les réglages
     for (const k of Object.keys(r.courses)) r.courses[k] = migrateSrs({ ...COURSE(), srsV: 1, ...(s.courses?.[k] || {}) });
     return r;
   }

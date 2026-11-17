@@ -17,6 +17,61 @@ export function stepDepth(id) {
 }
 
 const UNIT_BONUS = 15; // XP offerts à la fin d'un module
+
+// Repères officiels (indicatifs) : niveau du CECR et examen correspondant, chapitre par chapitre.
+const LEVEL_BANDS = {
+  ko: [[1, 'Pré-A1'], [3, 'A1 · TOPIK 1'], [3, 'A2 · TOPIK 2'], [4, 'A2+ · TOPIK 2'], [3, '→ B1 · TOPIK 3']],
+  ja: [[1, 'Pré-A1'], [3, 'A1 · JLPT N5'], [3, 'A2 · JLPT N4'], [4, 'A2+ · JLPT N4'], [3, '→ B1 · JLPT N3']],
+};
+/** Repère officiel du chapitre k (0 = premier). */
+export function chapterLevel(k) {
+  let n = 0;
+  for (const [len, label] of LEVEL_BANDS[course().id] || []) {
+    n += len;
+    if (k < n) return label;
+  }
+  return '';
+}
+/** Niveau atteint (dernier palier dont tous les chapitres sont terminés) et palier en cours avec sa progression. */
+export function officialLevel(R = roadState()) {
+  let k = 0;
+  let reached = null;
+  for (const [len, label] of LEVEL_BANDS[course().id] || []) {
+    const chs = R.chapters.slice(k, k + len);
+    k += len;
+    const units = chs.flatMap((c) => c.list);
+    const done = units.filter((u) => u.complete).length;
+    if (units.length && done === units.length) { reached = label; continue; }
+    return { reached, next: label, done, total: units.length, from: k - len + 1, to: k };
+  }
+  return { reached, next: null, done: 0, total: 0 };
+}
+
+/**
+ * Test de niveau réussi : les n premiers chapitres sont validés (étapes, objectifs, examens),
+ * sans célébration ni XP, et la suite s'ouvre.
+ */
+export function skipChapters(n) {
+  const st = store.get();
+  st.road ||= {};
+  st.read ||= {};
+  st.exams ||= {};
+  const R = roadState();
+  R.chapters.slice(0, n).forEach((c) => {
+    c.list.forEach((u) => {
+      u.steps.forEach((s) => {
+        if (s.kind === 'lesson') st.read[s.lesson] ||= 1;
+        else if (s.kind === 'pairs') { st.best ||= {}; st.best.pairs ||= 60000; }
+        else st.road[s.id] = Math.max(st.road[s.id] || 0, 1);
+      });
+      st.exams[u.id] = Math.max(st.exams[u.id] || 0, store.EXAM_PASS);
+      st.road[`bonus:${u.id}`] = true;
+      st.road[`plat:${u.id}`] = true;
+    });
+    st.road[`platch:${c.id}`] = true;
+  });
+  store.save();
+}
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const GEM = '<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3 7 9l5 12 5-12-2-6"/></svg>';
 
@@ -33,7 +88,7 @@ function goal(theme, st = store.get()) {
 export function stepDone(s, st = store.get()) {
   if (s.kind === 'lesson') return !!st.read?.[s.lesson];
   if (s.kind === 'pairs') return !!st.best?.pairs;
-  if (s.kind === 'mastery') { const g = goal(s.theme, st); return g.total > 0 && g.n >= g.total; }
+  if (s.kind === 'mastery') { const g = goal(s.theme, st); return !!st.road?.[s.id] || (g.total > 0 && g.n >= g.total); }
   return !!st.road?.[s.id];
 }
 const STARRED = ['script', 'words', 'cards', 'phrase', 'type', 'dictation', 'ptype', 'speak'];
@@ -213,7 +268,7 @@ export function roadScreen(el) {
             <b>${esc(tr(c.title))}</b>
             <span class="ch-sub">${esc(tr(c.sub))}</span>
           </span>
-          <span class="ch-count"><b>${c.complete} / ${c.list.length}</b></span>
+          <span class="ch-count"><span class="ch-lvl">${esc(chapterLevel(k))}</span><b>${c.complete} / ${c.list.length}</b></span>
           <span class="ch-chev">›</span>
         </summary>
         <div class="ch-body">${c.list.map(unitHtml).join('')}</div>
