@@ -83,6 +83,8 @@ export function placementScreen(el, q) {
         const okBasics = kind === 'basics' && passed && okScript;
         const n = okBasics ? 2 : okScript ? 1 : 0;
         if (n) skipChapters(n);
+        store.get().road.placed = true;
+        store.save();
         exam.passText = t(n === 2 ? 'place.done2' : 'place.done1');
         exam.failText = n === 1 ? t('place.done1') : t('place.fail');
         return 0;

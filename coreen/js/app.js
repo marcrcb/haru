@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '71'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '72'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -837,8 +837,9 @@ function settings(el) {
       <div class="card settings">
         <div class="set-row col"><span>${t('set.goal')}</span>${seg('goal', GOALS.map(([xp, min]) => [xp, `${min} min`]), st.goal)}
           <span class="muted small">${t('set.goalHelp', { xp: st.goal })}</span></div>
-        <a class="set-row set-link" href="#/placement"><span>${t('place.title')}</span><span class="muted small">${t('place.settings')}</span><span class="chev">›</span></a>
+        <a class="set-row set-link place-link" href="#/placement"><span class="place-ico kr">${C.id === 'ja' ? '診断' : '진단'}</span><span class="place-txt"><b>${t('place.title')}</b><span class="muted small">${t('place.settings')}</span></span><span class="chev">›</span></a>
         ${toggle('roman', t('set.roman'), s.roman)}
+        ${C.id === 'ja' ? toggle('furigana', t('set.furigana'), s.furigana !== false) : ''}
         ${toggle('speech', t('set.speech'), s.speech !== false)}
         <div class="set-row col"><span class="muted small">${t(listenSupported() ? 'set.speechHelp' : 'set.speechNo')}</span></div>
       </div>
@@ -1047,6 +1048,7 @@ function applySettings() {
   root.dataset.course = course().id;
   root.classList.toggle('kr-large', !!s.krLarge);
   root.classList.toggle('no-motion', !s.motion);
+  root.classList.toggle('no-furi', s.furigana === false);
   $$('meta[name="theme-color"]').forEach((m) => {
     const scheme = m.media.includes('dark') ? 'dark' : 'light';
     m.content = THEME_BG[s.theme === 'auto' ? scheme : s.theme];

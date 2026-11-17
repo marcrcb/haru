@@ -2,7 +2,7 @@
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, confetti, countUp, pulse, burst, ICONS, reducedMotion } from './ui.js';
 import { addXp, review, pickForReview, get, save, markRoad } from './store.js';
 import { course, t, gloss } from './course.js';
-import { wordsOf, sizeCls, SERIES } from './quiz.js';
+import { wordsOf, sizeCls, SERIES, stepVerdict, furi } from './quiz.js';
 
 // ---------- Cartes mémoire ----------
 export function flashcards(el, theme, step) {
@@ -29,7 +29,7 @@ export function flashcards(el, theme, step) {
     $('.progress i', el).style.width = `${(i / deck.length) * 100}%`;
     $('.count', el).textContent = `${i + 1} / ${deck.length}`;
     const w = deck[i];
-    const read = C.wordRead(w);
+    const read = furi(w);
     deckEl.innerHTML = `
       <div class="flip" tabindex="0" role="button" aria-label="${t('cards.flip')}">
         <div class="face front">
@@ -92,7 +92,8 @@ export function flashcards(el, theme, step) {
   function finish() {
     const xp = known + 5;
     addXp(xp);
-    if (step) markRoad(step); // auto-évaluation : aller au bout du paquet suffit
+    const pct = Math.round((known / deck.length) * 100);
+    if (step) markRoad(step, pct);
     if (known / deck.length >= 0.7) confetti();
     sfx.win();
     el.innerHTML = `
@@ -100,6 +101,7 @@ export function flashcards(el, theme, step) {
         <div class="big-glyph kr">${course().id === 'ja' ? 'できた！' : '끝!'}</div>
         <h2>${t('cards.result', { n: known, total: deck.length })}</h2>
         <p class="muted">${t('cards.resultHint')}</p>
+        ${step ? stepVerdict(pct) : ''}
         <div class="xp-won">+<span class="n">0</span> XP</div>
         <div class="stack">
           <button class="btn primary again">${t('cards.newSet')}</button>

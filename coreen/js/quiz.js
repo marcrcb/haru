@@ -2,7 +2,7 @@
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
 import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, stopSpeaking } from './ui.js';
-import { addXp, review, pickForReview, mistakes, get, save, markRoad, STEP_PASS, box, streakOf, bump, record } from './store.js';
+import { addXp, review, pickForReview, mistakes, get, save, markRoad, box, streakOf, bump, record } from './store.js';
 import { reviewItems, reviewCount, nextReviewIn, letterId, kanjiId, REVIEW_MAX } from './review.js';
 import { course, t, tr, gloss, lang } from './course.js';
 import { ALL_THEMES } from './content/lexicon.js';
@@ -87,13 +87,27 @@ function gridWord(s, pair = '') {
   return `<div class="teach-grid kr" aria-label="${esc(s)}">${chars.map((c) => `<span class="cell">${esc(c)}</span>`).join('')}${pair ? `<span class="cell pair">${esc(pair)}</span>` : ''}</div>`;
 }
 
+/** Libellé d'une réponse, avec sa lecture en kana au-dessus quand il y en a une. */
+const rubyLabel = (o) => (o.read ? `<ruby>${esc(o.label)}<rt>${esc(o.read)}</rt></ruby>` : esc(o.label));
+
+/** Fin d'une étape du parcours : score obtenu ; en dessous de 100 %, on rappelle qu'on peut y revenir. */
+export function stepVerdict(pct) {
+  return `<span class="step-verdict ${pct === 100 ? 'pass' : 'part'}">${pct === 100 ? t('step.full') : t('step.partial', { n: pct })}</span>`;
+}
+
+/** Lecture en kana d'un mot à kanji (japonais), si le réglage « lecture des kanji » est activé. */
+export function furi(w) {
+  const C = course();
+  return C.id === 'ja' && get().settings.furigana !== false ? C.wordRead(w) : '';
+}
+
 function teachCard(L) {
   const C = course();
   const roman = get().settings.roman;
   if (L.w) {
     const w = L.w;
     const pic = pictureOf(w);
-    const read = C.wordRead(w);
+    const read = furi(w);
     return {
       type: 'teach', say: w.tl,
       html: `${pic ? `<div class="teach-pic" aria-hidden="true">${pic}</div>` : ''}
@@ -233,8 +247,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       stage.innerHTML = `${head}
         <div class="options ${q.options.length > 4 ? 'many' : ''} ${q.pics ? 'pics' : ''}">
           ${q.options.map((o, i) => (o.pic
-            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}"><span class="pic" aria-hidden="true">${o.pic}</span><span class="kr">${esc(o.label)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
-            : `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${esc(o.label)}</button>`)).join('')}
+            ? `<button class="opt pic-opt" style="--i:${i}" data-i="${i}"><span class="pic" aria-hidden="true">${o.pic}</span><span class="kr">${rubyLabel(o)}</span>${o.rom ? `<small class="muted">${esc(o.rom)}</small>` : ''}</button>`
+            : `<button class="opt ${o.kr ? 'kr' : ''}" style="--i:${i}" data-i="${i}">${rubyLabel(o)}</button>`)).join('')}
         </div>`;
       $$('.opt', stage).forEach((b) => b.addEventListener('click', () => {
         const i = Number(b.dataset.i);
@@ -505,8 +519,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     if (exam) xp += exam.onEnd?.(pct, passed) || 0;
     addXp(xp);
     if (ratio === 1 && total >= 5) bump('perfect');
-    const stepOk = ratio >= STEP_PASS - 1e-9;
-    if (step && !exam && stepOk) markRoad(step);
+    if (step && !exam) markRoad(step, pct);
     if (exam ? passed : ratio >= 0.7) {
       sfx.win();
       confetti();
@@ -518,7 +531,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
          <p class="muted">${esc(title || '')} · ${passed ? esc(exam.passText || '') : exam.failText ? esc(exam.failText) : t('exam.need', { n: total - Math.ceil(total * exam.pass - 1e-9) })}</p>`
       : `<h2>${ratio === 1 ? t('quiz.perfect') : ratio >= 0.7 ? t('quiz.great') : ratio >= 0.4 ? t('quiz.good') : t('quiz.keepGoing')}</h2>
          <p class="muted">${esc(title || '')}</p>
-         ${step ? `<span class="step-verdict ${stepOk ? 'pass' : 'fail'}">${stepOk ? t('step.passed') : t('step.failed', { n: Math.round(STEP_PASS * 100) })}</span>` : ''}`;
+         ${step ? stepVerdict(pct) : ''}`;
     // Révision : « Séance suivante (n fautes) », ou rien quand il n'y a plus de faute.
     const again2 = againLabel ? againLabel() : undefined;
     el.querySelector('.quiz').classList.remove('kb-mode');
@@ -622,7 +635,7 @@ const endOf = (w) => (w.tl.match(/[.?!。？！]+$/) || [''])[0];
 export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true, intro = true } = {}) {
   const C = course();
   const roman = get().settings.roman && !plain;
-  const sub = [C.wordRead(w), roman ? C.wordRom(w) : ''].filter(Boolean).join(' · ');
+  const sub = [furi(w), roman ? C.wordRom(w) : ''].filter(Boolean).join(' · ');
   const all = pool && pool.length >= 8 ? pool : C.words;
   const decoys = all.filter((o) => o.id !== w.id);
   const base = {
@@ -669,9 +682,9 @@ export function wordQuestion(w, kind, { pool, n = 4, plain = false, track = true
     return mcq({ ...base, auto: true, prompt: listenBtn(), sub: t('quiz.whatMeansHeard') }, { label: gloss(w) }, decoys.map((o) => ({ label: gloss(o) })), n);
   }
   if (kind === 'fr2kr') {
-    return mcq({ ...base, say: null, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('quiz.howSay', { lang: language }) }, { label: w.tl, kr: true }, decoys.map((o) => ({ label: o.tl, kr: true })), n);
+    return mcq({ ...base, say: null, prompt: `<span class="qlatin">${esc(gloss(w))}</span>`, sub: t('quiz.howSay', { lang: language }) }, { label: w.tl, kr: true, read: furi(w) }, decoys.map((o) => ({ label: o.tl, kr: true, read: furi(o) })), n);
   }
-  return mcq({ ...base, auto: true, prompt: listenBtn(), sub: t('quiz.whatHeard') }, { label: w.tl, kr: true }, decoys.map((o) => ({ label: o.tl, kr: true })), n);
+  return mcq({ ...base, auto: true, prompt: listenBtn(), sub: t('quiz.whatHeard') }, { label: w.tl, kr: true, read: furi(w) }, decoys.map((o) => ({ label: o.tl, kr: true, read: furi(o) })), n);
 }
 
 /**
@@ -684,7 +697,7 @@ export function pictureQuestion(w, pool = []) {
   const pic = pictureOf(w);
   if (!pic) return null;
   const roman = get().settings.roman;
-  const opt = (o) => ({ label: o.tl, kr: true, pic: pictureOf(o), rom: roman ? C.wordRom(o) : '' });
+  const opt = (o) => ({ label: o.tl, kr: true, read: furi(o), pic: pictureOf(o), rom: roman ? C.wordRom(o) : '' });
   const seen = new Set([pic, w.tl]);
   const pick = (list) => shuffle(list).filter((o) => {
     const p = pictureOf(o);

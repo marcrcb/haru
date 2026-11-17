@@ -5,7 +5,7 @@ const KEY = 'haru.v1';
 const DAY = 86400000;
 
 const SETTINGS = () => ({
-  roman: true, sound: true, rate: 0.85, theme: 'auto', krLarge: false, motion: true,
+  roman: true, furigana: true, sound: true, rate: 0.85, theme: 'auto', krLarge: false, motion: true,
   autoplay: true, lang: 'fr', course: null, speech: true,
 });
 const COURSE = () => ({
@@ -104,13 +104,16 @@ export function reset() {
 }
 
 // ---------- Dates ----------
-/** Une étape du parcours est validée à partir de 70 % de réponses justes du premier coup. */
-export const STEP_PASS = 0.7;
-/** Parcours : enregistre une étape validée. */
-export function markRoad(id) {
+/**
+ * Parcours : enregistre une étape terminée et son meilleur score (en %). Une étape ratée compte quand même
+ * comme faite (la suite s'ouvre) ; on peut y revenir pour la réussir à 100 %.
+ */
+export function markRoad(id, pct = 100) {
   if (!id) return;
   state.road ||= {};
+  state.score ||= {};
   state.road[id] = 1;
+  state.score[id] = Math.max(state.score[id] || 0, Math.round(pct));
   save();
 }
 

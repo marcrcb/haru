@@ -71,6 +71,7 @@ export function skipChapters(n) {
       st.road[`bonus:${u.id}`] = true;
     });
     st.road[`chdone:${c.id}`] = true;
+    delete openChapters[c.id];
   });
   store.save();
 }
@@ -83,6 +84,16 @@ const GOAL_RATIO = 0.6;
 function goal(theme, st = store.get()) {
   const ws = course().words.filter((w) => w.t === theme);
   return { n: Math.min(Math.ceil(ws.length * GOAL_RATIO), ws.filter((w) => store.retained(st.srs?.[w.id])).length), total: Math.ceil(ws.length * GOAL_RATIO) };
+}
+
+/** Meilleur score d'une étape (en %) : les leçons et les paires faites valent 100 %, l'objectif suit sa progression. */
+export function stepScore(s, st = store.get()) {
+  if (s.kind === 'lesson' || s.kind === 'pairs') return stepDone(s, st) ? 100 : 0;
+  if (s.kind === 'mastery') { const g = goal(s.theme, st); return st.road?.[s.id] ? 100 : g.total ? Math.round((Math.min(g.n, g.total) / g.total) * 100) : 0; }
+  const v = st.score?.[s.id];
+  if (v != null) return v;
+  const old = st.road?.[s.id] || 0; // anciennes étoiles (1 à 3) : score approché
+  return old >= 3 ? 90 : old === 2 ? 70 : old ? 60 : 0;
 }
 
 /** Une étape est-elle terminée ? Les leçons, les paires et le défi se lisent dans la progression existante. */
@@ -133,7 +144,7 @@ export function stepInfo(s) {
 export function roadState() {
   const st = store.get();
   const units = roadUnits().map((u) => {
-    const steps = u.steps.map((s) => ({ ...s, done: stepDone(s, st) }));
+    const steps = u.steps.map((s) => ({ ...s, done: stepDone(s, st), score: stepScore(s, st) }));
     const done = steps.filter((s) => s.done).length;
     const score = st.exams?.[u.id] || 0;
     // Un module n'est validé qu'une fois son examen réussi (toutes les étapes faites ne suffisent pas).
@@ -211,7 +222,7 @@ export function roadRewards() {
     store.save();
     celebrate({ glyph: fresh.glyph, title: t('road.unitComplete'), text: t('road.unitValid', { name: tr(fresh.title) }), button: t('continue') });
   } else if (ended) {
-    R.chapters.filter((c) => c.full).forEach((c) => { st.road[`chdone:${c.id}`] = true; });
+    R.chapters.filter((c) => c.full).forEach((c) => { st.road[`chdone:${c.id}`] = true; delete openChapters[c.id]; });
     store.save();
     celebrate({ glyph: ended.glyph, title: t('road.chDoneTitle'), text: t('road.chDoneText', { name: tr(ended.title) }), button: t('continue') });
   }
@@ -244,7 +255,7 @@ export function roadScreen(el) {
             const x = OFFSETS[n % OFFSETS.length];
             const inner = `
               <span class="rn-btn kr ${info.glyph.length > 2 ? 'long' : ''}">${s.done ? `<span class="seal-mark">${ja ? '済' : '완'}</span>` : u.open ? esc(info.glyph) : LOCK}</span>
-              <span class="rn-label"><b>${esc(info.title)}</b><span>${esc(info.type)}</span>${cur ? `<span class="rn-go">${R.done ? t('road.continue') : t('road.start')}</span>` : ''}</span>`;
+              <span class="rn-label"><b>${esc(info.title)}</b><span>${esc(info.type)}</span>${u.open ? `<span class="rn-score ${s.score === 100 ? 'full' : ''}" style="--p:${s.score}" role="img" aria-label="${t('step.scoreLabel', { n: s.score })}"><i></i></span>` : ''}${cur ? `<span class="rn-go">${R.done ? t('road.continue') : t('road.start')}</span>` : ''}</span>`;
             const cls = `rn ${x > 0 ? 'right' : 'left'} ${s.done ? 'done' : ''} ${cur ? 'cur' : ''}`;
             return u.open
               ? `<a class="${cls}" href="${info.href}" style="--x:${x}; --k:${n}">${inner}</a>`
@@ -269,6 +280,12 @@ export function roadScreen(el) {
   el.innerHTML = `
     <div class="screen road">
       ${skyCard(R, due)}
+      ${!st.road?.placed && !R.chapters.some((c) => c.full) ? `
+      <a class="card place-card" href="#/placement">
+        <span class="place-seal kr">${ja ? '診断' : '진단'}</span>
+        <span class="place-text"><b>${t('place.cardTitle', { lang: tr(C.name).toLowerCase() })}</b><span>${t('place.cardSub')}</span></span>
+        <span class="place-go">${t('place.cardGo')}</span>
+      </a>` : ''}
       ${R.chapters.map((c, k) => ({ c, k })).sort((a, b) => a.c.full - b.c.full || a.k - b.k).map(({ c, k }) => {
         const here = c.list.includes(R.cur) || (!R.cur && k === 0);
         const open = openChapters[c.id] ?? here;
@@ -339,8 +356,10 @@ export function roadScreen(el) {
   const onResize = () => (el.querySelector('.road') ? draw() : removeEventListener('resize', onResize));
   addEventListener('resize', onResize);
   document.fonts?.ready.then(() => el.querySelector('.road') && draw());
+  // Seul un geste de l'utilisateur est retenu (l'ouverture automatique du chapitre en cours ne l'est pas),
+  // pour qu'un chapitre terminé se replie ensuite de lui-même.
+  $$('.chapter > summary', el).forEach((sm) => sm.addEventListener('click', () => { const d = sm.parentElement; openChapters[d.dataset.c] = !d.open; }));
   $$('.chapter', el).forEach((d) => d.addEventListener('toggle', () => {
-    openChapters[d.dataset.c] = d.open;
     if (d.open) draw();
   }));
 
