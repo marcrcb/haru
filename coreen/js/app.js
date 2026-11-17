@@ -50,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '72'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '73'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -134,7 +134,7 @@ function welcome(el) {
         <button class="seg-btn ${lang() === 'fr' ? 'on' : ''}" data-l="fr">Français</button>
         <button class="seg-btn ${lang() === 'en' ? 'on' : ''}" data-l="en">English</button>
       </div>
-      <div class="w-logo"><img src="icons/icon.svg" alt=""></div>
+      <div class="w-logo"><img src="icons/haru-icon.svg" alt=""></div>
       <h1>Haru</h1>
       <p class="muted">${t('welcome.tagline')}</p>
       <h2>${t('welcome.question')}</h2>

@@ -1882,10 +1882,7 @@ a.rn:active .rn-btn { transform: scale(.95); box-shadow: var(--lift); }
 .tile-link[href*="mode=type"] { --dot: var(--shu); }
 .tile-link[href*="dictation"] { --dot: var(--c-phrases); }
 .tile-link[href*="mode=speak"] { --dot: var(--matcha); }
-.tile-link[href="#/quiz?mode=review"] { background: var(--ai); color: var(--accent-ink); border-color: transparent; box-shadow: 0 14px 28px -14px color-mix(in srgb, var(--ai) 80%, transparent); }
-.tile-link[href="#/quiz?mode=review"] :is(.tl-kr, .muted) { color: var(--accent-ink); opacity: .9; }
 .tile-link[href="#/quiz?mode=review"]::after { display: none; }
-.tile-link[href="#/quiz?mode=review"] .badge { box-shadow: 0 0 0 3px var(--ai); }
 .cat-head .gl, .theme-tile .tt-glyph, .gl, .tact-g, .theme-resume .gl { background: var(--surface-2); color: var(--ink); }
 .theme-tile { background: var(--card); }
 .tact.main { background: var(--ai-soft); border-color: transparent; box-shadow: none; }
@@ -2074,3 +2071,10 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
   /* en-tête de module collant : la carte seule, posée sous la barre */
   .ru-stick { top: calc(env(safe-area-inset-top) + 8px + var(--topbar-h) + 6px); padding: 4px 0 8px; background: none !important; background-image: none !important; }
 }
+
+/* ===== Version 73 ===== */
+/* Examen : sceau vermillon comme les étapes (plus d'argent du platine) */
+.exam-seal { width: 104px; height: 104px; border-radius: 50%; color: var(--shu); background: radial-gradient(circle, var(--shu-soft) 0 60%, transparent 61%); border: 4px solid var(--shu); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 6px var(--shu); transform: rotate(-6deg); animation: popIn .5s var(--spring) both; }
+.exam-intro .exam-seal, .exam-intro.plat .exam-seal { animation: popIn .5s var(--spring) both; }
+/* Onglet Mots : la tuile Révision comme les autres ; sa pastille rouge indique les mots à revoir */
+.tile-link[href="#/quiz?mode=review"] .badge { box-shadow: 0 0 0 3px var(--card); }

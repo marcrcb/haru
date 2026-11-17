@@ -1,6 +1,6 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent les nouveaux fichiers.
-const VERSION = 'haru-v72';
+const VERSION = 'haru-v73';
 const AUDIO = 'haru-audio'; // voix enregistrées : gardées d'une version à l'autre (elles ne changent pas)
 const REMINDER = 'haru-reminder'; // état du rappel quotidien, écrit par l'application (js/reminders.js)
 const FILES = [
@@ -57,11 +57,11 @@ const FILES = [
   './js/content/strokes.ja.js',
   './js/content/strokes.kanji.js',
   './fonts/nunito-latin.woff2',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-512.png',
-  './icons/apple-touch-icon.png',
+  './icons/haru-icon.svg',
+  './icons/haru-icon-192.png',
+  './icons/haru-icon-512.png',
+  './icons/haru-maskable-512.png',
+  './icons/haru-apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (e) => {
@@ -148,7 +148,7 @@ async function remind() {
   s.notified = today;
   await cache.put('./__reminder-state', new Response(JSON.stringify(s), { headers: { 'Content-Type': 'application/json' } }));
   await self.registration.showNotification(tx.title || 'Haru', {
-    body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'haru-reminder', data: { url: './#/road' },
+    body, icon: 'icons/haru-icon-192.png', badge: 'icons/haru-icon-192.png', tag: 'haru-reminder', data: { url: './#/road' },
   });
 }
 

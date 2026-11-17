@@ -59,7 +59,7 @@ export async function syncState(extra = {}) {
 async function show() {
   const reg = await navigator.serviceWorker.ready;
   const { title, body } = message();
-  await reg.showNotification(title, { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: TAG, renotify: true, data: { url: './#/road' } });
+  await reg.showNotification(title, { body, icon: 'icons/haru-icon-192.png', badge: 'icons/haru-icon-192.png', tag: TAG, renotify: true, data: { url: './#/road' } });
 }
 
 let timer = null;
