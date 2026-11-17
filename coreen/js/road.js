@@ -5,6 +5,9 @@ import { course, t, tr, lang } from './course.js';
 import { ALL_THEMES, themeGlyph, themeShort } from './content/lexicon.js';
 import { ROADMAP, CHAPTERS } from './content/roadmap.js';
 import { reviewCount } from './review.js';
+import { STORIES } from './content/stories.js';
+
+const storyOf = (id) => (STORIES[course().id] || []).find((s) => s.id === id);
 
 export const roadUnits = () => ROADMAP[course().id] || [];
 export const roadChapters = () => CHAPTERS[course().id] || [];
@@ -91,7 +94,7 @@ export function stepDone(s, st = store.get()) {
   if (s.kind === 'mastery') { const g = goal(s.theme, st); return !!st.road?.[s.id] || (g.total > 0 && g.n >= g.total); }
   return !!st.road?.[s.id];
 }
-const STARRED = ['script', 'words', 'cards', 'phrase', 'type', 'dictation', 'ptype', 'speak'];
+const STARRED = ['script', 'words', 'cards', 'phrase', 'type', 'dictation', 'ptype', 'speak', 'story'];
 const stars = (s, st) => (STARRED.includes(s.kind) ? st.road?.[s.id] || 0 : 0);
 
 /** Titre, type, pastille et adresse d'une étape. */
@@ -121,6 +124,10 @@ export function stepInfo(s) {
     if (s.kind === 'speak') return { title, type: t('road.speak'), glyph, href: `#/quiz?t=${s.theme}&mode=speak&${q}` };
     return { title, type: t('road.quiz'), glyph, href: `#/quiz?t=${s.theme}&${q}` };
   }
+  if (s.kind === 'story') {
+    const st = storyOf(s.story);
+    return { title: st ? tr(st.title) : s.story, type: t('road.story'), glyph: ja ? '話' : '이야기', href: `#/story?id=${s.story}&${q}` };
+  }
   if (s.kind === 'phrase') return { title: tr(s.title), type: t('road.phrases'), glyph: ja ? '文' : '문장', href: `#/rphrase?${q}` };
   if (s.kind === 'ptype') return { title: tr(s.title), type: t('road.ptype'), glyph: ja ? '作文' : '작문', href: `#/rphrase?${q}` };
   return { title: t('title.pairs'), type: t('road.game'), glyph: ja ? 'ペア' : '짝', href: `#/pairs?${q}` };
@@ -136,7 +143,7 @@ export function roadState() {
     // Un module n'est validé qu'une fois son examen réussi (toutes les étapes faites ne suffisent plus) ;
     // le réussir le fait aussi passer au platine.
     const stepsDone = done === steps.length;
-    const plat = score >= store.EXAM_PASS;
+    const plat = u.noExam ? stepsDone : score >= store.EXAM_PASS; // module sans examen (histoire) : validé avec ses étapes
     return { ...u, steps, done, stepsDone, complete: stepsDone && plat, score, plat };
   });
   units.forEach((u, k) => {
@@ -226,7 +233,7 @@ export function roadScreen(el) {
               ? `<a class="${cls}" href="${info.href}" style="--x:${x}; --k:${n}">${inner}</a>`
               : `<div class="${cls}" style="--x:${x}; --k:${n}">${inner}</div>`;
           }).join('')}
-          ${(() => {
+          ${u.noExam ? '' : (() => {
             // Examen du module : accessible une fois toutes les étapes terminées
             const x = OFFSETS[u.steps.length % OFFSETS.length];
             const now = u === R.cur && u.stepsDone && !u.plat; // l'examen est la prochaine chose à faire

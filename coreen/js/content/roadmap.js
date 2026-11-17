@@ -15,6 +15,8 @@
 // Les modules sont rangés en chapitres (CHAPTERS, en bas du fichier).
 // L'identifiant d'une étape (id) sert de clé de sauvegarde : ne pas le changer.
 
+import { STORIES } from './stories.js';
+
 const L = (fr, en) => ({ fr, en });
 const script = (id, set) => ({ id, kind: 'script', set });
 const lesson = (id) => ({ id: `l-${id}`, kind: 'lesson', lesson: id });
@@ -591,6 +593,13 @@ const CH = {
   ],
 };
 
+// Histoires : un module par histoire, ajouté à la fin de son chapitre. Il se valide en répondant aux questions (pas d'examen).
+const storyUnits = (c) => (STORIES[c] || []).map((s) => ({
+  id: `${c}st${s.ch}`, glyph: s.glyph, color: 'var(--c-phrases)', title: s.title, sub: s.sub, noExam: true,
+  steps: [{ id: `st-${s.id}`, kind: 'story', story: s.id }],
+}));
+for (const c of ['ko', 'ja']) for (const s of STORIES[c] || []) CH[c][s.ch - 1].units.push(`${c}st${s.ch}`);
+
 function build(course, modules) {
   const byId = new Map(modules.map((m) => [m.id, m]));
   // Une étape déjà présente plus tôt dans le parcours n'est pas répétée (les ateliers reprennent d'anciens thèmes).
@@ -604,8 +613,8 @@ function build(course, modules) {
 
 /** Tous les modules définis (pour vérifier qu'aucun n'est oublié dans les chapitres). */
 export const MODULES = {
-  ko: [...KO, ...KO_VOCAB.map((x) => x[1]), ...KO_NEW, ...shared(false), ...advanced(false)],
-  ja: [...JA, ...JA_VOCAB.map((x) => x[1]), ...JA_NEW, ...shared(true), ...advanced(true)],
+  ko: [...KO, ...KO_VOCAB.map((x) => x[1]), ...KO_NEW, ...shared(false), ...advanced(false), ...storyUnits('ko')],
+  ja: [...JA, ...JA_VOCAB.map((x) => x[1]), ...JA_NEW, ...shared(true), ...advanced(true), ...storyUnits('ja')],
 };
 export const CHAPTERS = CH;
 export const ROADMAP = { ko: build('ko', MODULES.ko), ja: build('ja', MODULES.ja) };

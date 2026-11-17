@@ -1,6 +1,7 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent les nouveaux fichiers.
-const VERSION = 'haru-v63';
+const VERSION = 'haru-v65';
+const AUDIO = 'haru-audio'; // voix enregistrées : gardées d'une version à l'autre (elles ne changent pas)
 const REMINDER = 'haru-reminder'; // état du rappel quotidien, écrit par l'application (js/reminders.js)
 const FILES = [
   './',
@@ -18,6 +19,9 @@ const FILES = [
   './js/review.js',
   './js/placement.js',
   './js/reminders.js',
+  './js/audio-key.js',
+  './js/story.js',
+  './js/content/stories.js',
   './js/content/pictures.js',
   './js/games.js',
   './js/phrases.js',
@@ -66,15 +70,43 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== REMINDER).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== REMINDER && k !== AUDIO).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
+
+// Voix enregistrée : depuis le cache (sinon téléchargée une fois). Safari lit l'audio par morceaux (en-tête Range) :
+// on renvoie alors le morceau demandé (réponse 206), sinon la lecture resterait muette.
+async function voiceResponse(req) {
+  const cache = await caches.open(AUDIO);
+  let res = await cache.match(req.url);
+  if (!res) {
+    res = await fetch(req.url);
+    if (!res.ok) return res;
+    await cache.put(req.url, res.clone());
+  }
+  const range = req.headers.get('range');
+  if (!range) return res;
+  const buf = await res.arrayBuffer();
+  const total = buf.byteLength;
+  const m = /bytes=(\d*)-(\d*)/.exec(range) || [];
+  const start = m[1] ? Number(m[1]) : 0;
+  const end = m[2] ? Math.min(Number(m[2]), total - 1) : total - 1;
+  return new Response(buf.slice(start, end + 1), {
+    status: 206,
+    headers: { 'Content-Type': 'audio/mpeg', 'Content-Range': `bytes ${start}-${end}/${total}`, 'Content-Length': String(end - start + 1), 'Accept-Ranges': 'bytes' },
+  });
+}
 
 // Réseau d'abord (pour recevoir les mises à jour), cache en secours hors connexion.
 // « no-cache » : le navigateur revalide chaque fichier auprès du serveur au lieu de resservir
 // sa copie pendant 10 minutes, ce qui mélangeait anciens et nouveaux fichiers après une mise à jour.
 self.addEventListener('fetch', (e) => {
+  // Voix enregistrées : depuis le cache s'il y est, sinon téléchargées une fois puis gardées (écoute hors connexion).
+  if (e.request.method === 'GET' && /\/audio\/[a-z]+\/[0-9a-f]{8}\.mp3$/.test(new URL(e.request.url).pathname)) {
+    e.respondWith(voiceResponse(e.request));
+    return;
+  }
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     fetch(e.request.url, { cache: 'no-cache' })

@@ -1,5 +1,5 @@
 // Haru (하루) — application d'entraînement au coréen et au japonais. Navigation et écrans principaux.
-import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS } from './ui.js';
+import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices } from './ui.js';
 import * as store from './store.js';
 import { ALL_THEMES, isPhraseTheme, themeGlyph, themeColor, themeShort } from './content/lexicon.js';
 import { course, hasCourse, setCourse, COURSES, t, tr, lang, gloss } from './course.js';
@@ -13,6 +13,7 @@ import { achievements, newTiers, TIERS } from './achievements.js';
 import { listenSupported } from './speech.js';
 import { reviewCount } from './review.js';
 import { placementScreen } from './placement.js';
+import { storyScreen } from './story.js';
 import { officialLevel } from './road.js';
 import * as reminders from './reminders.js';
 
@@ -37,6 +38,7 @@ const SCREENS = {
   hquiz: { title: () => t('title.scriptQuiz', { name: tr(course().script.title) }), tab: 'hangul', back: '#/hangul', focus: true, render: (el, q) => scriptQuiz(el, q.set || Object.keys(course().script.sets)[0], q.step, q.mode) },
   exam: { title: () => t('title.exam'), tab: 'road', back: '#/road', focus: true, render: examScreen },
   placement: { title: () => t('place.title'), tab: 'road', back: '#/road', focus: true, render: placementScreen },
+  story: { title: () => t('story.eyebrow'), tab: 'road', back: '#/road', focus: true, render: storyScreen },
   quiz: { title: () => t('title.quiz'), tab: 'words', back: '#/words', focus: true, render: (el, q) => vocabQuiz(el, q.t || 'all', q.mode, q.step) },
   cards: { title: () => t('title.cards'), tab: 'words', back: '#/words', focus: true, render: (el, q) => flashcards(el, q.t || 'all', q.step) },
   pairs: { title: () => t('title.pairs'), tab: 'words', back: '#/words', focus: true, render: (el, q) => pairs(el, q.step) },
@@ -48,7 +50,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '63'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '65'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -68,7 +70,7 @@ function route() {
   if (name !== 'settings' && name !== 'welcome') lastHash = location.hash || '#/road';
   const params = Object.fromEntries(new URLSearchParams(query));
   const s = SCREENS[name];
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  stopSpeaking();
   $$('.celebrate').forEach((c) => c.remove()); // ferme une célébration restée ouverte
   closeSheet(); // et le volet des exercices d'un thème
   renderChrome();
@@ -859,6 +861,8 @@ function settings(el) {
       <h2>${t('set.sound')}</h2>
       <div class="card settings">
         ${toggle('autoplay', t('set.autoplay'), s.autoplay)}
+        ${toggle('natural', t('set.natural'), s.natural !== false)}
+        <div class="set-row col"><span class="muted small">${t('set.naturalHelp')}</span></div>
         ${toggle('sound', t('set.sfx'), s.sound)}
         <div class="set-row col">
           <span>${t('set.rate')} <b class="rate-val">${s.rate.toFixed(2).replace('.', t('decimal'))}</b></span>
@@ -1107,6 +1111,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 }
 
 applySettings();
+preloadVoices(); // liste des voix enregistrées de la langue apprise
 // Rappel quotidien : reprogrammé au lancement, à chaque gain d'XP, changement de réglage et retour dans l'application
 reminders.schedule();
 addEventListener('haru:xp', () => reminders.schedule());

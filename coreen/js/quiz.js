@@ -1,7 +1,7 @@
 // Moteur d'exercices : réponses à écrire au clavier, dictées, prononciation à voix haute,
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS } from './ui.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, stopSpeaking } from './ui.js';
 import { addXp, review, pickForReview, mistakes, get, save, markRoad, starsFor, box, streakOf, bump, record } from './store.js';
 import { reviewItems, reviewCount, nextReviewIn, letterId, kanjiId, REVIEW_MAX } from './review.js';
 import { course, t, tr, gloss, lang } from './course.js';
@@ -374,7 +374,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
     });
     mic.addEventListener('click', () => {
       if (mic.classList.contains('on')) return listening?.stop();
-      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      stopSpeaking();
       mic.classList.add('on');
       msg.textContent = t('speak.listening');
       sfx.tap();

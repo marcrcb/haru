@@ -1,6 +1,7 @@
 // Petits outils d'interface : voix, sons, confettis, animations.
 import { get } from './store.js';
 import { course } from './course.js';
+import { audioKey, audioHash } from './audio-key.js';
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -47,8 +48,77 @@ export const currentVoice = () => findVoice();
 
 let current = null; // garde une référence : sinon certains navigateurs coupent la voix en cours de route
 let pending = 0;
+
+// ---------- Voix naturelles (enregistrées) ----------
+// audio/<langue>/index.json liste les enregistrements validés ; sans enregistrement, c'est la voix du téléphone.
+const voiceIndex = {};
+function loadVoices(id) {
+  if (id in voiceIndex || typeof fetch === 'undefined') return;
+  voiceIndex[id] = null;
+  fetch(`audio/${id}/index.json`)
+    .then((r) => (r.ok ? r.json() : []))
+    .then((list) => { voiceIndex[id] = new Set(list); })
+    .catch(() => { voiceIndex[id] = new Set(); });
+}
+/** Charge à l'avance la liste des enregistrements de la langue apprise. */
+export const preloadVoices = () => loadVoices(course().id);
+/** Un enregistrement existe-t-il pour ce texte ? */
+export function naturalUrl(text) {
+  const id = course().id;
+  loadVoices(id);
+  if (get().settings.natural === false) return null;
+  const h = audioHash(audioKey(text));
+  return voiceIndex[id]?.has(h) ? `audio/${id}/${h}.mp3` : null;
+}
+// Un seul lecteur, réutilisé : sur iPhone, un lecteur débloqué par un premier toucher le reste ensuite.
+let player = null;
+let playing = false;
+const voicePlayer = () => (player ||= typeof Audio === 'undefined' ? null : new Audio());
+/** Coupe la voix en cours (enregistrement ou synthèse). */
+export function stopSpeaking() {
+  if (playing && player) player.pause();
+  playing = false;
+  clearTimeout(pending);
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+let last = { key: '', at: 0, slow: false };
+
+/** Prononce un texte : voix enregistrée si elle existe, sinon voix du téléphone. Toucher deux fois de suite : plus lentement. */
 export function speak(text, rate) {
+  const key = audioKey(text);
+  if (!key) return;
+  const now = Date.now();
+  const slow = last.key === key && now - last.at < 4000 && !last.slow;
+  last = { key, at: now, slow };
+  const url = naturalUrl(text);
+  if (!url) return ttsSpeak(text, rate, slow);
+  const a = voicePlayer();
+  if (!a) return ttsSpeak(text, rate, slow);
+  stopSpeaking();
+  const turn = ++voiceTurn;
+  let failed = false;
+  const fallback = () => {
+    if (failed || turn !== voiceTurn) return;
+    failed = true;
+    playing = false;
+    ttsSpeak(text, rate, slow);
+  };
+  a.onerror = fallback;
+  a.onended = () => { if (turn === voiceTurn) playing = false; };
+  a.src = url;
+  // vitesse du réglage (0,85 = vitesse naturelle de l'enregistrement), plus lente au deuxième toucher
+  a.playbackRate = slow ? 0.72 : Math.max(0.7, Math.min(1.25, (rate ?? get().settings.rate) / 0.85));
+  a.defaultPlaybackRate = a.playbackRate;
+  a.preservesPitch = true;
+  playing = true;
+  const p = a.play();
+  if (p) p.catch((e) => { if (e?.name !== 'AbortError') fallback(); });
+}
+let voiceTurn = 0;
+
+function ttsSpeak(text, rate, slow = false) {
   if (!canSpeak()) return;
+  if (player) { player.pause(); player = null; }
   clearTimeout(pending);
   const busy = speechSynthesis.speaking || speechSynthesis.pending;
   speechSynthesis.cancel();
@@ -60,7 +130,7 @@ export function speak(text, rate) {
   const voice = findVoice();
   if (voice) u.voice = voice;
   // Les mots isolés, un peu plus posés, s'entendent mieux ; une vitesse trop lente sonne haché.
-  const base = rate ?? get().settings.rate;
+  const base = (rate ?? get().settings.rate) * (slow ? 0.75 : 1);
   const short = [...clean].length <= 2;
   u.rate = Math.max(0.6, Math.min(1.1, short ? base * 0.92 : base));
   u.pitch = 1;

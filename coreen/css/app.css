@@ -1687,3 +1687,26 @@ body[data-tab="phrases"] { --ink-accent: var(--ink-phrases); }
 .remind-none { padding: 12px 0; }
 /* Messages éphémères : une carte arrondie (et non une bulle) quand le texte tient sur plusieurs lignes */
 .toast { width: max-content; max-width: min(90vw, 420px); border-radius: 16px; text-align: center; line-height: 1.35; }
+
+/* ================= Version 65 : histoires ================= */
+.st-head { display: flex; align-items: center; gap: 14px; margin: 6px 0 8px; }
+.st-head h1 { font-size: 1.45rem; line-height: 1.2; }
+.st-head .eyebrow { margin: 0; color: var(--ink-phrases); }
+.st-glyph { flex: 0 0 auto; display: grid; place-items: center; min-width: 60px; height: 60px; padding: 0 8px; border-radius: 18px; font-size: 1.1rem; font-weight: 900; color: #2b1d00; background: var(--c-phrases); box-shadow: 0 4px 0 color-mix(in srgb, var(--c-phrases) 60%, #000); }
+.st-help { margin-bottom: 12px; }
+.st-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.st-line { display: grid; gap: 4px; }
+.st-line.fresh { animation: rise .4s var(--ease) both; }
+.st-who { font-size: .8rem; font-weight: 900; color: var(--ink-phrases); padding-left: 6px; }
+.st-bubble { position: relative; display: grid; gap: 6px; padding: 12px 46px 12px 14px; border-radius: 18px; background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 3px 0 var(--line); }
+.st-line.narration .st-bubble { background: transparent; border-style: dashed; box-shadow: none; }
+.st-tl { font-size: calc(1.25rem * var(--krs)); font-weight: 700; line-height: 1.5; }
+.st-tl.has-ruby { line-height: 2.1; }
+.st-rom { color: var(--muted); font-size: .88rem; }
+.st-tr { font-size: .95rem; }
+.st-say { position: absolute; top: 6px; right: 4px; color: var(--ink-phrases); }
+.st-progress { margin: 14px 0 0; text-align: center; }
+.st-q { font-size: 1.25rem; font-weight: 800; line-height: 1.35; display: block; padding: 0 6px; }
+:root.no-motion .st-line.fresh { animation: none; }
+.st-bubble > * { min-width: 0; }
+.st-tl, .st-rom { overflow-wrap: anywhere; }
