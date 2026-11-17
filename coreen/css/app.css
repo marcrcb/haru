@@ -1675,3 +1675,15 @@ body[data-tab="phrases"] { --ink-accent: var(--ink-phrases); }
 .cefr-card b { font-size: 1.08rem; }
 .set-link { color: inherit; }
 .set-link > span:first-child { flex: 1; }
+
+/* ================= Version 63 : 5 onglets, Guide dans l'en-tête, rappels ================= */
+#tabs { grid-template-columns: repeat(5, 1fr); }
+#title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-actions { flex: 0 0 auto; }
+.top-actions .icon-btn[data-top="guide"].on { color: var(--c-guide); border-color: var(--c-guide); box-shadow: 0 3px 0 color-mix(in srgb, var(--c-guide) 60%, #000); }
+@media (max-width: 360px) { .lv-chip .lv-meter { display: none; } .lv-chip { padding-right: 5px; } }
+.remind-card input[type="time"] { padding: 6px 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+.remind-cal { width: 100%; }
+.remind-none { padding: 12px 0; }
+/* Messages éphémères : une carte arrondie (et non une bulle) quand le texte tient sur plusieurs lignes */
+.toast { width: max-content; max-width: min(90vw, 420px); border-radius: 16px; text-align: center; line-height: 1.35; }

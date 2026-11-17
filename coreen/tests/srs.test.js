@@ -59,3 +59,17 @@ test('les anciennes progressions sont converties une seule fois, sans rien perdr
   assert.equal(again.courses.ko.srs.a.b, 4);
   assert.equal(store.normalize({ v: 2, courses: {} }).courses.ja.srsV, 2, 'nouveau cours : déjà en version 2');
 });
+
+test('jour de repos : un jour manqué isolé par semaine ne casse pas la série', () => {
+  store.selectCourse('ko');
+  const st = store.get();
+  const key = (back) => { const d = new Date(); d.setDate(d.getDate() - back); return store.dayKey(d); };
+  const set = (pattern) => { st.days = {}; [...pattern].forEach((c, back) => { if (c === 'x') st.days[key(back)] = st.goal; }); };
+  // motif lu d'aujourd'hui vers le passé : x = objectif atteint, . = manqué
+  set('xxx.xxx'); assert.equal(store.streak(), 6, 'un trou isolé est protégé');
+  set('xx..xxx'); assert.equal(store.streak(), 2, 'deux jours manqués d’affilée cassent la série');
+  set('xx.xx.xx'); assert.equal(store.streak(), 4, 'un seul jour de repos par semaine');
+  set('.xxxx'); assert.equal(store.streak(), 4, 'aujourd’hui pas encore fait : la série tient');
+  set('..xxxx'); assert.equal(store.streak(), 4, 'hier = jour de repos : la série tient encore aujourd’hui');
+  set('...xxx'); assert.equal(store.streak(), 0, 'deux jours manqués avant aujourd’hui : la série s’arrête');
+});

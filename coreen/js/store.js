@@ -185,14 +185,28 @@ export function level(xp = state.xp) {
   return { lv, progress: (xp - start) / (next - start), toNext: next - xp, into: xp - start, span: next - start };
 }
 
-/** Jours consécutifs avec l'objectif quotidien atteint (aujourd'hui compte s'il est atteint). */
+/**
+ * Jours consécutifs avec l'objectif quotidien atteint (aujourd'hui compte s'il est atteint).
+ * Jour de repos : un jour manqué isolé ne casse pas la série, au plus une fois par semaine
+ * (il ne compte pas dans la série, il la protège). Deux jours manqués d'affilée la remettent à zéro.
+ */
 export function streak() {
+  const ok = (d) => (state.days[dayKey(d)] || 0) >= root.goal;
   let n = 0;
+  let i = 0; // jours parcourus vers le passé
+  let rest = -Infinity; // dernier jour de repos utilisé (en jours parcourus)
   const d = new Date();
-  if ((state.days[dayKey(d)] || 0) < root.goal) d.setDate(d.getDate() - 1);
-  while ((state.days[dayKey(d)] || 0) >= root.goal) {
-    n++;
+  if (!ok(d)) d.setDate(d.getDate() - 1); // aujourd'hui n'est pas encore fini
+  for (;;) {
+    if (ok(d)) n++;
+    else {
+      const before = new Date(d);
+      before.setDate(before.getDate() - 1);
+      if (ok(before) && i - rest >= 7) rest = i; // jour de repos
+      else break;
+    }
     d.setDate(d.getDate() - 1);
+    i++;
   }
   return n;
 }

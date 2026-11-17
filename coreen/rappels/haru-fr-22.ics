@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Haru//Rappel quotidien//FR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:haru-rappel-fr-22@marcrcb.github.io
+DTSTAMP:20261117T000000Z
+DTSTART:20261118T220000
+DURATION:PT10M
+RRULE:FREQ=DAILY
+SUMMARY:Haru · ta séance du jour
+DESCRIPTION:Quelques minutes de coréen ou de japonais : ton objectif du jour t’attend. https://marcrcb.github.io/haru/
+URL:https://marcrcb.github.io/haru/
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Haru · ta séance du jour
+TRIGGER:PT0M
+END:VALARM
+END:VEVENT
+END:VCALENDAR

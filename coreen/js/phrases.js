@@ -6,6 +6,7 @@ import { meaningOf, showPeek, peekAttr } from './peek.js';
 import { generate, TENSE_LABEL, STYLE_LABEL, FORM_LABEL } from './generator.js';
 import { THEMES } from './content/concepts.js';
 import { course, t, tr, lang } from './course.js';
+import { roadState } from './road.js';
 
 const STYLE_HELP = {
   ko: { polite: { fr: '-요 : le plus courant', en: '-요: the most common' }, formal: { fr: '-니다 : travail, annonces', en: '-니다: work, announcements' }, casual: { fr: 'entre amis proches', en: 'between close friends' } },
@@ -358,12 +359,18 @@ export function phrasesScreen(el) {
   }
   const CRITERIA = criteria();
   const crit = { ...DEFAULT_CRIT, ...(st.crit || {}) };
+  // Sans critères choisis : le niveau suit l'avancement dans le parcours (chapitres 1-4, 5-7, puis la suite)
+  if (!st.crit) {
+    const R = roadState();
+    const k = Math.max(0, R.chapters.findIndex((c) => c.list.includes(R.cur)));
+    crit.level = R.cur ? (k <= 3 ? '1' : k <= 6 ? '2' : '3') : '3';
+  }
   if (!C.styles.includes(crit.style)) crit.style = 'polite';
   const roman = st.settings.roman;
 
   el.innerHTML = `
     <div class="screen phrases">
-      <details class="card crit" ${st.crit ? '' : 'open'}>
+      <details class="card crit">
         <summary><span>${t('crit.title')}</span><span class="crit-sum muted"></span></summary>
         ${CRITERIA.map((c) => `
           <div class="crit-group">
@@ -373,7 +380,7 @@ export function phrasesScreen(el) {
             </div>
           </div>`).join('')}
       </details>
-      <button class="btn primary big gen-btn">${ICONS.shuffle}<span>${t('phrase.generate')}</span></button>
+      <button class="btn primary big gen-btn">${ICONS.shuffle}<span>${t('phrase.forMe')}</span></button>
       <div class="phrase-zone"></div>
       <section class="journal"></section>
     </div>`;
