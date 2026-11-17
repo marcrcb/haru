@@ -2078,3 +2078,9 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
 .exam-intro .exam-seal, .exam-intro.plat .exam-seal { animation: popIn .5s var(--spring) both; }
 /* Onglet Mots : la tuile Révision comme les autres ; sa pastille rouge indique les mots à revoir */
 .tile-link[href="#/quiz?mode=review"] .badge { box-shadow: 0 0 0 3px var(--card); }
+
+/* ===== Version 75 ===== */
+/* Plein écran : le fond de la page couvre tout l'écran, y compris la zone de l'appareil photo et de l'ancienne barre d'état */
+:root:fullscreen, :root:-webkit-full-screen { background: var(--paper); }
+:root::backdrop { background: var(--paper); }
+:root:fullscreen body::before { background: var(--paper); }
