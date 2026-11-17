@@ -23,10 +23,16 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 - **Succès** : 17 badges à cinq paliers (bronze, argent, or, platine, diamant) dans le Profil.
 - **À voix haute** : le téléphone écoute (reconnaissance vocale du navigateur) et vérifie qu’il comprend le bon mot ou la bonne lettre. Sans micro, ces exercices sont remplacés par des exercices écrits.
 - **Difficulté progressive** : au début du parcours, surtout des choix multiples ; ensuite, de plus en plus d’exercices à écrire (clavier coréen ou japonais), des paires à relier, des syllabes et des mots à remettre dans l’ordre par glisser-déposer ; à la fin, plus aucun choix multiple. Le nombre de questions est fixé par type de série (`SERIES` dans `js/quiz.js`).
+- **Apprendre avant d’être interrogé** : avant la première question sur un mot, une lettre ou un kanji jamais vu, une carte « Nouveau » le présente (son, sens, lecture, dessin, ordre des traits). Elle ne compte pas dans le score.
+- **Premier lancement** : langue, objectif quotidien (5 à 20 min), niveau ; test de niveau qui valide les premiers chapitres (aussi dans les Réglages). Ensuite, l’application s’ouvre directement sur la dernière langue.
+- **Repères officiels** : chaque chapitre indique son niveau indicatif (CECR, TOPIK, JLPT) ; le Profil montre le niveau atteint.
+- **Histoires** : une par chapitre (2 à 14), avec Léo à Séoul ou à Tokyo : réplique par réplique (voix, traduction à révéler, sens de chaque mot au toucher, furigana), puis questions de compréhension (`js/content/stories.js`).
+- **Voix naturelles** : mots, lettres, exemples et histoires enregistrés par synthèse vocale libre (MeloTTS pour le coréen, Kokoro pour le japonais) et vérifiés un par un par reconnaissance vocale (Whisper) ; sinon, voix du téléphone. Toucher deux fois : plus lent. Génération : `tools/audio-list.mjs` puis `tools/make-audio.py`.
+- **Rappels** : rappel quotidien ajouté à l’agenda (tous les téléphones) et notification là où le navigateur le permet ; un jour de repos par semaine protège la série.
 - **Nouveaux mots en images** : au premier contact avec un mot concret, on le reconnaît parmi quatre dessins (`js/content/pictures.js`).
 - **Sans clavier** : un bouton clavier, en haut des exercices à écrire, remplace le clavier par les morceaux de la réponse à remettre dans l’ordre (ou, pour une seule lettre, à choisir). Le choix est mémorisé.
 - **Trou de mémoire** : toucher un mot d’une phrase (ou appuyer longuement sur une étiquette à remettre dans l’ordre) affiche son sens ; pas pendant les examens.
-- **Révision** : une question par faute (mot raté, pas encore réussi depuis), au plus 10 par séance ; s’il en reste, une séance suivante est proposée.
+- **Révisions du jour** : répétition espacée longue (révision après 1, 3, 7, 16, 35, 90 puis 180 jours ; on ne monte qu’à une révision due). Les mots, lettres et kanji arrivés à échéance et les fautes forment la séance du jour (carte en haut du Parcours, raccourci « Réviser » sur l’icône), en rappel actif. « Retenu » = deux bonnes réponses d’affilée (objectifs du parcours) ; « maîtrisé » = a tenu au moins trois semaines.
 - **Mots par familles** : les thèmes sont rangés en grandes familles repliables (essentiels, gens, maison, ville et voyage…), chacune avec sa progression ; toucher un thème ouvre un volet avec ses cinq exercices expliqués, et « Reprendre » ramène au dernier thème travaillé. Les familles se règlent dans `CATS` (`js/app.js`).
 - **À retenir** : à la fin de chaque série, les réponses ratées sont listées, à relire et à réécouter.
 - **Progression** : XP, niveaux, série de jours, objectif quotidien et calendrier d’activité. La progression peut être exportée ou restaurée.
@@ -44,13 +50,14 @@ Tout ce qui suit existe pour les deux langues (hangeul pour le coréen, hiragana
 ```bash
 cd coreen
 python3 -m http.server 8080      # puis ouvrir http://localhost:8080
-node --test tests/*.test.js      # tests du moteur coréen
+node --test tests/*.test.js      # tests du moteur (langues, répétition espacée, histoires…)
+node tests/e2e/smoke.cjs http://localhost:8080   # tests d’écrans (playwright et axe-core requis)
 ```
 
 ## Mettre l’application en ligne (gratuit, GitHub Pages)
 
 1. Sur GitHub : **Settings → Pages → Source : « GitHub Actions »**.
-2. Pousser sur la branche : le workflow `.github/workflows/haru-pages.yml` lance les tests puis publie le dossier `coreen/`. Il est aussi possible de le lancer à la main dans l’onglet **Actions**.
+2. Pousser sur la branche : le workflow `.github/workflows/haru-pages.yml` lance les tests du moteur, prépare une version minifiée (`tools/build.mjs`), la vérifie écran par écran dans un vrai navigateur (`tests/e2e/smoke.cjs` : aucune erreur, aucun débordement, contraste WCAG AA, en coréen et en japonais, clair et sombre, téléphone et ordinateur), puis la publie. Si un test échoue, rien n’est publié. Il est aussi possible de le lancer à la main dans l’onglet **Actions**.
 3. L’adresse s’affiche dans le résultat du workflow, par exemple `https://<utilisateur>.github.io/<dépôt>/`.
 
 ## Publier sur le Play Store (Android)
