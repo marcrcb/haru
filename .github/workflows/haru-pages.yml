@@ -42,6 +42,7 @@ jobs:
           python3 -m http.server 8090 --directory dist > /dev/null 2>&1 &
           sleep 1
           NODE_PATH=/tmp/ci/node_modules node coreen/tests/e2e/smoke.cjs http://localhost:8090
+          NODE_PATH=/tmp/ci/node_modules node coreen/tests/e2e/order.cjs http://localhost:8090
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

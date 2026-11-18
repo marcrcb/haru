@@ -1,5 +1,5 @@
 // Générateur de phrases, exercice « reconstituer » et défi du jour.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, confetti, countUp, pulse, floatXp, toast, burst, ICONS } from './ui.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, confetti, countUp, pulse, floatXp, toast, burst, ICONS, emptyArt } from './ui.js';
 import { addXp, get, save, dayKey, markRoad, bump } from './store.js';
 import { mountTyping, normAnswer } from './keyboard.js';
 import { meaningOf, showPeek, peekAttr } from './peek.js';
@@ -412,7 +412,7 @@ export function phrasesScreen(el) {
 
   function showPhrase(animate) {
     if (!current) {
-      zone.innerHTML = `<div class="empty muted">${t('phrase.empty')}</div>`;
+      zone.innerHTML = `<div class="empty muted">${emptyArt('book')}<span>${t('phrase.empty')}</span></div>`;
       return;
     }
     const p = current;

@@ -1,6 +1,7 @@
 // Parcours : chapitres, modules et étapes de difficulté croissante, examens de module et examen final.
 import { $, $$, esc, sfx, celebrate, ICONS, skyTime } from './ui.js';
 import * as store from './store.js';
+import { backupDue, saveFile, snooze } from './backup.js';
 import { course, t, tr, lang } from './course.js';
 import { ALL_THEMES, themeGlyph, themeShort } from './content/lexicon.js';
 import { ROADMAP, CHAPTERS } from './content/roadmap.js';
@@ -224,7 +225,7 @@ export function roadRewards() {
   } else if (ended) {
     R.chapters.filter((c) => c.full).forEach((c) => { st.road[`chdone:${c.id}`] = true; delete openChapters[c.id]; });
     store.save();
-    celebrate({ glyph: ended.glyph, title: t('road.chDoneTitle'), text: t('road.chDoneText', { name: tr(ended.title) }), button: t('continue') });
+    celebrate({ glyph: ended.glyph, stamp: course().id === 'ja' ? '修了' : '수료', title: t('road.chDoneTitle'), text: t('road.chDoneText', { name: tr(ended.title) }), button: t('continue') });
   }
   return R;
 }
@@ -280,6 +281,12 @@ export function roadScreen(el) {
   el.innerHTML = `
     <div class="screen road">
       ${skyCard(R, due)}
+      ${backupDue() ? `
+      <div class="card safe-card" role="note">
+        <span class="safe-seal kr" aria-hidden="true">${ja ? '保存' : '보관'}</span>
+        <span class="safe-text"><b>${t('safe.cardTitle')}</b><span>${t('safe.cardText')}</span></span>
+        <span class="safe-btns"><button class="btn small primary safe-go">${t('safe.save')}</button><button class="btn small ghost safe-later">${t('safe.later')}</button></span>
+      </div>` : ''}
       ${!st.road?.placed && !R.chapters.some((c) => c.full) ? `
       <a class="card place-card" href="#/placement">
         <span class="place-seal kr">${ja ? '診断' : '진단'}</span>
@@ -320,6 +327,11 @@ export function roadScreen(el) {
 
   requestAnimationFrame(() => requestAnimationFrame(() => $$('.mini-bar', el).forEach((b) => b.classList.add('go'))));
 
+  // Rappel de sauvegarde : fait (ou remis à plus tard) → la carte s'efface
+  const safe = $('.safe-card', el);
+  const hideSafe = () => { safe.classList.add('out'); setTimeout(() => safe.remove(), 260); };
+  $('.safe-go', el)?.addEventListener('click', async () => { if (await saveFile()) { sfx.win(); hideSafe(); } });
+  $('.safe-later', el)?.addEventListener('click', () => { sfx.tap(); snooze(); hideSafe(); });
   $$('.ru-open', el).forEach((b) => b.addEventListener('click', () => {
     st.road[`open:${b.closest('.ru').dataset.u}`] = true;
     store.save();

@@ -271,11 +271,15 @@ export function burst(el, n = 12) {
 }
 
 /** Fenêtre de célébration (niveau, objectif…). */
-export function celebrate({ glyph, title, text, button = 'Continuer' }) {
+export function celebrate({ glyph, title, text, button = 'Continuer', stamp = '' }) {
   const box = document.createElement('div');
-  box.className = 'celebrate';
+  box.className = `celebrate ${stamp ? 'stamped' : ''}`;
+  // stamp : un sceau à l'encre vermillon s'imprime sur la carte (fin de chapitre)
+  const top = stamp
+    ? `<div class="cel-stamp" aria-hidden="true"><span class="cel-stamp-ink kr">${[...stamp].map((c) => `<i>${esc(c)}</i>`).join('')}</span></div><div class="cel-chglyph kr">${esc(glyph)}</div>`
+    : `<div class="cel-glyph kr">${esc(glyph)}</div>`;
   box.innerHTML = `<div class="cel-card" role="dialog" aria-modal="true">
-    <div class="cel-glyph kr">${esc(glyph)}</div><h2>${esc(title)}</h2><p class="muted">${esc(text)}</p>
+    ${top}<h2>${esc(title)}</h2><p class="muted">${esc(text)}</p>
     <button class="btn primary">${esc(button)}</button></div>`;
   document.body.append(box);
   sfx.win();
@@ -364,3 +368,20 @@ export const ICONS = {
   shuffle: '<svg viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>',
   trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
 };
+
+/** Petits dessins à l'encre pour les états vides (pinceau, pousse). */
+export function emptyArt(kind) {
+  const art = {
+    // pinceau posé, une goutte d'encre
+    xp: '<path d="M14 44c8-2 18-10 26-22l4 4C36 38 26 46 16 48z"/><path d="M40 22l6-6 4 4-6 6"/><circle cx="12" cy="50" r="2.5"/>',
+    // pousse qui sort de terre
+    words: '<path d="M8 50h48"/><path d="M32 50V30"/><path d="M32 34c-2-8-9-12-16-11 1 8 8 12 16 11z"/><path d="M32 30c2-8 9-12 16-11-1 8-8 12-16 11z"/>',
+    // pile de cartes
+    cards: '<rect x="12" y="18" width="30" height="34" rx="4"/><path d="M20 12h26a4 4 0 0 1 4 4v30"/>',
+    // carnet ouvert
+    book: '<path d="M8 16c8-3 16-3 24 2v34c-8-5-16-5-24-2z"/><path d="M56 16c-8-3-16-3-24 2v34c8-5 16-5 24-2z"/>',
+    // sceau « fini »
+    done: '<circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="15"/><path d="M24 32l6 6 11-12"/>',
+  }[kind];
+  return `<svg class="ink-art" viewBox="0 0 64 64" aria-hidden="true">${art}</svg>`;
+}

@@ -22,10 +22,13 @@ const COURSE = () => ({
   stats: {}, // compteurs pour les succès : typed, traced, dictation, perfect, phrases, combo, streak
   srsV: 2, // version de la répétition espacée (2 : intervalles longs, jusqu'à 6 mois)
   ach: {}, // succès : id → palier déjà fêté
+  hist: {}, // 'AAAA-MM-JJ' → [mots retenus, lettres et kanji retenus] ce jour-là (courbe de progrès)
 });
 const DAILY_GOAL = 30; // XP par jour pour compter dans la série (le réglage n'existe plus)
 const ROOT = () => ({ v: 2, goal: DAILY_GOAL, settings: SETTINGS(), courses: { ko: COURSE(), ja: COURSE() } });
 
+let fresh = false; // aucune donnée trouvée au lancement (premier lancement, ou mémoire vidée ou abîmée)
+let afterSave = null;
 let root = load();
 let state; // progression du cours actif (avec accès à settings et goal)
 selectCourse(root.settings.course || 'ko');
@@ -35,7 +38,8 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) return normalize(JSON.parse(raw));
-  } catch { /* stockage indisponible : on repart de zéro */ }
+  } catch { /* stockage indisponible ou abîmé : on repart de zéro */ }
+  fresh = true;
   return ROOT();
 }
 
@@ -82,7 +86,12 @@ export function selectCourse(id) {
 
 export function save() {
   try { localStorage.setItem(KEY, JSON.stringify(root)); } catch { /* navigation privée, quota… */ }
+  afterSave?.();
 }
+/** Aucune progression trouvée au lancement ? (la copie de secours peut alors la rendre) */
+export const startedFresh = () => fresh;
+/** Fonction appelée après chaque enregistrement (copie de secours). */
+export const onSave = (fn) => { afterSave = fn; };
 
 export const get = () => state;
 export const exportAll = () => JSON.stringify(root);
@@ -170,12 +179,21 @@ export function addXp(n) {
   state.days[k] = dayBefore + n;
   state.stats ||= {};
   state.stats.streak = Math.max(state.stats.streak || 0, streak());
+  snapshot();
   save();
   dispatchEvent(new CustomEvent('haru:xp'));
   // Événements pour les célébrations (niveau gagné, objectif du jour atteint)
   const after = level().lv;
   if (after > before) dispatchEvent(new CustomEvent('haru:levelup', { detail: after }));
   if (dayBefore < root.goal && state.days[k] >= root.goal) dispatchEvent(new CustomEvent('haru:goal', { detail: streak() }));
+}
+
+/** Note le nombre de mots et de lettres retenus aujourd'hui (pour la courbe de progrès du profil). */
+function snapshot() {
+  let words = 0;
+  let script = 0;
+  for (const [id, c] of Object.entries(state.srs)) if (retained(c)) (/^[LK]:/.test(id) ? script++ : words++);
+  (state.hist ||= {})[dayKey()] = [words, script];
 }
 
 export const todayXp = () => state.days[dayKey()] || 0;

@@ -1,12 +1,13 @@
 // Haru (하루) — application d'entraînement au coréen et au japonais. Navigation et écrans principaux.
-import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices, skyTime } from './ui.js';
+import * as errlog from './errlog.js'; // en premier : il entend aussi les erreurs des autres modules
+import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices, skyTime, emptyArt } from './ui.js';
 import * as store from './store.js';
 import { ALL_THEMES, isPhraseTheme, themeGlyph, themeColor, themeShort } from './content/lexicon.js';
 import { course, hasCourse, setCourse, COURSES, t, tr, lang, gloss } from './course.js';
 import { scriptQuiz, vocabQuiz, wordsOf } from './quiz.js';
 import { flashcards, pairs } from './games.js';
 import { phrasesScreen, roadPhrases } from './phrases.js';
-import { roadScreen, findStep } from './road.js';
+import { roadScreen, findStep, roadState, stepInfo } from './road.js';
 import { strokeDemo, canTrace } from './draw.js';
 import { examScreen } from './exam.js';
 import { achievements, newTiers, TIERS } from './achievements.js';
@@ -16,6 +17,8 @@ import { placementScreen } from './placement.js';
 import { storyScreen } from './story.js';
 import { officialLevel } from './road.js';
 import * as reminders from './reminders.js';
+import * as backup from './backup.js';
+import { progressSection, bindProgress } from './progress.js';
 
 const view = $('#view');
 const titleEl = $('#title');
@@ -28,6 +31,11 @@ let installEvent = null;
 const SCREENS = {
   welcome: { title: () => 'Haru', tab: 'road', bare: true, render: welcome },
   road: { title: () => t('road.title'), tab: 'road', render: roadScreen },
+  // Raccourci « Continuer » (appui long sur l'icône) : ouvre directement la prochaine étape du parcours
+  next: { title: () => t('road.title'), tab: 'road', render: () => {
+    const R = roadState();
+    location.replace(R.next ? stepInfo(R.next).href : '#/road');
+  } },
   hangul: { title: () => tr(course().script.title), tab: 'hangul', render: script },
   words: { title: () => t('title.words'), tab: 'words', render: words },
   phrases: { title: () => t('title.phrases'), tab: 'phrases', render: phrasesScreen },
@@ -50,7 +58,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '78'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '79'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -555,7 +563,7 @@ function lexicon(el) {
           <span class="dots5" title="${t('lex.mastery')}">${[1, 2, 3, 4, 5].map((k) => `<i class="${b >= k * 7 / 5 - 0.4 ? 'on' : ''}"></i>`).join('')}</span>
         </li>`;
       }).join('')
-      : `<li class="empty muted">${t('lex.none')}</li>`;
+      : `<li class="empty muted">${emptyArt('book')}<span>${t('lex.none')}</span></li>`;
   }
   input.addEventListener('input', render);
   $('.themes-seg', el).addEventListener('click', (e) => {
@@ -752,6 +760,8 @@ function profile(el) {
         <div class="stat"><b>${lessons} / ${guideList().length}</b><span>${t('progress.lessons')}</span></div>
       </div>
 
+      ${progressSection()}
+
       <h2>${t('progress.weeks')}</h2>
       <div class="card heat">
         ${days.map((x, i) => `<i style="--i:${i}" class="h${x.xp >= st.goal ? 3 : x.xp >= st.goal / 2 ? 2 : x.xp > 0 ? 1 : 0}" title="${x.k} : ${x.xp} XP"></i>`).join('')}
@@ -784,6 +794,7 @@ function profile(el) {
       </div>
     </div>`;
   countUp($('.goal-ring .n', el), tx);
+  bindProgress(el);
   requestAnimationFrame(() => requestAnimationFrame(() => {
     $('.xp-bar', el)?.classList.add('go');
     $('.goal-ring', el)?.classList.add('go');
@@ -803,6 +814,16 @@ const seg = (key, options, current) => `
   <div class="seg set-seg" data-key="${key}">
     ${options.map(([v, l]) => `<button class="seg-btn ${String(current) === String(v) ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}
   </div>`;
+
+/** Coche verte (protégé) ou point d'alerte vermillon. */
+const safeIcon = (ok) => (ok ? ICONS.check : '<span class="safe-dot" aria-hidden="true">!</span>');
+
+/** « Dernière sauvegarde : il y a 3 jours » (ou aucune). */
+function lastBackupText() {
+  const n = backup.lastBackupDays();
+  if (!Number.isFinite(n)) return t('safe.never');
+  return t('safe.last', { when: n <= 0 ? t('safe.today') : n === 1 ? t('safe.yesterday') : t('safe.daysAgo', { n }) });
+}
 
 function settings(el) {
   const st = store.get();
@@ -890,9 +911,20 @@ function settings(el) {
       <h2>${t('set.data')}</h2>
       <div class="card data-actions">
         <p class="muted small">${t('set.dataHelp')}</p>
-        <button class="btn ghost export">${t('set.export')}</button>
+        <ul class="safe-list">
+          <li class="safe-persist">${ICONS.check}<span>${t('safe.mirror')}</span></li>
+          <li class="safe-last">${safeIcon(backup.lastBackupDays() < backup.REMIND_EVERY)}<span>${lastBackupText()}</span></li>
+        </ul>
+        <button class="btn primary export">${t('safe.save')}</button>
+        <details class="safe-copies" hidden><summary>${t('safe.copies')}</summary><div class="safe-copy-list"></div></details>
         <label class="btn ghost import">${t('set.import')}<input type="file" accept="application/json,.json" hidden></label>
         <button class="btn danger reset">${t('set.reset', { lang: tr(C.name).toLowerCase() })}</button>
+      </div>
+
+      <h2>${t('err.title')}</h2>
+      <div class="card err-card">
+        <p class="muted small err-sum"></p>
+        <div class="err-actions"><button class="btn ghost err-copy">${t('err.copy')}</button><button class="btn ghost err-clear">${t('err.clear')}</button></div>
       </div>
 
       <p class="muted small center version">Haru · 하루 · ${t('set.haru')} · v${APP_VERSION}</p>
@@ -991,14 +1023,42 @@ function settings(el) {
     route();
   });
 
-  $('.export', el).addEventListener('click', () => {
-    const blob = new Blob([store.exportAll()], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `haru-backup-${store.dayKey()}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $('.export', el).addEventListener('click', async () => {
+    if (!(await backup.saveFile())) return;
+    toast(t('safe.saved'));
+    $('.safe-last', el).innerHTML = `${safeIcon(true)}<span>${lastBackupText()}</span>`;
   });
+  // Protection : état réel du stockage, copies de secours des derniers jours
+  backup.persisted().then((on) => {
+    const li = document.createElement('li');
+    li.innerHTML = `${safeIcon(on)}<span>${t(on ? 'safe.persist' : 'safe.noPersist')}</span>`;
+    $('.safe-list', el)?.prepend(li);
+  });
+  backup.copies().then((list) => {
+    const box = $('.safe-copies', el);
+    if (!box || !list.length) return;
+    const fmt = (at) => new Date(at).toLocaleDateString(lang() === 'en' ? 'en-GB' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('.safe-copy-list', box).innerHTML = list.map((c) => `<button class="btn ghost small safe-copy" data-k="${esc(c.key)}" data-d="${esc(fmt(c.at))}">${esc(fmt(c.at))}</button>`).join('');
+    box.hidden = false;
+    box.addEventListener('click', async (e) => {
+      const b = e.target.closest('.safe-copy');
+      if (!b || !confirm(t('safe.restoreConfirm', { date: b.dataset.d }))) return;
+      await backup.restoreCopy(b.dataset.k);
+      toast(t('safe.restored'));
+      setTimeout(() => location.reload(), 600);
+    });
+  });
+  // Journal d'erreurs
+  const errSum = () => {
+    const n = errlog.read().length;
+    $('.err-sum', el).textContent = n ? t('err.some', { n }) : t('err.none');
+    $('.err-actions', el).hidden = !n;
+  };
+  errSum();
+  $('.err-copy', el).addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(errlog.report()); toast(t('err.copied')); } catch { prompt('', errlog.report()); }
+  });
+  $('.err-clear', el).addEventListener('click', () => { errlog.clear(); errSum(); toast(t('err.cleared')); });
   $('.import input', el).addEventListener('change', async (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -1113,6 +1173,12 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     .catch(() => {});
 }
 
+errlog.setVersion(APP_VERSION);
+// Copie de secours après chaque enregistrement ; si la mémoire principale a été vidée, la copie revient avant le premier affichage.
+store.onSave(backup.mirror);
+const recovered = await backup.recover();
+if (hasCourse()) backup.protect();
+
 applySettings();
 preloadVoices(); // liste des voix enregistrées de la langue apprise
 // Rappel quotidien : reprogrammé au lancement, à chaque gain d'XP, changement de réglage et retour dans l'application
@@ -1124,6 +1190,8 @@ if (hasCourse()) {
   newTiers(true); // les succès déjà acquis ne sont pas annoncés au lancement
 }
 route();
+if (recovered) toast(t('safe.recovered'));
+backup.mirror(); // copie à jour dès le lancement
 
 // La roue des réglages et le livre du guide ouvrent leur page ; touchés de nouveau, ils la referment (retour à l'écran précédent).
 for (const [top, prefix] of [['settings', '#/settings'], ['guide', '#/guide']]) {

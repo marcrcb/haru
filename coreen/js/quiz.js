@@ -1,7 +1,7 @@
 // Moteur d'exercices : réponses à écrire au clavier, dictées, prononciation à voix haute,
 // mots et syllabes à remettre dans l'ordre, paires à relier. Les choix multiples ne servent plus que de secours.
 // Il sert aux quiz d'écriture (hangeul / kana / kanji), de vocabulaire, et aux examens.
-import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, stopSpeaking } from './ui.js';
+import { $, $$, esc, shuffle, sfx, speak, autoSpeak, canSpeak, hasVoice, confetti, countUp, pulse, burst, toast, ICONS, stopSpeaking, emptyArt } from './ui.js';
 import { addXp, review, pickForReview, mistakes, get, save, markRoad, box, streakOf, bump, record } from './store.js';
 import { reviewItems, reviewCount, nextReviewIn, letterId, kanjiId, REVIEW_MAX } from './review.js';
 import { course, t, tr, gloss, lang } from './course.js';
@@ -74,7 +74,7 @@ export function withTeaching(questions) {
     for (const L of q.learn || []) {
       if (taught.has(L.id) || box(L.id) >= 0) continue;
       taught.add(L.id);
-      out.push(teachCard(L));
+      out.push({ ...teachCard(L), teaches: L.id });
     }
     out.push(q);
   }
@@ -139,8 +139,12 @@ function teachCard(L) {
   };
 }
 
+/** Dernière série préparée (lue par les tests d'ordre des exercices). */
+export const lastSeries = { questions: [] };
+
 export function runQuiz(el, { questions, title, again, back, step, exam, backLabel, againLabel }) {
   if (!exam) questions = withTeaching(seeBeforeSaying(questions));
+  lastSeries.questions = questions;
   let queue = questions.map((q) => ({ ...q, retry: false }));
   let total = questions.filter((q) => q.type !== 'teach').length; // les cartes « Nouveau » ne comptent pas
   let done = 0;
@@ -557,7 +561,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
   }
 
   if (!total) {
-    el.innerHTML = `<div class="screen result"><p class="muted">${t('quiz.empty')}</p><a class="btn primary" href="${back || '#/road'}">${t('back')}</a></div>`;
+    el.innerHTML = `<div class="screen result"><div class="empty-art">${emptyArt('cards')}</div><p class="muted">${t('quiz.empty')}</p><a class="btn primary" href="${back || '#/road'}">${t('back')}</a></div>`;
     return;
   }
   show();
@@ -811,7 +815,7 @@ export function reviewQuiz(el) {
     const next = nextReviewIn();
     el.innerHTML = `
       <div class="screen result">
-        <div class="big-glyph kr">${C.id === 'ja' ? '復習' : '복습'}</div>
+        <div class="empty-art">${emptyArt('done')}</div>
         <h2>${t('review.none')}</h2>
         <p class="muted">${t('review.noneSub')}</p>
         ${next ? `<p class="muted small">${next > 1 ? t('review.nextIn', { n: next }) : t('review.nextDay')}</p>` : ''}

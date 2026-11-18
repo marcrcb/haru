@@ -35,10 +35,36 @@
   ],
   "shortcuts": [
     {
+      "name": "Continuer la leçon",
+      "short_name": "Continuer",
+      "description": "La prochaine étape du parcours",
+      "url": "./#/next",
+      "icons": [
+        {
+          "src": "icons/haru-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Réviser",
       "short_name": "Réviser",
       "description": "Les révisions du jour",
       "url": "./#/quiz?mode=review",
+      "icons": [
+        {
+          "src": "icons/haru-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ma progression",
+      "short_name": "Progrès",
+      "description": "Courbes et statistiques",
+      "url": "./#/profile",
       "icons": [
         {
           "src": "icons/haru-icon-192.png",
