@@ -49,7 +49,8 @@ export function seeBeforeSaying(questions) {
       if (questions.slice(i + 1).some((o) => o.type !== 'speak' && ids(o).includes(q.wid))) return later.push(q);
       if (q.fresh && q.intro) {
         const intro = q.intro();
-        if (intro) out.push({ ...intro, wid: q.wid });
+        // la question d'introduction porte la carte « Nouveau » (tracé de la lettre, son…) : elle passe avant
+        if (intro) out.push({ ...intro, wid: q.wid, learn: q.learn });
       }
     }
     out.push(q);

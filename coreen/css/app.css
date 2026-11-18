@@ -2080,7 +2080,10 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
 .tile-link[href="#/quiz?mode=review"] .badge { box-shadow: 0 0 0 3px var(--card); }
 
 /* ===== Version 75 ===== */
-/* Plein écran : le fond de la page couvre tout l'écran, y compris la zone de l'appareil photo et de l'ancienne barre d'état */
-:root:fullscreen, :root:-webkit-full-screen { background: var(--paper); }
-:root::backdrop { background: var(--paper); }
-:root:fullscreen body::before { background: var(--paper); }
+
+/* ===== Version 78 ===== */
+/* Clavier des exercices : la barre du haut flotte avec des marges (haut de l'écran + 8 px au-dessus, 8 px dessous),
+   qu'il faut retirer de la hauteur de l'écran pour que le clavier tienne en entier au-dessus de la barre Android. */
+@media (max-width: 899px) {
+  .quiz.kb-mode { min-height: calc(100dvh - var(--topbar-h, 62px) - env(safe-area-inset-top) - 20px); }
+}
