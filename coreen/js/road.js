@@ -24,8 +24,8 @@ const UNIT_BONUS = 15; // XP offerts à la fin d'un module
 
 // Repères officiels (indicatifs) : niveau du CECR et examen correspondant, chapitre par chapitre.
 const LEVEL_BANDS = {
-  ko: [[1, 'Pré-A1'], [3, 'A1 · TOPIK 1'], [3, 'A2 · TOPIK 2'], [4, 'A2+ · TOPIK 2'], [3, '→ B1 · TOPIK 3']],
-  ja: [[1, 'Pré-A1'], [3, 'A1 · JLPT N5'], [3, 'A2 · JLPT N4'], [4, 'A2+ · JLPT N4'], [3, '→ B1 · JLPT N3']],
+  ko: [[1, 'Pré-A1'], [3, 'A1 · TOPIK 1'], [3, 'A2 · TOPIK 2'], [4, 'A2+ · TOPIK 2'], [3, '→ B1 · TOPIK 3'], [3, 'B1 · TOPIK 3']],
+  ja: [[1, 'Pré-A1'], [3, 'A1 · JLPT N5'], [3, 'A2 · JLPT N4'], [4, 'A2+ · JLPT N4'], [3, '→ B1 · JLPT N3'], [3, 'B1 · JLPT N3']],
 };
 /** Repère officiel du chapitre k (0 = premier). */
 export function chapterLevel(k) {

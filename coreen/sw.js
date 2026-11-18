@@ -1,6 +1,6 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent les nouveaux fichiers.
-const VERSION = 'haru-v81';
+const VERSION = 'haru-v82';
 const AUDIO = 'haru-audio'; // voix enregistrées : gardées d'une version à l'autre (elles ne changent pas)
 const REMINDER = 'haru-reminder'; // état du rappel quotidien, écrit par l'application (js/reminders.js)
 const FILES = [
@@ -41,6 +41,7 @@ const FILES = [
   './js/content/kanji.js',
   './js/content/concepts.js',
   './js/content/lexicon.js',
+  './js/content/lexicon.more.js',
   './js/content/strings.js',
   './js/content/jamo.js',
   './js/content/guide.js',
@@ -50,8 +51,10 @@ const FILES = [
   './js/content/guide.util.js',
   './js/content/guide.plus.js',
   './js/content/guide.adv.js',
+  './js/content/guide.more.js',
   './js/content/guide.ja.plus.js',
   './js/content/guide.ja.adv.js',
+  './js/content/guide.ja.more.js',
   './js/content/awkward.js',
   './js/content/awkward.en.js',
   './js/content/guide.pron.js',

@@ -3,6 +3,7 @@
 // W(thème, coréen, japonais, lecture en kana (si le mot contient des kanji), français, anglais)
 
 import { THEMES } from './concepts.js';
+import { LEX_THEMES_MORE, LEXICON_MORE } from './lexicon.more.js';
 
 const W = (t, ko, ja, r, fr, en) => ({ t, ko, ja: ja ? [ja, r || ja] : null, fr, en });
 
@@ -1521,6 +1522,10 @@ export const LEXICON = [
   W('phrDate', '사귀자.', '付き合おう。', 'つきあおう。', 'Sortons ensemble.', 'Let’s go out together.'),
   W('phrDate', '천천히 생각해 봐.', 'ゆっくり考えて。', 'ゆっくりかんがえて。', 'Prends le temps d’y réfléchir.', 'Take your time to think about it.'),
 ];
+
+// Suite du lexique (chapitres 15 à 17)
+Object.assign(LEX_THEMES, LEX_THEMES_MORE);
+LEXICON.push(...LEXICON_MORE);
 
 // Thèmes d'origine (ceux du générateur de phrases) : mot-pastille et couleur.
 const BASE_STYLE = {

@@ -556,6 +556,57 @@ const advanced = (ja) => {
   return [...vocab, ...workshops, ...sentences];
 };
 
+// ---------- Chapitres 15 à 17 : voyager, prendre soin, parler comme sur place ----------
+const extra = (ja) => {
+  const g = (ko, jp) => (ja ? jp : ko);
+  const p = ja ? 'ja' : 'ko';
+  const mod = (id, glyph, color, title, sub, steps) => ({ id: `${p}${id}`, glyph, color, title, sub, steps });
+  const les = (ko, jp) => lesson(ja ? jp : ko);
+  let n = 0;
+  const sents = (specs) => specs.map(([kind, t, crit]) => {
+    n++;
+    return (kind === 'w' ? ptype : phrase)(`${p}-e${n}`, t, crit);
+  });
+  return [
+    // Chapitre 15 : voyager et découvrir
+    mod('e01', g('관광', '観光'), 'var(--c-home)', L('Visiter', 'Sightseeing'), L('Palais, temples, belvédères et billets d’entrée', 'Palaces, temples, viewpoints and tickets'),
+      [les('simultane', 'nagara'), ...themePlus('sights')]),
+    mod('e02', g('호텔', 'ホテル'), 'var(--c-home)', L('À l’hôtel', 'At the hotel'), L('Arriver, demander, régler un problème', 'Checking in, asking, sorting out a problem'), phrasePlus('phrHotel')),
+    mod('e03', g('카페', '喫茶'), 'var(--c-phrases)', L('Café et desserts', 'Cafés and desserts'), L('Boissons, gâteaux et petits goûts', 'Drinks, cakes and flavours'),
+      [les('changement', 'sugiru'), ...themePlus('cafe')]),
+    mod('e04', g('주문', '注文'), 'var(--c-phrases)', L('Commander au café', 'Ordering at a café'), L('Sur place ou à emporter, sucré ou pas', 'For here or to go, sweet or not'), phrasePlus('phrCafe')),
+    mod('e05', g('술', '飲み会'), 'var(--c-guide)', L('Boire un verre', 'Going for a drink'), L('Soirées, toasts et addition', 'Nights out, toasts and the bill'), themePlus('drinks')),
+    mod('e06', g('운전', '運転'), 'var(--c-stats)', L('Sur la route', 'On the road'), L('Conduire, se garer, éviter les bouchons', 'Driving, parking, avoiding traffic jams'),
+      [les('regret', 'shimau'), ...themePlus('car')]),
+    mod('e07', g('여행기', '旅行記'), 'var(--c-phrases)', L('Récits de voyage', 'Travel stories'), L('Raconter et préparer un voyage', 'Telling about and planning a trip'), sents([
+      ['r', L('Ce qu’on a visité', 'What we visited'), { level: '3', tense: 'past', theme: 'city' }], ['r', L('Les prochaines vacances', 'The next holidays'), { level: '3', tense: 'future', theme: 'leisure' }],
+      ['w', L('Écrire un souvenir de voyage', 'Write a travel memory'), { level: '3', tense: 'past', theme: 'leisure' }], ['w', L('Écrire ce qu’on veut voir', 'Write what you want to see'), { level: '3', form: 'want', theme: 'city' }]])),
+    // Chapitre 16 : prendre soin
+    mod('e08', g('미용', '美容'), 'var(--c-guide)', L('Coiffeur et beauté', 'Hair and beauty'), L('Coupe, couleur, soins de la peau', 'Cuts, colour, skincare'),
+      [les('degre', 'conseil'), ...themePlus('beauty')]),
+    mod('e09', g('미용실', '美容院'), 'var(--c-guide)', L('Chez le coiffeur', 'At the hairdresser’s'), L('Expliquer ce qu’on veut', 'Explaining what you want'), phrasePlus('phrHair')),
+    mod('e10', g('반려동물', 'ペット'), 'var(--c-words)', L('Animaux de compagnie', 'Pets'), L('Les nourrir, les promener, les soigner', 'Feeding, walking and caring for them'), themePlus('pets')),
+    mod('e11', g('정원', '庭'), 'var(--c-words)', L('Jardin et plantes', 'Gardens and plants'), L('Planter, arroser, voir fleurir', 'Planting, watering, watching things bloom'),
+      [les('choix', 'tokoro'), ...themePlus('garden')]),
+    mod('e12', g('안전', '安全'), 'var(--c-hangul)', L('Urgences et sécurité', 'Emergencies and safety'), L('Incendie, séisme, objets perdus', 'Fires, earthquakes, lost property'), themePlus('safety')),
+    mod('e13', g('긴급', '緊急'), 'var(--c-hangul)', L('Demander de l’aide', 'Asking for help'), L('Les phrases à connaître en cas de problème', 'The phrases to know when things go wrong'), phrasePlus('phrEmergency')),
+    mod('e14', g('방문', '訪問'), 'var(--c-home)', L('Invité chez quelqu’un', 'Visiting someone'), L('Entrer, remercier, prendre congé', 'Arriving, thanking, taking your leave'), phrasePlus('phrVisit')),
+    // Chapitre 17 : parler comme sur place
+    mod('e15', g('의성어', '擬音語'), 'var(--c-hangul)', L('Onomatopées', 'Sound and mimetic words'), L('Les mots qui font du bruit et des images', 'Words that make sounds and pictures'),
+      [les('onomatopees', 'giongo'), ...themePlus('sounds')]),
+    mod('e16', g('직업', '職業'), 'var(--c-stats)', L('Les métiers', 'Jobs'), L('Dire ce que font les gens', 'Saying what people do'), themePlus('jobs')),
+    mod('e17', g('뉴스', 'ニュース'), 'var(--c-stats)', L('Les actualités', 'The news'), L('Politique, économie, société', 'Politics, economy, society'),
+      [les('expressions', 'kanyoku'), ...themePlus('news')]),
+    mod('e18', g('게임', 'ゲーム'), 'var(--c-phrases)', L('Jeux et divertissement', 'Games and entertainment'), L('Consoles, séries, mangas et streaming', 'Consoles, series, comics and streaming'),
+      [les('textos', 'kudaketa'), ...themePlus('games')]),
+    mod('e19', g('수다', '雑談'), 'var(--c-words)', L('Papoter', 'Small talk'), L('Les petites phrases qui font vivre une conversation', 'The little phrases that keep a chat going'), phrasePlus('phrChat')),
+    mod('e20', g('원어민', 'ネイティブ'), 'var(--c-guide)', L('Comme sur place', 'Like a local'), L('Phrases longues, familières ou soutenues, sans aide', 'Long sentences, casual or formal, unaided'), sents([
+      ['r', L('Entre amis, au passé', 'Among friends, in the past'), { level: '3', style: 'casual', tense: 'past' }], ['r', L('Poliment, au futur', 'Politely, in the future'), { level: '3', style: ja ? 'polite' : 'formal', tense: 'future' }],
+      ['w', L('Écrire à un ami', 'Write to a friend'), { level: '3', style: 'casual', form: 'question' }], ['w', L('Écrire une phrase longue', 'Write a long sentence'), { level: '3', time: 'yes' }],
+      ['w', L('Écrire ce qu’on n’a pas fait', 'Write what you didn’t do'), { level: '3', tense: 'past', form: 'neg' }]])),
+  ];
+};
+
 // ---------- Chapitres : ordre final des modules ----------
 const C = (id, glyph, title, sub, units) => ({ id, glyph, title, sub, units });
 const CH = {
@@ -574,6 +625,9 @@ const CH = {
     C('kc12', '연습', L('Ateliers sans filet', 'Workshops without a net'), L('Écrire, écouter et dire tous les mots appris', 'Writing, hearing and saying every word learnt'), ['kob01', 'kob02', 'kob03', 'kob04', 'kob05', 'kob06', 'kob07', 'kob08', 'kob09', 'kob10']),
     C('kc13', '문장', L('Construire des phrases', 'Building sentences'), L('Temps, négation, questions, envies, styles', 'Tenses, negation, questions, wishes, styles'), ['koc01', 'koc02', 'koc03', 'koc04', 'koc05', 'koc06', 'koc07', 'koc08', 'koc09']),
     C('kc14', '마스터', L('Vers la maîtrise', 'Towards mastery'), L('Phrases longues et complexes, écrites sans aide', 'Long, complex sentences, written unaided'), ['kod01', 'kod02', 'kod03', 'kod04', 'kod05', 'kod06', 'kod07']),
+    C('kc15', '여행', L('Voyager et découvrir', 'Travelling and exploring'), L('Visites, hôtel, café, sorties et route', 'Sightseeing, hotels, cafés, nights out and the road'), ['koe01', 'koe02', 'koe03', 'koe04', 'koe05', 'koe06', 'koe07']),
+    C('kc16', '돌봄', L('Prendre soin', 'Taking care'), L('Beauté, animaux, jardin, urgences et visites', 'Beauty, pets, gardens, emergencies and visits'), ['koe08', 'koe09', 'koe10', 'koe11', 'koe12', 'koe13', 'koe14']),
+    C('kc17', '원어민', L('Parler comme sur place', 'Speaking like a local'), L('Onomatopées, expressions, métiers, actualités, messages', 'Mimetic words, idioms, jobs, news, texting'), ['koe15', 'koe16', 'koe17', 'koe18', 'koe19', 'koe20']),
   ],
   ja: [
     C('jc1', 'かな', L('Les kana', 'Kana'), L('Lire, taper et prononcer hiragana et katakana', 'Reading, typing and saying hiragana and katakana'), ['ja1', 'ja1w', 'ja1k', 'ja2', 'ja2w']),
@@ -590,6 +644,9 @@ const CH = {
     C('jc12', '練習', L('Ateliers sans filet', 'Workshops without a net'), L('Écrire, écouter et dire tous les mots appris', 'Writing, hearing and saying every word learnt'), ['jab01', 'jab02', 'jab03', 'jab04', 'jab05', 'jab06', 'jab07', 'jab08', 'jab09', 'jab10']),
     C('jc13', '文', L('Construire des phrases', 'Building sentences'), L('Temps, négation, questions, envies, styles', 'Tenses, negation, questions, wishes, styles'), ['jac01', 'jac02', 'jac03', 'jac04', 'jac05', 'jac06', 'jac07', 'jac08', 'jac09']),
     C('jc14', '達人', L('Vers la maîtrise', 'Towards mastery'), L('Phrases longues et complexes, écrites sans aide', 'Long, complex sentences, written unaided'), ['jad01', 'jad02', 'jad03', 'jad04', 'jad05', 'jad06', 'jad07']),
+    C('jc15', '旅', L('Voyager et découvrir', 'Travelling and exploring'), L('Visites, hôtel, café, sorties et route', 'Sightseeing, hotels, cafés, nights out and the road'), ['jae01', 'jae02', 'jae03', 'jae04', 'jae05', 'jae06', 'jae07']),
+    C('jc16', '暮らし', L('Prendre soin', 'Taking care'), L('Beauté, animaux, jardin, urgences et visites', 'Beauty, pets, gardens, emergencies and visits'), ['jae08', 'jae09', 'jae10', 'jae11', 'jae12', 'jae13', 'jae14']),
+    C('jc17', '本場', L('Parler comme sur place', 'Speaking like a local'), L('Onomatopées, expressions, métiers, actualités, messages', 'Mimetic words, idioms, jobs, news, texting'), ['jae15', 'jae16', 'jae17', 'jae18', 'jae19', 'jae20']),
   ],
 };
 
@@ -613,8 +670,8 @@ function build(course, modules) {
 
 /** Tous les modules définis (pour vérifier qu'aucun n'est oublié dans les chapitres). */
 export const MODULES = {
-  ko: [...KO, ...KO_VOCAB.map((x) => x[1]), ...KO_NEW, ...shared(false), ...advanced(false), ...storyUnits('ko')],
-  ja: [...JA, ...JA_VOCAB.map((x) => x[1]), ...JA_NEW, ...shared(true), ...advanced(true), ...storyUnits('ja')],
+  ko: [...KO, ...KO_VOCAB.map((x) => x[1]), ...KO_NEW, ...shared(false), ...advanced(false), ...extra(false), ...storyUnits('ko')],
+  ja: [...JA, ...JA_VOCAB.map((x) => x[1]), ...JA_NEW, ...shared(true), ...advanced(true), ...extra(true), ...storyUnits('ja')],
 };
 export const CHAPTERS = CH;
 export const ROADMAP = { ko: build('ko', MODULES.ko), ja: build('ja', MODULES.ja) };

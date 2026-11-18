@@ -8,6 +8,7 @@ import { GUIDE_JA_PLUS } from '../content/guide.ja.plus.js';
 import { GUIDE_JA_ADV } from '../content/guide.ja.adv.js';
 import { GUIDE_JA_PRON, JA_SECTIONS } from '../content/guide.ja.pron.js';
 import { localize, arrange } from '../content/guide.util.js';
+import { GUIDE_JA_MORE } from '../content/guide.ja.more.js';
 import { AWKWARD } from '../content/awkward.js';
 import { AWKWARD_EN } from '../content/awkward.en.js';
 import { pick } from '../generator.js';
@@ -420,7 +421,7 @@ export const JA = {
   render,
   awkward,
   guide: {
-    fr: arrange([...GUIDE_JA, ...localize([...GUIDE_JA_PLUS, ...GUIDE_JA_PRON, ...GUIDE_JA_ADV], 'fr')], JA_SECTIONS, 'fr'),
-    en: arrange([...GUIDE_JA_EN, ...localize([...GUIDE_JA_PLUS, ...GUIDE_JA_PRON, ...GUIDE_JA_ADV], 'en')], JA_SECTIONS, 'en'),
+    fr: arrange([...GUIDE_JA, ...localize([...GUIDE_JA_PLUS, ...GUIDE_JA_PRON, ...GUIDE_JA_ADV, ...GUIDE_JA_MORE], 'fr')], JA_SECTIONS, 'fr'),
+    en: arrange([...GUIDE_JA_EN, ...localize([...GUIDE_JA_PLUS, ...GUIDE_JA_PRON, ...GUIDE_JA_ADV, ...GUIDE_JA_MORE], 'en')], JA_SECTIONS, 'en'),
   },
 };

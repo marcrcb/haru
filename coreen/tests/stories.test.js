@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import { STORIES } from '../js/content/stories.js';
 import { ROADMAP, CHAPTERS } from '../js/content/roadmap.js';
 
-test('une histoire par chapitre, du 2 au 14, dans chaque langue', () => {
+test('une histoire par chapitre, du 2 au 17, dans chaque langue', () => {
   for (const c of ['ko', 'ja']) {
-    assert.deepEqual(STORIES[c].map((s) => s.ch), [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], c);
+    assert.deepEqual(STORIES[c].map((s) => s.ch), [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], c);
     assert.equal(new Set(STORIES[c].map((s) => s.id)).size, STORIES[c].length, `${c} : identifiants uniques`);
   }
 });

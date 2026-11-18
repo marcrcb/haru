@@ -192,6 +192,45 @@ const KO = [
     ['Quel est son métier aujourd’hui ?', 'What is his job now?', ['Interprète', 'Interpreter'], ['Professeur', 'Teacher'], ['Cuisinier', 'Cook']],
     ['De quoi Léo se souvient-il ?', 'What does Léo remember?', ['Des mots de Minji le jour de leur rencontre', 'Minji’s words the day they met'], ['D’un voyage à Busan', 'A trip to Busan'], ['De son premier salaire', 'His first salary']],
   ]),
+  ko('ko-15', 15, '경주', L('Week-end à Gyeongju', 'A weekend in Gyeongju'), L('Visiter, faire une pause au café, voir la ville la nuit', 'Sightseeing, a café break, the city by night'), [
+    ['', '토요일 아침, 레오와 민지는 기차를 타고 경주에 갔다.', 'Samedi matin, Léo et Minji prirent le train pour Gyeongju.', 'On Saturday morning, Léo and Minji took the train to Gyeongju.'],
+    ['민지', '경주는 옛날 신라의 수도였어요. 볼 게 정말 많아요.', 'Gyeongju était la capitale de l’ancien royaume de Silla. Il y a plein de choses à voir.', 'Gyeongju was the capital of the old Silla kingdom. There’s so much to see.'],
+    ['레오', '먼저 호텔에 짐을 맡기고 절을 구경하는 게 어때요?', 'Et si on déposait d’abord nos bagages à l’hôtel pour aller visiter le temple ?', 'How about leaving our bags at the hotel first and visiting the temple?'],
+    ['', '절은 관광객으로 가득했지만, 경치는 생각보다 훨씬 아름다웠다.', 'Le temple était plein de touristes, mais le paysage était bien plus beau que prévu.', 'The temple was full of tourists, but the scenery was far more beautiful than expected.'],
+    ['민지', '다리 아프죠? 저기 카페에서 좀 쉬어요.', 'Tu as mal aux jambes ? Faisons une pause dans ce café, là-bas.', 'Your legs hurt, right? Let’s rest in that café over there.'],
+    ['레오', '좋아요. 저는 빙수 먹을래요. 민지 씨는요?', 'D’accord. Moi, je prends une glace pilée. Et toi, Minji ?', 'Good idea. I’ll have shaved ice. What about you, Minji?'],
+    ['민지', '저는 따뜻한 녹차요. 밤에는 야경을 보러 가요!', 'Moi, un thé vert chaud. Ce soir, on va voir la ville illuminée !', 'A hot green tea for me. Tonight let’s go and see the night view!'],
+  ], [
+    ['Comment sont-ils allés à Gyeongju ?', 'How did they get to Gyeongju?', ['En train', 'By train'], ['En voiture', 'By car'], ['En avion', 'By plane']],
+    ['Qu’a commandé Léo au café ?', 'What did Léo order at the café?', ['Une glace pilée', 'Shaved ice'], ['Un thé vert', 'A green tea'], ['Un gâteau', 'A cake']],
+    ['Que veulent-ils faire le soir ?', 'What do they want to do in the evening?', ['Voir la ville la nuit', 'See the night view'], ['Aller au karaoké', 'Go to karaoke'], ['Rentrer à Séoul', 'Go back to Seoul']],
+  ]),
+  ko('ko-16', 16, '나비', L('Le chat a disparu', 'The missing cat'), L('Une recherche dans le quartier, un jardin et un soulagement', 'A search of the neighbourhood, a garden and a relief'), [
+    ['', '일요일 오후, 민지에게서 급한 전화가 왔다.', 'Dimanche après-midi, Minji appela en urgence.', 'On Sunday afternoon, Minji made an urgent call.'],
+    ['민지', '레오 씨, 큰일 났어요! 고양이 나비가 없어졌어요.', 'Léo, c’est la catastrophe ! Mon chat Nabi a disparu.', 'Léo, it’s terrible! My cat Nabi has gone missing.'],
+    ['레오', '진정하세요. 지금 바로 갈게요. 마지막으로 언제 봤어요?', 'Calme-toi. J’arrive tout de suite. Tu l’as vu pour la dernière fois quand ?', 'Calm down. I’m coming right now. When did you last see him?'],
+    ['민지', '아침에 창문을 열어 놓았는데, 그때 나간 것 같아요.', 'J’avais laissé la fenêtre ouverte ce matin ; il a dû sortir à ce moment-là.', 'I left the window open this morning; he must have got out then.'],
+    ['', '두 사람은 동네를 돌아다니며 이웃들에게 물어보았다.', 'Ils firent le tour du quartier en interrogeant les voisins.', 'They went around the neighbourhood asking the neighbours.'],
+    ['', '그때 옆집 할머니의 정원에서 작은 소리가 들렸다. "야옹!"', 'C’est alors qu’un petit bruit vint du jardin de la vieille dame d’à côté : « Miaou ! »', 'Just then a little sound came from the old lady’s garden next door: “Meow!”'],
+    ['민지', '나비야! 꽃 사이에서 자고 있었구나. 정말 다행이다.', 'Nabi ! Tu dormais au milieu des fleurs. Quel soulagement !', 'Nabi! You were sleeping among the flowers. What a relief!'],
+  ], [
+    ['Qu’est-il arrivé à Minji ?', 'What happened to Minji?', ['Son chat a disparu', 'Her cat went missing'], ['Elle s’est blessée', 'She got hurt'], ['Elle a perdu son portefeuille', 'She lost her wallet']],
+    ['Par où le chat est-il sorti ?', 'How did the cat get out?', ['Par la fenêtre ouverte', 'Through the open window'], ['Par la porte d’entrée', 'Through the front door'], ['Dans un sac', 'In a bag']],
+    ['Où était le chat ?', 'Where was the cat?', ['Dans le jardin de la voisine', 'In the neighbour’s garden'], ['À la clinique vétérinaire', 'At the vet’s'], ['Sous le lit', 'Under the bed']],
+  ]),
+  ko('ko-17', 17, '첫 출근', L('Premier jour à la télé', 'First day at the TV station'), L('Actualités, trac et messages entre amis', 'News, nerves and texts between friends'), [
+    ['', '레오는 방송국에서 통역사로 첫 출근을 했다.', 'Léo commençait son premier jour comme interprète dans une chaîne de télévision.', 'Léo started his first day as an interpreter at a TV station.'],
+    ['', '뉴스 팀은 아침부터 정신없이 바빴다. 선거 결과가 곧 발표될 예정이었다.', 'L’équipe de l’info était débordée depuis le matin : les résultats de l’élection allaient être annoncés.', 'The news team had been frantically busy since morning: the election results were about to be announced.'],
+    ['기자', '레오 씨, 이 인터뷰를 프랑스어로 통역해 줄 수 있어요?', 'Léo, tu peux interpréter cette interview en français ?', 'Léo, can you interpret this interview into French?'],
+    ['레오', '네, 해 볼게요. 가슴이 두근두근하네요.', 'Oui, je vais essayer. J’ai le cœur qui bat la chamade.', 'Yes, I’ll give it a try. My heart is pounding.'],
+    ['', '통역은 생각보다 순조롭게 끝났고, 모두가 박수를 쳤다.', 'L’interprétation se passa mieux que prévu, et tout le monde applaudit.', 'The interpreting went more smoothly than expected, and everyone applauded.'],
+    ['', '저녁에 민지에게서 문자가 왔다. "첫날 어땠어? ㅋㅋ 떨렸지?"', 'Le soir, Minji lui envoya un message : « Alors, ce premier jour ? mdr T’avais le trac ? »', 'In the evening Minji texted: “How was day one? lol Were you nervous?”'],
+    ['레오', '응, 엄청 떨렸어. 그래도 사장님이 잘했다고 하셨어! ㅎㅎ', 'Ouais, super stressé. Mais le patron m’a dit que j’avais bien travaillé ! haha', 'Yeah, super nervous. But the boss said I did well! haha'],
+  ], [
+    ['Où Léo travaille-t-il ?', 'Where does Léo work?', ['Dans une chaîne de télévision', 'At a TV station'], ['Dans un hôtel', 'At a hotel'], ['Dans une école', 'At a school']],
+    ['Quelle nouvelle l’équipe attendait-elle ?', 'What news was the team waiting for?', ['Les résultats d’une élection', 'Election results'], ['La météo', 'The weather forecast'], ['Un match de football', 'A football match']],
+    ['Comment s’est passée l’interprétation ?', 'How did the interpreting go?', ['Mieux que prévu', 'Better than expected'], ['Très mal', 'Very badly'], ['Elle a été annulée', 'It was cancelled']],
+  ]),
 ];
 
 const JA = [
@@ -363,6 +402,45 @@ const JA = [
     ['Depuis combien de temps Léo est-il au Japon ?', 'How long has Léo been in Japan?', ['Trois ans', 'Three years'], ['Un an', 'One year'], ['Dix ans', 'Ten years']],
     ['Quel est son métier aujourd’hui ?', 'What is his job now?', ['Interprète', 'Interpreter'], ['Professeur', 'Teacher'], ['Cuisinier', 'Cook']],
     ['De quoi Léo se souvient-il ?', 'What does Léo remember?', ['Des mots de Yui le jour de leur rencontre', 'Yui’s words the day they met'], ['D’un voyage à Osaka', 'A trip to Osaka'], ['De son premier salaire', 'His first salary']],
+  ]),
+  ja('ja-15', 15, '京都', L('Week-end à Kyoto', 'A weekend in Kyoto'), L('Visiter, faire une pause au café, voir la ville la nuit', 'Sightseeing, a café break, the city by night'), [
+    ['', '土曜日[どようび]の 朝[あさ]、 レオと ゆいは 新幹線[しんかんせん]で 京都[きょうと]へ 行[い]った。', 'Samedi matin, Léo et Yui prirent le shinkansen pour Kyoto.', 'On Saturday morning, Léo and Yui took the bullet train to Kyoto.'],
+    ['ゆい', '京都[きょうと]は 昔[むかし]の 都[みやこ]です。 見[み]る ところが たくさん ありますよ。', 'Kyoto était l’ancienne capitale. Il y a plein de choses à voir.', 'Kyoto was the old capital. There’s so much to see.'],
+    ['レオ', 'まず ホテルに 荷物[にもつ]を 預[あず]けて、 お寺[てら]を 見[み]に 行[い]きませんか。', 'Et si on déposait d’abord nos bagages à l’hôtel pour aller voir le temple ?', 'Shall we leave our bags at the hotel first and go and see the temple?'],
+    ['', 'お寺[てら]は 観光客[かんこうきゃく]で いっぱいだったが、 景色[けしき]は 思[おも]ったより ずっと きれいだった。', 'Le temple était plein de touristes, mais le paysage était bien plus beau que prévu.', 'The temple was full of tourists, but the scenery was far more beautiful than expected.'],
+    ['ゆい', '足[あし]が 疲[つか]れたでしょう？ あの カフェで 少[すこ]し 休[やす]みましょう。', 'Tu as mal aux jambes ? Faisons une pause dans ce café, là-bas.', 'Your legs are tired, right? Let’s rest in that café over there.'],
+    ['レオ', 'いいですね。 ぼくは かき氷[ごおり]に します。 ゆいさんは？', 'D’accord. Moi, je prends une glace pilée. Et toi, Yui ?', 'Good idea. I’ll have shaved ice. What about you, Yui?'],
+    ['ゆい', 'わたしは 温[あたた]かい 緑茶[りょくちゃ]。 夜[よる]は 夜景[やけい]を 見[み]に 行[い]きましょう！', 'Moi, un thé vert chaud. Ce soir, on va voir la ville illuminée !', 'A hot green tea for me. Tonight let’s go and see the night view!'],
+  ], [
+    ['Comment sont-ils allés à Kyoto ?', 'How did they get to Kyoto?', ['En shinkansen', 'By bullet train'], ['En voiture', 'By car'], ['En avion', 'By plane']],
+    ['Qu’a commandé Léo au café ?', 'What did Léo order at the café?', ['Une glace pilée', 'Shaved ice'], ['Un thé vert', 'A green tea'], ['Un gâteau', 'A cake']],
+    ['Que veulent-ils faire le soir ?', 'What do they want to do in the evening?', ['Voir la ville la nuit', 'See the night view'], ['Aller au karaoké', 'Go to karaoke'], ['Rentrer à Tokyo', 'Go back to Tokyo']],
+  ]),
+  ja('ja-16', 16, 'ミケ', L('Le chat a disparu', 'The missing cat'), L('Une recherche dans le quartier, un jardin et un soulagement', 'A search of the neighbourhood, a garden and a relief'), [
+    ['', '日曜日[にちようび]の 午後[ごご]、 ゆいから 急[いそ]ぎの 電話[でんわ]が あった。', 'Dimanche après-midi, Yui appela en urgence.', 'On Sunday afternoon, Yui made an urgent call.'],
+    ['ゆい', 'レオさん、 大変[たいへん]です！ 猫[ねこ]の ミケが いなく なりました。', 'Léo, c’est la catastrophe ! Ma chatte Mike a disparu.', 'Léo, it’s terrible! My cat Mike has gone missing.'],
+    ['レオ', '落[お]ち着[つ]いて ください。 すぐ 行[い]きます。 最後[さいご]に 見[み]たのは いつですか。', 'Calme-toi. J’arrive tout de suite. Tu l’as vue pour la dernière fois quand ?', 'Calm down. I’m coming right away. When did you last see her?'],
+    ['ゆい', '朝[あさ]、 窓[まど]を 開[あ]けて おいたので、 その とき 出[で]て 行[い]ったみたいです。', 'J’avais laissé la fenêtre ouverte ce matin ; elle a dû sortir à ce moment-là.', 'I left the window open this morning; she seems to have got out then.'],
+    ['', '二人[ふたり]は 近所[きんじょ]を 歩[ある]きまわって、 となりの 人[ひと]たちに 聞[き]いた。', 'Ils firent le tour du quartier en interrogeant les voisins.', 'They walked around the neighbourhood asking the neighbours.'],
+    ['', 'その とき、 となりの おばあさんの 庭[にわ]から 小[ちい]さな 声[こえ]が 聞[き]こえた。 「ニャー！」', 'C’est alors qu’une petite voix vint du jardin de la vieille dame d’à côté : « Miaou ! »', 'Just then a little voice came from the old lady’s garden next door: “Meow!”'],
+    ['ゆい', 'ミケ！ 花[はな]の 間[あいだ]で 寝[ね]て いたの？ 本当[ほんとう]に よかった。', 'Mike ! Tu dormais au milieu des fleurs ? Quel soulagement !', 'Mike! Were you sleeping among the flowers? What a relief!'],
+  ], [
+    ['Qu’est-il arrivé à Yui ?', 'What happened to Yui?', ['Sa chatte a disparu', 'Her cat went missing'], ['Elle s’est blessée', 'She got hurt'], ['Elle a perdu son portefeuille', 'She lost her wallet']],
+    ['Par où la chatte est-elle sortie ?', 'How did the cat get out?', ['Par la fenêtre ouverte', 'Through the open window'], ['Par la porte d’entrée', 'Through the front door'], ['Dans un sac', 'In a bag']],
+    ['Où était la chatte ?', 'Where was the cat?', ['Dans le jardin de la voisine', 'In the neighbour’s garden'], ['À la clinique vétérinaire', 'At the vet’s'], ['Sous le lit', 'Under the bed']],
+  ]),
+  ja('ja-17', 17, '初出勤', L('Premier jour à la télé', 'First day at the TV station'), L('Actualités, trac et messages entre amis', 'News, nerves and texts between friends'), [
+    ['', 'レオは テレビ局[きょく]で 通訳[つうやく]として 初出勤[はつしゅっきん]した。', 'Léo commençait son premier jour comme interprète dans une chaîne de télévision.', 'Léo started his first day as an interpreter at a TV station.'],
+    ['', 'ニュースの チームは 朝[あさ]から とても 忙[いそが]しかった。 選挙[せんきょ]の 結果[けっか]が もうすぐ 発表[はっぴょう]される 予定[よてい]だった。', 'L’équipe de l’info était débordée depuis le matin : les résultats de l’élection allaient être annoncés.', 'The news team had been very busy since morning: the election results were about to be announced.'],
+    ['記者', 'レオさん、 この インタビューを フランス語[ご]に 通訳[つうやく]して もらえますか。', 'Léo, tu peux interpréter cette interview en français ?', 'Léo, could you interpret this interview into French?'],
+    ['レオ', 'はい、 やって みます。 どきどきしますね。', 'Oui, je vais essayer. J’ai le cœur qui bat la chamade.', 'Yes, I’ll give it a try. My heart is pounding.'],
+    ['', '通訳[つうやく]は 思[おも]ったより うまく いって、 みんなが 拍手[はくしゅ]した。', 'L’interprétation se passa mieux que prévu, et tout le monde applaudit.', 'The interpreting went better than expected, and everyone applauded.'],
+    ['', '夜[よる]、 ゆいから メッセージが 来[き]た。 「初日[しょにち]どうだった？w 緊張[きんちょう]した？」', 'Le soir, Yui lui envoya un message : « Alors, ce premier jour ? mdr T’avais le trac ? »', 'In the evening Yui texted: “How was day one? lol Were you nervous?”'],
+    ['レオ', 'うん、 マジで 緊張[きんちょう]した。 でも 社長[しゃちょう]に よく やったって 言[い]われたよ！', 'Ouais, super stressé. Mais le patron m’a dit que j’avais bien travaillé !', 'Yeah, seriously nervous. But the boss told me I did well!'],
+  ], [
+    ['Où Léo travaille-t-il ?', 'Where does Léo work?', ['Dans une chaîne de télévision', 'At a TV station'], ['Dans un hôtel', 'At a hotel'], ['Dans une école', 'At a school']],
+    ['Quelle nouvelle l’équipe attendait-elle ?', 'What news was the team waiting for?', ['Les résultats d’une élection', 'Election results'], ['La météo', 'The weather forecast'], ['Un match de football', 'A football match']],
+    ['Comment s’est passée l’interprétation ?', 'How did the interpreting go?', ['Mieux que prévu', 'Better than expected'], ['Très mal', 'Very badly'], ['Elle a été annulée', 'It was cancelled']],
   ]),
 ];
 

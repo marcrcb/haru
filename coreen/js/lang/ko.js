@@ -9,6 +9,7 @@ import { GUIDE_KO_PLUS } from '../content/guide.plus.js';
 import { GUIDE_KO_ADV } from '../content/guide.adv.js';
 import { GUIDE_KO_PRON, KO_SECTIONS } from '../content/guide.pron.js';
 import { localize, arrange } from '../content/guide.util.js';
+import { GUIDE_KO_MORE } from '../content/guide.more.js';
 import { pick } from '../generator.js';
 import { LEXICON } from '../content/lexicon.js';
 import { AWKWARD_EN } from '../content/awkward.en.js';
@@ -316,7 +317,7 @@ export const KO = {
   render,
   awkward,
   guide: {
-    fr: arrange([...GUIDE, ...localize([...GUIDE_KO_PLUS, ...GUIDE_KO_PRON, ...GUIDE_KO_ADV], 'fr')], KO_SECTIONS, 'fr'),
-    en: arrange([...GUIDE_EN, ...localize([...GUIDE_KO_PLUS, ...GUIDE_KO_PRON, ...GUIDE_KO_ADV], 'en')], KO_SECTIONS, 'en'),
+    fr: arrange([...GUIDE, ...localize([...GUIDE_KO_PLUS, ...GUIDE_KO_PRON, ...GUIDE_KO_ADV, ...GUIDE_KO_MORE], 'fr')], KO_SECTIONS, 'fr'),
+    en: arrange([...GUIDE_EN, ...localize([...GUIDE_KO_PLUS, ...GUIDE_KO_PRON, ...GUIDE_KO_ADV, ...GUIDE_KO_MORE], 'en')], KO_SECTIONS, 'en'),
   },
 };
