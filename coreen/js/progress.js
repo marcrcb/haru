@@ -126,7 +126,7 @@ export function progressSection() {
         <div class="pg-head"><b>${t('pg.scriptTitle', { name: tr(course().script.title) })}</b></div>
         ${rows.map((r) => `
         <div class="pg-row" role="img" aria-label="${esc(r.label)} : ${r.done} / ${r.total}">
-          <span class="pg-glyph kr" aria-hidden="true">${esc(r.sample)}</span>
+          <span class="pg-glyph kr ${[...r.sample].length > 1 ? 'long' : ''}" aria-hidden="true">${esc(r.sample)}</span>
           <span class="pg-name">${esc(r.label)}</span>
           <span class="pg-meter"><i style="--w:${r.total ? r.done / r.total : 0}"></i></span>
           <span class="pg-n">${r.done}<span>/${r.total}</span></span>

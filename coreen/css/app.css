@@ -1853,3 +1853,6 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
   body { background-attachment: scroll; }
   .topbar, .ru-stick, #tabs { background-image: none !important; }
 }
+/* Écriture maîtrisée : les sons combinés (きゃ) tiennent sur une ligne dans leur pastille */
+.pg-glyph { white-space: nowrap; line-height: 1; }
+.pg-glyph.long { font-size: .74rem; letter-spacing: -.03em; }
