@@ -58,9 +58,13 @@ let pending = 0;
 
 // ---------- Voix naturelles (enregistrées) ----------
 // audio/<langue>/index.json liste les enregistrements validés ; sans enregistrement, c'est la voix du téléphone.
+// Désactivées pour l'instant : seule la voix du téléphone (synthèse vocale du navigateur ou du système) est utilisée.
+// Remettre à true pour réactiver les enregistrements de audio/<langue>/.
+export const NATURAL_VOICES = false;
 const voiceIndex = {};
 function loadVoices(id) {
-  if (id in voiceIndex || typeof fetch === 'undefined') return;
+  if (id in voiceIndex) return;
+  if (!NATURAL_VOICES || typeof fetch === 'undefined') { voiceIndex[id] = new Set(); return; }
   voiceIndex[id] = null;
   fetch(`audio/${id}/index.json`)
     .then((r) => (r.ok ? r.json() : []))

@@ -1,6 +1,6 @@
 // Haru (하루) — application d'entraînement au coréen et au japonais. Navigation et écrans principaux.
 import * as errlog from './errlog.js'; // en premier : il entend aussi les erreurs des autres modules
-import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices, skyTime, emptyArt } from './ui.js';
+import { $, $$, esc, speak, canSpeak, hasVoice, currentVoice, sfx, toast, countUp, pulse, celebrate, ICONS, stopSpeaking, preloadVoices, skyTime, emptyArt, NATURAL_VOICES } from './ui.js';
 import * as store from './store.js';
 import { ALL_THEMES, isPhraseTheme, themeGlyph, themeColor, themeShort } from './content/lexicon.js';
 import { course, hasCourse, setCourse, COURSES, t, tr, lang, gloss } from './course.js';
@@ -58,7 +58,7 @@ const SCREENS = {
 };
 const ALIASES = { learn: 'words', home: 'road', progress: 'profile', daily: 'phrases' }; // anciennes adresses
 
-const APP_VERSION = '80'; // à changer avec VERSION dans sw.js
+const APP_VERSION = '81'; // à changer avec VERSION dans sw.js
 
 // À chaque lancement, on repasse par le choix de la langue (sauf après un rechargement de mise à jour).
 const SKIP_MENU = 'haru.skipMenu';
@@ -883,8 +883,8 @@ function settings(el) {
       <h2>${t('set.sound')}</h2>
       <div class="card settings">
         ${toggle('autoplay', t('set.autoplay'), s.autoplay)}
-        ${toggle('natural', t('set.natural'), s.natural !== false)}
-        <div class="set-row col"><span class="muted small">${t('set.naturalHelp')}</span></div>
+        ${NATURAL_VOICES ? `${toggle('natural', t('set.natural'), s.natural !== false)}
+        <div class="set-row col"><span class="muted small">${t('set.naturalHelp')}</span></div>` : ''}
         ${toggle('sound', t('set.sfx'), s.sound)}
         <div class="set-row col">
           <span>${t('set.rate')} <b class="rate-val">${s.rate.toFixed(2).replace('.', t('decimal'))}</b></span>
