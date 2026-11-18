@@ -216,12 +216,17 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       el.querySelector('.quiz').classList.add('kb-mode');
       stage.innerHTML = `${head}<div class="type-dock"></div>`;
       let helped = false;
+      let checked = false;
       const norm = latin ? normRoman : q.exact ? (s) => s.trim() : normAnswer;
       const good = q.accept.map(norm);
       const check = () => {
         const v = norm(typing.value);
-        if (!v) return;
+        if (!v || checked) return;
+        checked = true;
         typing.kb.lock(true);
+        $('.check-btn', stage).disabled = true;
+        const hint = $('.hint-btn', stage);
+        if (hint) hint.disabled = true;
         const ok = good.includes(v);
         typing.box.classList.add(ok ? 'good' : 'bad');
         settle(q, ok && !helped, typing.box, q.answer, ok, !latin);
@@ -229,7 +234,7 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
       const typing = mountTyping($('.type-dock', stage), {
         kind: latin ? 'latin' : course().id, layout: lang() === 'en' ? 'qwerty' : 'azerty', kata: q.kata, space: /\s/.test(q.answer),
         placeholder: esc(q.placeholder || t(latin ? 'type.placeholderRom' : 'type.placeholder')), onEnter: check,
-        onChange: (v) => { $('.check-btn', stage).disabled = !v; },
+        onChange: (v) => { $('.check-btn', stage).disabled = !v || checked; },
         actions: `<div class="type-actions">
           ${exam ? '' : `<button class="btn ghost small hint-btn">${t('recon.hint')}</button>`}
           <button class="btn primary check-btn" disabled>${t('type.check')}</button>
@@ -437,6 +442,8 @@ export function runQuiz(el, { questions, title, again, back, step, exam, backLab
    * Enregistre une réponse. clean : juste, du premier coup et sans aide ; okNow : juste (même avec un indice).
    */
   function settle(q, clean, target, answer, okNow = clean, kr = true) {
+    // Une question ne se valide qu'une fois : un second appui (bouton Vérifier, Entrée…) ne compte rien.
+    if (queue[0] !== q) return;
     if (q.say && !(q.auto && okNow)) autoSpeak(q.say);
     if (okNow) {
       sfx.ok();

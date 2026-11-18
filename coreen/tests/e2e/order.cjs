@@ -77,6 +77,27 @@ const RUNS = 6; // chaque série est tirée au hasard : plusieurs tirages par é
       await page.close();
     }
   }
+  // Appuyer plusieurs fois sur « Vérifier » ne valide la question qu'une fois (ni série ni XP en trop).
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.addInitScript(() => localStorage.setItem('haru.v1', JSON.stringify({ v: 2, goal: 20, settings: { lang: 'fr', course: 'ko', onboarded: true, motion: false, sound: false }, courses: { ko: { xp: 0 }, ja: { xp: 0 } } })));
+    await page.goto(`${BASE}/#/hquiz?set=vowels&mode=type`);
+    await page.waitForSelector('.quiz');
+    for (let k = 0; k < 30; k++) {
+      const teach = await page.$('.teach-next');
+      if (teach) { await teach.click(); continue; }
+      if (!(await page.$('.check-btn'))) break;
+      const before = parseInt(await page.textContent('.qcount'), 10);
+      for (let h = 0; h < 4 && await page.$eval('.check-btn', (x) => x.disabled); h++) await page.click('.hint-btn');
+      for (let i = 0; i < 5; i++) await page.$eval('.check-btn', (x) => x.click());
+      await page.evaluate(() => document.querySelector('.sheet:not([hidden]) .sheet-next')?.click());
+      await page.waitForTimeout(80);
+      const now = await page.$('.qcount') ? parseInt(await page.textContent('.qcount'), 10) : before + 1;
+      if (now > before + 1) { failures.push(`ko/#/hquiz?set=vowels&mode=type : 5 appuis sur « Vérifier » ont avancé de ${now - before} questions`); break; }
+      checked++;
+    }
+    await page.close();
+  }
   await browser.close();
   if (failures.length) {
     console.error(`${failures.length} problème(s) :\n` + [...new Set(failures)].slice(0, 40).join('\n'));
