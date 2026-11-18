@@ -1847,3 +1847,9 @@ body.focus, body.focus .topbar { background-image: var(--wave-soft); }
 /* Texte vermillon sur fond vermillon pâle : plus foncé en clair, vif en sombre (contraste AA) */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shu-ink: var(--shu); } }
 :root[data-theme="dark"] { --shu-ink: var(--shu); }
+
+/* ===== Version 83 : sur téléphone, le motif de vagues défile avec la page partout (comme sur iPhone) ===== */
+@media (max-width: 899px) {
+  body { background-attachment: scroll; }
+  .topbar, .ru-stick, #tabs { background-image: none !important; }
+}
